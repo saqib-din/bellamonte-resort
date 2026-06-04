@@ -6,57 +6,20 @@
             <div class="row">
                 <div class="col-lg-6">
                     <div class="hero-text">
-                        <h1>Bellamonte Resort A Luxury Hotel</h1>
+                        <h1>{{ $hero->hero_title ?? 'Bellamonte Resort A Luxury Hotel' }}</h1>
+
                         <p>
-                            Experience luxury, comfort, and breathtaking mountain views at Bellamonte
-                            Resort Shogran, Pakistan, offering premium rooms, peaceful stays, and
-                            unforgettable hospitality for families, couples, and travelers.
+                            {{ $hero->description ?? 'Experience luxury, comfort, and breathtaking mountain views at Bellamonte Resort Shogran, Pakistan, offering premium rooms, peaceful stays, and unforgettable hospitality for families, couples, and travelers.' }}
                         </p>
-                        {{-- <a href="#" class="primary-btn">Discover Now</a> --}}
                     </div>
                 </div>
-                {{-- <div class="col-xl-4 col-lg-5 offset-xl-2 offset-lg-1">
-                    <div class="booking-form">
-                        <h3>Booking Your Hotel</h3>
-                        <form action="#">
-                            <div class="check-date">
-                                <label for="date-in">Check In:</label>
-                                <input type="text" class="date-input" id="date-in" />
-                                <i class="icon_calendar"></i>
-                            </div>
-                            <div class="check-date">
-                                <label for="date-out">Check Out:</label>
-                                <input type="text" class="date-input" id="date-out" />
-                                <i class="icon_calendar"></i>
-                            </div>
-                            <div class="select-option">
-                                <label for="guest">Guests:</label>
-                                <select id="guest">
-                                    <option value="">2 Adults</option>
-                                    <option value="">3 Adults</option>
-                                </select>
-                            </div>
-                            <div class="select-option">
-                                <label for="room">Room:</label>
-                                <select id="room">
-                                    <option value="">1 Room</option>
-                                    <option value="">2 Room</option>
-                                </select>
-                            </div>
-                            <button type="submit">Check Availability</button>
-                        </form>
-                    </div>
-                </div> --}}
             </div>
         </div>
+
         <div class="hero-slider owl-carousel">
-            <div class="hs-item set-bg" data-setbg="{{ asset('landing-assets/img/hero/hero-1.jpg') }}">
-            </div>
-
-            <div class="hs-item set-bg" data-setbg="{{ asset('landing-assets/img/hero/hero-2.jpg') }}">
-            </div>
-
-            <div class="hs-item set-bg" data-setbg="{{ asset('landing-assets/img/hero/hero-3.jpg') }}">
+            <div class="hs-item set-bg"
+                style="height:770px;background-size:cover;background-position:center center;background-repeat:no-repeat;"
+                data-setbg="{{ !empty($hero?->image) ? asset('uploads/hero/' . $hero->image) : asset('landing-assets/img/hero/hero-1.jpg') }}">
             </div>
         </div>
     </section>
@@ -71,13 +34,12 @@
                     <div class="about-text">
                         <div class="section-title">
                             <span>About Us</span>
-                            <h2>Bellamonte Resort <br />Shogran Pakistan</h2>
+                            <h2>{{ $data['welcome_title'] ?? 'Welcome To Bellamonte Resort.' }}</h2>
+
                         </div>
 
                         <p class="f-para">
-                            Bellamonte Resort is a premium hotel located in the beautiful hills of
-                            Shogran, Pakistan. We provide luxury accommodation, peaceful surroundings,
-                            and quality hospitality for travelers and families.
+                            {{ $data['welcome_description'] ?? 'Located in the beautiful hills of Shogran, Pakistan, Bellamonte Resort offers luxury accommodation, breathtaking mountain views, peaceful surroundings, and comfortable rooms for a memorable stay with family and friends.' }}
                         </p>
 
                         <p class="s-para">
@@ -242,10 +204,10 @@
                                                     <td>{{ $room->bed_type ?? 'King Beds' }}</td>
                                                 </tr>
 
-                                                <tr>
+                                                {{-- <tr>
                                                     <td class="r-o">Services:</td>
                                                     <td>{{ $room->services ?? 'Wifi, Television, Bathroom' }}</td>
-                                                </tr>
+                                                </tr> --}}
                                             </tbody>
                                         </table>
 
@@ -260,10 +222,10 @@
                         {{-- 🔥 Dummy fallback (same design) --}}
                         @php
                             $dummyRooms = [
-                                ['title' => 'Luxury Suite', 'price' => 299, 'img' => 'room-b4.jpg'],
-                                ['title' => 'Premium King Room', 'price' => 259, 'img' => 'room-b2.jpg'],
-                                ['title' => 'Deluxe Room', 'price' => 199, 'img' => 'room-b3.jpg'],
-                                ['title' => 'Double Room', 'price' => 159, 'img' => 'room-b1.jpg'],
+                                ['title' => 'Luxury Suite', 'price' => 24499, 'img' => 'room-b4.jpg'],
+                                ['title' => 'Premium King Room', 'price' => 25559, 'img' => 'room-b2.jpg'],
+                                ['title' => 'Deluxe Room', 'price' => 14499, 'img' => 'room-b3.jpg'],
+                                ['title' => 'Double Room', 'price' => 18859, 'img' => 'room-b1.jpg'],
                             ];
                         @endphp
 
@@ -274,7 +236,7 @@
 
                                     <div class="hr-text">
                                         <h3>{{ $d['title'] }}</h3>
-                                        <h2>${{ $d['price'] }}<span>/Per Night</span></h2>
+                                        <h2>Pkr {{ $d['price'] }}<span>/Per Night</span></h2>
 
                                         <table>
                                             <tbody>
@@ -300,7 +262,7 @@
                                             </tbody>
                                         </table>
 
-                                        <a href="#" class="primary-btn">More Details</a>
+                                        <a href="{{ route('rooms.list') }}" class="primary-btn">More Details</a>
                                     </div>
                                 </div>
                             </div>
@@ -398,26 +360,24 @@
 
                 $getImage = fn($event) => $useDb
                     ? ($event->image
-                        ? asset('storage/' . $event->image)
+                        ? asset('uploads/events/' . $event->image)
                         : asset('landing-assets/img/blog/blog-1.jpg'))
                     : $event->image_url;
 
-                $getLink = fn($event) => $useDb
-                    ? route('event.detail', $event->id) // DB → ID pass
-                : route('event.details'); // Dummy → no ID, controller fallback chalega @endphp
+                $getLink = fn($event) => $useDb ? route('event.detail', $event->id) : route('event.details');
+            @endphp
 
             <div class="row">
 
                 {{-- ── Top 3 cards ── --}}
                 @foreach ($top3 as $event)
                     <div class="col-lg-4 col-md-6">
-                        <div class="blog-item set-bg" data-setbg="{{ $getImage($event) }}">
+                        <div class="blog-item set-bg" data-setbg="{{ $getImage($event) }}"
+                            style="background-image: url('{{ $getImage($event) }}'); background-size: cover; background-position: center;">
                             <div class="bi-text">
                                 <span class="b-tag">{{ $event->tag }}</span>
                                 <h4>
-                                    <a href="{{ $getLink($event) }}">
-                                        {{ $event->title }}
-                                    </a>
+                                    <a href="{{ $getLink($event) }}">{{ $event->title }}</a>
                                 </h4>
                                 <div class="b-time">
                                     <i class="icon_clock_alt"></i>
@@ -428,7 +388,7 @@
                     </div>
                 @endforeach
 
-                {{-- ── Bottom row: wide + small ── --}}
+                {{-- ── Bottom row ── --}}
                 @php
                     $item4 = $bottom2->values()->get(0);
                     $item5 = $bottom2->values()->get(1);
@@ -436,13 +396,12 @@
 
                 @if ($item4)
                     <div class="col-lg-8 col-md-12">
-                        <div class="blog-item small-size set-bg" data-setbg="{{ $getImage($item4) }}">
+                        <div class="blog-item small-size set-bg" data-setbg="{{ $getImage($item4) }}"
+                            style="background-image: url('{{ $getImage($item4) }}'); background-size: cover; background-position: center;">
                             <div class="bi-text">
                                 <span class="b-tag">{{ $item4->tag }}</span>
                                 <h4>
-                                    <a href="{{ $getLink($item4) }}">
-                                        {{ $item4->title }}
-                                    </a>
+                                    <a href="{{ $getLink($item4) }}">{{ $item4->title }}</a>
                                 </h4>
                                 <div class="b-time">
                                     <i class="icon_clock_alt"></i>
@@ -455,13 +414,12 @@
 
                 @if ($item5)
                     <div class="col-lg-4 col-md-12">
-                        <div class="blog-item small-size set-bg" data-setbg="{{ $getImage($item5) }}">
+                        <div class="blog-item small-size set-bg" data-setbg="{{ $getImage($item5) }}"
+                            style="background-image: url('{{ $getImage($item5) }}'); background-size: cover; background-position: center;">
                             <div class="bi-text">
                                 <span class="b-tag">{{ $item5->tag }}</span>
                                 <h4>
-                                    <a href="{{ $getLink($item5) }}">
-                                        {{ $item5->title }}
-                                    </a>
+                                    <a href="{{ $getLink($item5) }}">{{ $item5->title }}</a>
                                 </h4>
                                 <div class="b-time">
                                     <i class="icon_clock_alt"></i>

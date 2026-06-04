@@ -101,7 +101,7 @@
                                                     <div class="d-flex align-items-center">
                                                         <div class="flex-shrink-0">
                                                             @if ($customer->image)
-                                                                <img src="{{ asset('storage/' . $customer->image) }}"
+                                                                <img src="{{ asset('uploads/customers/' . $customer->image) }}"
                                                                     alt="{{ $customer->name }}"
                                                                     style="width:40px;height:40px;object-fit:cover;"
                                                                     class="rounded-circle">

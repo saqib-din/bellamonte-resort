@@ -30,7 +30,7 @@
                 <div class="col-md-3">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-primary">{{ $bills->count() }} Pkr</h4>
+                            <h4 class="mb-1 text-primary">{{ $bills->count() }}</h4>
                             <p class="mb-0 text-muted f-12">Total Invoices</p>
                         </div>
                     </div>
@@ -57,7 +57,7 @@
                 <div class="col-md-3">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-warning">{{ $bills->where('status', 'Partial')->count() }} Pkr</h4>
+                            <h4 class="mb-1 text-warning">{{ $bills->where('status', 'Partial')->count() }}</h4>
                             <p class="mb-0 text-muted f-12">Partial Paid</p>
                         </div>
                     </div>

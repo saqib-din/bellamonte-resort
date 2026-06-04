@@ -114,7 +114,7 @@
                     <!-- RIGHT -->
                     <div class="col-lg-4">
 
-                        {{-- Sirf Admin ko Role Section dikhe --}}
+                        {{-- only Admin show this section --}}
                         @if (auth()->user()->isAdmin())
 
                             @php
@@ -201,11 +201,11 @@
                             </div>
                         @else
                             {{-- Non-admin users cannot see role section --}}
-                            {{-- Current role is passed in hidden field to avoid validation errors --}}
                             @if (isset($user))
                                 <input type="hidden" name="role" value="{{ $user->role }}">
+                            @else
+                                <input type="hidden" name="role" value="staff"> {{-- default role on create --}}
                             @endif
-
                         @endif
 
                         <!-- Save Button -->

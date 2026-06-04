@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\HeroSectionController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\AboutController;
@@ -12,7 +13,10 @@ use App\Http\Controllers\BillController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
-// use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FoodOrderController;
+use App\Http\Controllers\FoodItemController;
+use App\Http\Controllers\FoodCategoryController;
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'show'])
@@ -38,9 +42,9 @@ Route::get('/contact-us', [ContactController::class, 'show'])
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return view('dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -50,6 +54,16 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+
+    // Hero Section
+    // Route::get('/hero/section/list', [HeroSectionController::class, 'index'])->name('hero-section.index');
+    // Route::get('/hero/create', [HeroSectionController::class, 'form'])->name('hero.create');
+    // Route::get('/hero/edit/{id}', [HeroSectionController::class, 'form'])->name('hero.edit');
+    // Route::post('/hero/save/{id?}', [HeroSectionController::class, 'save'])->name('hero.save');
+    // Route::delete('/hero/delete/{id}', [HeroSectionController::class, 'destroy'])->name('hero.delete');
+
+    Route::get('about', [AboutController::class, 'index'])->name('about.index');
+    Route::put('about', [AboutController::class, 'update'])->name('about.update');
 
     Route::resource('admin/rooms', RoomController::class)
         ->names('admin.rooms');
@@ -68,9 +82,34 @@ Route::middleware('auth')->group(function () {
     Route::post('/events',             [EventController::class, 'store'])->name('events.store');
     Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
     Route::put('/events/{event}',      [EventController::class, 'update'])->name('events.update');
-    Route::delete('/events/{event}',   [EventController::class, 'destroy'])->name('events.destroy');
+    // Route::delete('/events/{event}',   [EventController::class, 'destroy'])->name('events.destroy');
 
     Route::resource('customers', CustomerController::class);
+
+    // Auth middleware group 
+    Route::prefix('food')->name('food.')->group(function () {
+        // Orders
+        Route::get('orders',                    [FoodOrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/create',             [FoodOrderController::class, 'create'])->name('orders.create');
+        Route::post('orders',                   [FoodOrderController::class, 'store'])->name('orders.store');
+        Route::get('orders/{foodOrder}',        [FoodOrderController::class, 'show'])->name('orders.show');
+        Route::get('orders/{foodOrder}/edit',   [FoodOrderController::class, 'edit'])->name('orders.edit');
+        Route::put('orders/{foodOrder}',        [FoodOrderController::class, 'update'])->name('orders.update');
+        Route::delete('orders/{foodOrder}',     [FoodOrderController::class, 'destroy'])->name('orders.destroy');
+        Route::post('orders/{foodOrder}/status', [FoodOrderController::class, 'updateStatus'])->name('orders.status');
+        Route::get('orders/{foodOrder}/print',  [FoodOrderController::class, 'print'])->name('orders.print');
+
+        Route::get('categories',                      [FoodCategoryController::class, 'index'])->name('categories.index');
+        Route::post('categories',                     [FoodCategoryController::class, 'store'])->name('categories.store');
+        Route::put('categories/{foodCategory}',       [FoodCategoryController::class, 'update'])->name('categories.update');
+        Route::delete('categories/{foodCategory}',    [FoodCategoryController::class, 'destroy'])->name('categories.destroy');
+
+        // Menu Items
+        Route::get('items',                     [FoodItemController::class, 'index'])->name('items.index');
+        Route::post('items',                    [FoodItemController::class, 'store'])->name('items.store');
+        Route::put('items/{foodItem}',          [FoodItemController::class, 'update'])->name('items.update');
+        Route::delete('items/{foodItem}',       [FoodItemController::class, 'destroy'])->name('items.destroy');
+    });
 
     Route::resource('billing', BillController::class)
         ->parameters(['billing' => 'bill']);
@@ -89,5 +128,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/contacts/{contact}/reply', [ContactController::class, 'reply'])->name('contacts.reply');
     Route::delete('/contacts/{contact}',   [ContactController::class, 'delete'])->name('contacts.delete');
 });
+
+Route::get('/ping', fn() => response('ok', 200));
 
 require __DIR__ . '/auth.php';

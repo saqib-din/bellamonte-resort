@@ -73,11 +73,17 @@
                 <ul class="bm-footer__contact">
                     <li>
                         <span class="bm-footer__contact-icon"><i class="fa fa-phone"></i></span>
-                        <span>{{ \App\Models\Setting::get('hotel_phone') ?? '0329 6777222' }}</span>
+                        <a href="tel:{{ \App\Models\Setting::get('hotel_phone') ?? '0329 6777222' }}"
+                            style="color: inherit; text-decoration: none;">
+                            {{ \App\Models\Setting::get('hotel_phone') ?? '0329 6777222' }}
+                        </a>
                     </li>
                     <li>
                         <span class="bm-footer__contact-icon"><i class="fa fa-envelope"></i></span>
-                        <span>{{ \App\Models\Setting::get('hotel_email') ?? 'info@bellamonteresort.com' }}</span>
+                        <a href="mailto:{{ \App\Models\Setting::get('hotel_email') ?? 'bellamonteresort01@gmail.com' }}"
+                            style="color: inherit; text-decoration: none;">
+                            {{ \App\Models\Setting::get('hotel_email') ?? 'bellamonteresort01@gmail.com' }}
+                        </a>
                     </li>
                     <li>
                         <span class="bm-footer__contact-icon"><i class="fa fa-map-marker"></i></span>
@@ -108,11 +114,6 @@
 <!-- Footer Section End -->
 
 <style>
-    /* ════════════════════════════════════════
-       BELLAMONTE FOOTER — Light Theme
-       Matches services-section style
-    ════════════════════════════════════════ */
-
     .bm-footer {
         background: #f9f9f9;
         color: #888;

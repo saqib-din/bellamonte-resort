@@ -70,12 +70,12 @@ class BookingController extends Controller
             'payment_method'  => $request->payment_method,
             'advance_paid'    => $request->advance_paid ?? 0,
             'status'          => $request->status,
-            'special_requests'=> $request->special_requests,
+            'special_requests' => $request->special_requests,
             'notes'           => $request->notes,
         ]);
 
         // Mark room as occupied
-        if ($request->status === 'Checked In') {
+        if (in_array($request->status, ['Confirmed', 'Checked In'])) {
             $room->update(['status' => 'Occupied']);
         }
 
@@ -139,12 +139,12 @@ class BookingController extends Controller
             'payment_method'  => $request->payment_method,
             'advance_paid'    => $request->advance_paid ?? 0,
             'status'          => $request->status,
-            'special_requests'=> $request->special_requests,
+            'special_requests' => $request->special_requests,
             'notes'           => $request->notes,
         ]);
 
         // Room status update
-        if ($request->status === 'Checked In') {
+        if (in_array($request->status, ['Confirmed', 'Checked In'])) {
             $room->update(['status' => 'Occupied']);
         } elseif (in_array($request->status, ['Checked Out', 'Cancelled', 'No Show'])) {
             $room->update(['status' => 'Available']);
@@ -160,9 +160,12 @@ class BookingController extends Controller
         if ($booking->status === 'Checked In') {
             $booking->room->update(['status' => 'Available']);
         }
+
+
+
         $booking->delete();
         return redirect()->route('admin.bookings.index')
-            ->with('success', 'Booking delete ho gayi!');
+            ->with('success', 'Booking has been deleted successfully!');
     }
 
     // Quick checkout

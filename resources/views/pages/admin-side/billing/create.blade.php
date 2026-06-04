@@ -62,7 +62,8 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <small class="text-muted">Select a booking to auto-fill all details automatically.</small>
+                                        <small class="text-muted">Select a booking to auto-fill all details
+                                            automatically.</small>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Customer (Optional)</label>
@@ -234,6 +235,50 @@
 
                     <!-- RIGHT -->
                     <div class="col-lg-4">
+
+                        <div class="card mb-4 border-info">
+                            <div class="card-header bg-light-info">
+                                <h5 class="mb-0 text-info"><i class="ti ti-info-circle me-2"></i>Quick Info</h5>
+                            </div>
+                            <div class="card-body f-13">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2">
+                                        <i class="ti ti-calendar text-primary me-1"></i>
+                                        <strong>Auto-Fill from Booking</strong>
+                                        <p class="text-muted mb-0 ms-3">Select an existing booking to automatically fill
+                                            guest name, room, dates and charges.</p>
+                                    </li>
+                                    <hr class="my-2">
+                                    <li class="mb-2">
+                                        <i class="ti ti-calculator text-warning me-1"></i>
+                                        <strong>Live Calculator</strong>
+                                        <p class="text-muted mb-0 ms-3">Total amount is calculated in real-time as you
+                                            enter room charges, extra charges, discount and tax.</p>
+                                    </li>
+                                    <hr class="my-2">
+                                    <li class="mb-2">
+                                        <i class="ti ti-receipt text-success me-1"></i>
+                                        <strong>Extra Charges</strong>
+                                        <p class="text-muted mb-0 ms-3">Include additional costs like food orders, laundry,
+                                            or room service in the extra charges field.</p>
+                                    </li>
+                                    <hr class="my-2">
+                                    <li class="mb-2">
+                                        <i class="ti ti-credit-card text-secondary me-1"></i>
+                                        <strong>Payment Status</strong>
+                                        <p class="text-muted mb-0 ms-3">Set status as Paid, Unpaid, or Partial based on the
+                                            amount received from the guest.</p>
+                                    </li>
+                                    <hr class="my-2">
+                                    <li>
+                                        <i class="ti ti-file-invoice text-danger me-1"></i>
+                                        <strong>Invoice Preview</strong>
+                                        <p class="text-muted mb-0 ms-3">The right panel shows a live breakdown of all
+                                            charges before generating the invoice.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
 
                         <!-- Payment Settings -->
                         <div class="card mb-4">

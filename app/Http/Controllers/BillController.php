@@ -40,7 +40,7 @@ class BillController extends Controller
 
         $bill = new Bill();
 
-        $bill->invoice_number = 'INV-' . time();
+        $bill->invoice_number = 'INV-' . date('Y') . '-' . str_pad(Bill::count() + 1, 4, '0', STR_PAD_LEFT);
         $bill->booking_id     = $request->booking_id;
         $bill->customer_id    = $request->customer_id;
         $bill->guest_name     = $request->guest_name;

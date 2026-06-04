@@ -29,9 +29,13 @@ class SettingController extends Controller
         // Save logo
         if ($request->hasFile('hotel_logo')) {
             $old = Setting::get('hotel_logo');
-            if ($old) Storage::disk('public')->delete($old);
-            $path = $request->file('hotel_logo')->store('settings', 'public');
-            Setting::set('hotel_logo', $path);
+            if ($old && file_exists(public_path('uploads/settings/' . $old))) {
+                unlink(public_path('uploads/settings/' . $old));
+            }
+            $file = $request->file('hotel_logo');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/settings'), $filename);
+            Setting::set('hotel_logo', $filename);
         }
 
         // Save all other settings

@@ -25,25 +25,6 @@
     <section class="rooms-section spad">
         <div class="container">
 
-            <!-- 🔎 FILTER SECTION -->
-            {{-- <form method="GET" class="row mb-4">
-
-                <div class="col-md-4">
-                    <input type="number" name="price" class="form-control" placeholder="Max Price"
-                        value="{{ request('price') }}">
-                </div>
-
-                <div class="col-md-4">
-                    <input type="number" name="capacity" class="form-control" placeholder="Min Capacity"
-                        value="{{ request('capacity') }}">
-                </div>
-
-                <div class="col-md-4">
-                    <button class="btn btn-primary w-100">Filter</button>
-                </div>
-
-            </form> --}}
-
             <div class="row">
 
                 @forelse($rooms as $room)
@@ -57,7 +38,7 @@
                                 <h4>{{ $room->type }}</h4>
 
                                 <h3>
-                                  ₨ {{ $room->price_per_night }}
+                                    ₨ {{ $room->price_per_night }}
                                     <span>/Per night</span>
                                 </h3>
 
@@ -75,10 +56,10 @@
                                             <td class="r-o">Bed:</td>
                                             <td>{{ $room->bed_type ?? 'Standard' }}</td>
                                         </tr>
-                                        <tr>
+                                        {{-- <tr>
                                             <td class="r-o">Services:</td>
                                             <td>{{ $room->services ?? 'Wifi, TV, Bathroom' }}</td>
-                                        </tr>
+                                        </tr> --}}
                                     </tbody>
                                 </table>
 
@@ -92,7 +73,6 @@
 
                 @empty
 
-                    {{-- 🔥 DUMMY DATA --}}
                     @php
                         $dummyRooms = [
                             ['type' => 'Premium King Room', 'price' => 159],
@@ -114,7 +94,7 @@
                                     <h4>{{ $dummy['type'] }}</h4>
 
                                     <h3>
-                                      ₨ {{ $dummy['price'] }}
+                                        ₨ {{ $dummy['price'] }}
                                         <span>/Per night</span>
                                     </h3>
 
@@ -139,7 +119,7 @@
                                         </tbody>
                                     </table>
 
-                                    <a href="{{ route('rooms.details') }}" class="primary-btn">More Details</a>
+                                    {{-- <a href="{{ route('rooms.details') }}" class="primary-btn">More Details</a> --}}
                                 </div>
 
                             </div>
@@ -149,12 +129,112 @@
 
             </div>
 
-            <!-- 📄 PAGINATION -->
-            <div class="room-pagination mt-4">
-                {{ $rooms->links() }}
-            </div>
+            {{-- Pagination (only shown when real rooms exist) --}}
+            @if ($rooms->hasPages())
+                <div class="room-pagination-wrapper mt-4">
+                    <div class="room-pagination">
+                        {{ $rooms->links('pagination::bootstrap-5') }}
+                    </div>
+                </div>
+            @endif
 
         </div>
     </section>
     <!-- Rooms Section End -->
+
+    <style>
+        .room-pagination .pagination-info,
+        .room-pagination nav p,
+        .room-pagination nav>div:first-child {
+            display: none !important;
+        }
+
+        .room-pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .room-pagination .pagination {
+            gap: 10px;
+            margin: 0;
+            padding: 12px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .room-pagination .page-item {
+            list-style: none;
+        }
+
+        .room-pagination .page-link {
+            width: 44px;
+            height: 44px;
+            border: 0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            background: #f8f9fa;
+            transition: all .25s ease;
+            box-shadow: none;
+        }
+
+        .room-pagination .page-link svg {
+            width: 14px;
+            height: 14px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .room-pagination .page-link:hover {
+            background: #dfa974;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .room-pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, #dfa974, #dfa974);
+            color: #fff;
+            border: none;
+            box-shadow: 0 6px 18px rgba(162, 188, 120, 0.35);
+        }
+
+        .room-pagination .page-item.disabled .page-link {
+            background: #f1f3f5;
+            color: #adb5bd;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .room-pagination .page-item:first-child .page-link,
+        .room-pagination .page-item:last-child .page-link {
+            width: auto;
+            min-width: 90px;
+            padding: 0 16px;
+        }
+
+        @media (max-width: 576px) {
+            .room-pagination .pagination {
+                gap: 6px;
+                padding: 8px;
+            }
+
+            .room-pagination .page-link {
+                width: 38px;
+                height: 38px;
+                font-size: 13px;
+            }
+
+            .room-pagination .page-item:first-child .page-link,
+            .room-pagination .page-item:last-child .page-link {
+                min-width: 70px;
+                padding: 0 10px;
+            }
+        }
+    </style>
 @endsection

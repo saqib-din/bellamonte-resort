@@ -42,28 +42,28 @@ class Event extends Model
     public function getImageUrlAttribute(): string
     {
         return $this->image
-            ? asset('storage/' . $this->image)
+            ? asset('uploads/events/' . $this->image)
             : asset('landing-assets/img/blog/blog-1.jpg');
     }
 
     public function getDetailImage1UrlAttribute(): string
     {
         return $this->detail_image_1
-            ? asset('storage/' . $this->detail_image_1)
+            ? asset('uploads/events/' . $this->detail_image_1)
             : asset('landing-assets/img/blog/blog-details/blog-details-1.jpg');
     }
 
     public function getDetailImage2UrlAttribute(): string
     {
         return $this->detail_image_2
-            ? asset('storage/' . $this->detail_image_2)
+            ? asset('uploads/events/' . $this->detail_image_2)
             : asset('landing-assets/img/blog/blog-details/blog-details-2.jpg');
     }
 
     public function getDetailImage3UrlAttribute(): string
     {
         return $this->detail_image_3
-            ? asset('storage/' . $this->detail_image_3)
+            ? asset('uploads/events/' . $this->detail_image_3)
             : asset('landing-assets/img/blog/blog-details/blog-details-3.jpg');
     }
 }

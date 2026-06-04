@@ -77,6 +77,9 @@
     {{-- jQuery for Select2 and other plugins --}}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
+    {{-- <script src="{{ asset('offline.js') }}"></script> --}}
+
+
     {{-- Stack for additional scripts from child pages --}}
     @stack('scripts')
 

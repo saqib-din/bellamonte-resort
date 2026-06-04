@@ -54,10 +54,11 @@
                                     <div class="col-md-4">
                                         <label class="form-label">Room Type <span class="text-danger">*</span></label>
                                         <select name="type" class="form-select @error('type') is-invalid @enderror">
-                                            @foreach (['Single', 'Double', 'Deluxe', 'Suite', 'Presidential Suite'] as $type)
+                                            @foreach (['Deluxe Suite Room', 'Duplex Suite Room', 'VIP Honeymoon Room', 'Deluxe VIP Room', 'VIP Excutive Room'] as $type)
                                                 <option value="{{ $type }}"
                                                     {{ old('type', $room->type) == $type ? 'selected' : '' }}>
-                                                    {{ $type }}</option>
+                                                    {{ $type }}
+                                                </option>
                                             @endforeach
                                         </select>
                                         @error('type')
@@ -205,7 +206,7 @@
                                 @if ($room->image)
                                     <div class="mb-3 text-center">
                                         <p class="text-muted f-12 mb-1">Current Image:</p>
-                                        <img src="{{ asset('storage/' . $room->image) }}" class="img-fluid rounded"
+                                        <img src="{{ asset('uploads/rooms/' . $room->image) }}" class="img-fluid rounded"
                                             style="max-height:160px;" id="imagePreview">
                                     </div>
                                 @else

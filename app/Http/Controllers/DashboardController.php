@@ -107,8 +107,6 @@ class DashboardController extends Controller
         $upcomingEvents = Event::where('event_date', '>=', now())->count();
         $pastEvents = Event::where('event_date', '<', now())->count();
 
-        $totalUsers = User::count();
-        $activeUsers = User::where('status', 'active')->count();
 
         return view('dashboard', compact(
             'rooms',

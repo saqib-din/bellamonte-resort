@@ -276,11 +276,11 @@
         <!-- Header -->
         <div class="header">
             <div>
-                <div class="hotel-name">🏨 BM Resort</div>
+                <div class="hotel-name">🏨 Bellamonte Resort</div>
                 <div class="hotel-info">
                     Hotel Management System<br>
-                    Lahore, Pakistan<br>
-                    Tel: 0300-1234567
+                    Shogran, Pakistan<br>
+                    Tel: 0329 6777222
                 </div>
             </div>
             <div class="invoice-title">
@@ -402,7 +402,7 @@
         <!-- Footer -->
         <div class="footer">
             <div class="thankyou">Thank you for staying with us.</div>
-            <div>BM Resort — Lahore, Pakistan | info@bmresort.com | 0300-1234567</div>
+            <div>Bellamonte Resort — Shogran, Pakistan | bellamonteresort01@gmail.com | 0329 6777222</div>
             <div style="margin-top:6px;font-size:11px;color:#bbb;">
                 Generated on {{ now()->format('d M Y, h:i A') }}
             </div>

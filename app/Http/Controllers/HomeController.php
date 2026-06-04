@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use App\Models\Event;
+use App\Models\HeroSection;
+
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -22,13 +24,27 @@ class HomeController extends Controller
 
     public function show()
     {
-        // Rooms
         $rooms = Room::latest()->get();
 
-        $dbEvents = Event::active()->orderBy('sort_order')->orderByDesc('event_date')->take(5)->get();
-        $useDb    = $dbEvents->count() > 0;
-        $events = $useDb ? $dbEvents : collect($this->dummyEvents())->map(fn($e) => (object) $e);
+        // $hero = HeroSection::where('status', 'Active')->latest()->first();
 
-        return view('pages.landing.index', compact('rooms', 'events', 'useDb'));
+        $dbEvents = Event::active()
+            ->orderBy('sort_order')
+            ->orderByDesc('event_date')
+            ->take(5)
+            ->get();
+
+        $useDb = $dbEvents->count() > 0;
+
+        $events = $useDb
+            ? $dbEvents
+            : collect($this->dummyEvents())->map(fn($e) => (object) $e);
+
+        return view('pages.landing.index', compact(
+            'rooms',
+            'events',
+            'useDb'
+            
+        ));
     }
 }

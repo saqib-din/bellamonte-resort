@@ -106,7 +106,7 @@
                                                     <div class="d-flex align-items-center">
                                                         <div class="flex-shrink-0">
                                                             @if ($room->image)
-                                                                <img src="{{ asset('storage/' . $room->image) }}"
+                                                                <img src="{{ $room->image ? asset('uploads/rooms/' . $room->image) : asset('landing-assets/img/room/room-1.jpg') }}"
                                                                     alt="Room {{ $room->room_number }}"
                                                                     style="width:45px;height:45px;object-fit:cover;"
                                                                     class="rounded">

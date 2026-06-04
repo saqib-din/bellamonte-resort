@@ -40,7 +40,7 @@
                     <div class="card mb-4">
                         <div class="card-body text-center p-4">
                             @if ($room->image)
-                                <img src="{{ asset('storage/' . $room->image) }}" class="img-fluid rounded mb-3"
+                                <img src="{{ asset('uploads/rooms/' . $room->image) }}" class="img-fluid rounded mb-3"
                                     style="max-height:220px;width:100%;object-fit:cover;">
                             @else
                                 <div class="bg-light-primary rounded d-flex align-items-center justify-content-center mb-3"

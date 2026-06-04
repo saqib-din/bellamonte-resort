@@ -51,15 +51,22 @@ class ContactController extends Controller
             'reply_message' => 'required|string|max:5000',
         ]);
 
-        $contact->update([
-            'reply_message' => $request->reply_message,
-            'is_replied'    => true,
-            'replied_at'    => now(),
-        ]);
+        try {
+            $contact->reply_message = $request->reply_message;
+            Mail::to($contact->email)->send(new ContactReplyMail($contact));
 
-        Mail::to($contact->email)->send(new ContactReplyMail($contact));
+            $contact->update([
+                'reply_message' => $request->reply_message,
+                'is_replied'    => true,
+                'replied_at'    => now(),
+            ]);
 
-        return redirect()->route('contacts.index')->with('success', "Reply sent to {$contact->name} successfully!");
+            return redirect()->route('contacts.index')
+                ->with('success', "Reply sent to {$contact->name} successfully!");
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to send email. Please check mail settings.');
+        }
     }
 
     // ─── Admin: Delete a contact 

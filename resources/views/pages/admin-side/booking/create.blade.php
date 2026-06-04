@@ -43,8 +43,7 @@
                                     <div class="col-md-6">
                                         <label class="form-label">Select Room <span class="text-danger">*</span></label>
                                         <select name="room_id" id="roomSelect"
-                                            class="form-select @error('room_id') is-invalid @enderror"
-                                            onchange="updateRoomInfo()">
+                                            class="form-select @error('room_id') is-invalid @enderror">
                                             <option value="">-- Available Rooms --</option>
                                             @foreach ($rooms as $room)
                                                 <option value="{{ $room->id }}"
@@ -67,8 +66,8 @@
                                                 &nbsp;|&nbsp;
                                                 <span class="text-muted">Capacity:</span> <strong id="rCapacity"></strong>
                                                 &nbsp;|&nbsp;
-                                                <span class="text-muted">Price:</span> <strong class="text-success"
-                                                    id="rPrice"></strong>/night
+                                                <span class="text-muted">Price:</span>
+                                                <strong class="text-success" id="rPrice"></strong>/night
                                             </small>
                                         </div>
                                     </div>
@@ -76,8 +75,7 @@
                                     <div class="col-md-6">
                                         <label class="form-label">Select Customer <span class="text-danger">*</span></label>
                                         <select name="customer_id" id="customerSelect"
-                                            class="form-select @error('customer_id') is-invalid @enderror"
-                                            onchange="fillCustomerInfo()">
+                                            class="form-select @error('customer_id') is-invalid @enderror">
                                             <option value="">-- Select Customer --</option>
                                             @foreach ($customers as $customer)
                                                 <option value="{{ $customer->id }}" data-name="{{ $customer->name }}"
@@ -222,7 +220,8 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Special Requests (Guest)</label>
-                                        <textarea name="special_requests" class="form-control" rows="3" placeholder="Enter any special requests from the guest...">{{ old('special_requests') }}</textarea>
+                                        <textarea name="special_requests" class="form-control" rows="3"
+                                            placeholder="Enter any special requests from the guest...">{{ old('special_requests') }}</textarea>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Admin Notes</label>
@@ -268,8 +267,8 @@
                                         <option value="Pending"
                                             {{ old('payment_status', 'Pending') == 'Pending' ? 'selected' : '' }}>⏳ Pending
                                         </option>
-                                        <option value="Paid" {{ old('payment_status') == 'Paid' ? 'selected' : '' }}>
-                                            ✅ Paid</option>
+                                        <option value="Paid" {{ old('payment_status') == 'Paid' ? 'selected' : '' }}>✅
+                                            Paid</option>
                                         <option value="Partial"
                                             {{ old('payment_status') == 'Partial' ? 'selected' : '' }}>🔶 Partial</option>
                                     </select>
@@ -280,7 +279,8 @@
                                         @foreach (['Cash', 'Card', 'Bank Transfer', 'JazzCash', 'EasyPaisa'] as $method)
                                             <option value="{{ $method }}"
                                                 {{ old('payment_method', 'Cash') == $method ? 'selected' : '' }}>
-                                                {{ $method }}</option>
+                                                {{ $method }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -295,10 +295,56 @@
                             </div>
                         </div>
 
+                        <!-- Quick Info -->
+                        <div class="card mb-4 border-info">
+                            <div class="card-header bg-light-info">
+                                <h5 class="mb-0 text-info"><i class="ti ti-info-circle me-2"></i>Quick Info</h5>
+                            </div>
+                            <div class="card-body f-13">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2">
+                                        <i class="ti ti-home text-primary me-1"></i>
+                                        <strong>Room & Customer</strong>
+                                        <p class="text-muted mb-0 ms-3">Select an available room and customer. Guest
+                                            details will be auto-filled from the selected customer.</p>
+                                    </li>
+                                    <hr class="my-2">
+                                    <li class="mb-2">
+                                        <i class="ti ti-calendar text-warning me-1"></i>
+                                        <strong>Check In / Check Out</strong>
+                                        <p class="text-muted mb-0 ms-3">Total amount is calculated automatically based on
+                                            selected dates and room price per night.</p>
+                                    </li>
+                                    <hr class="my-2">
+                                    <li class="mb-2">
+                                        <i class="ti ti-settings text-success me-1"></i>
+                                        <strong>Booking Status</strong>
+                                        <p class="text-muted mb-0 ms-3">Set as Confirmed for future bookings or Checked In
+                                            if the guest has already arrived.</p>
+                                    </li>
+                                    <hr class="my-2">
+                                    <li class="mb-2">
+                                        <i class="ti ti-credit-card text-secondary me-1"></i>
+                                        <strong>Payment</strong>
+                                        <p class="text-muted mb-0 ms-3">Enter the advance amount received. Full payment can
+                                            be recorded at checkout via billing.</p>
+                                    </li>
+                                    <hr class="my-2">
+                                    <li>
+                                        <i class="ti ti-notes text-danger me-1"></i>
+                                        <strong>Notes</strong>
+                                        <p class="text-muted mb-0 ms-3">Special requests are visible to staff. Admin notes
+                                            are for internal use only.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
                         <!-- Buttons -->
                         <div class="card">
                             <div class="card-body">
                                 <div class="d-grid gap-2">
+                                    
                                     <button type="submit" class="btn btn-primary">
                                         <i class="ti ti-check me-2"></i>Confirm Booking
                                     </button>
@@ -316,46 +362,97 @@
     </div>
 @endsection
 
+@push('styles')
+    {{-- Tom Select CSS --}}
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/css/tom-select.bootstrap5.min.css">
+    <style>
+        .ts-wrapper .ts-control {
+            border-radius: 6px;
+            min-height: 38px;
+            padding: 4px 8px;
+        }
+
+        .ts-wrapper.focus .ts-control {
+            border-color: #4680ff;
+            box-shadow: 0 0 0 0.2rem rgba(70, 128, 255, .25);
+        }
+    </style>
+@endpush
+
 @push('scripts')
+    {{-- Tom Select JS --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.min.js"></script>
+
     <script>
-        // Fill customer info when selected
-        function fillCustomerInfo() {
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ── Room Select with Search ──────────────────────
+            const roomTS = new TomSelect('#roomSelect', {
+                placeholder: 'Search room...',
+                allowEmptyOption: true,
+                onChange: function(value) {
+                    updateRoomInfo(value);
+                }
+            });
+
+            // ── Customer Select with Search ──────────────────
+            const customerTS = new TomSelect('#customerSelect', {
+                placeholder: 'Search customer...',
+                allowEmptyOption: true,
+                onChange: function(value) {
+                    fillCustomerInfo(value);
+                }
+            });
+
+            // Init on load
+            updateRoomInfo(document.getElementById('roomSelect').value);
+            calcTotal();
+        });
+
+        // ── Room Info Box ────────────────────────────────────
+        function updateRoomInfo(value) {
+            const sel = document.getElementById('roomSelect');
+            const opt = sel.options[sel.selectedIndex];
+
+            if (!value || !opt) {
+                document.getElementById('roomInfoBox').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('rType').textContent = opt.dataset.type || '';
+            document.getElementById('rCapacity').textContent = (opt.dataset.capacity || '') + ' persons';
+            document.getElementById('rPrice').textContent = '₨' + Number(opt.dataset.price || 0).toLocaleString();
+            document.getElementById('roomInfoBox').style.display = 'block';
+            calcTotal();
+        }
+
+        // ── Customer Autofill ────────────────────────────────
+        function fillCustomerInfo(value) {
             const sel = document.getElementById('customerSelect');
             const opt = sel.options[sel.selectedIndex];
-            if (!opt.value) return;
+
+            if (!value || !opt) return;
+
             document.getElementById('guestName').value = opt.dataset.name || '';
             document.getElementById('guestPhone').value = opt.dataset.phone || '';
             document.getElementById('guestCnic').value = opt.dataset.cnic || '';
             document.getElementById('guestEmail').value = opt.dataset.email || '';
         }
 
-        // Show room info
-        function updateRoomInfo() {
-            const sel = document.getElementById('roomSelect');
-            const opt = sel.options[sel.selectedIndex];
-            if (!opt.value) {
-                document.getElementById('roomInfoBox').style.display = 'none';
-                return;
-            }
-            document.getElementById('rType').textContent = opt.dataset.type;
-            document.getElementById('rCapacity').textContent = opt.dataset.capacity + ' persons';
-            document.getElementById('rPrice').textContent = '₨' + Number(opt.dataset.price).toLocaleString();
-            document.getElementById('roomInfoBox').style.display = 'block';
-            calcTotal();
-        }
-
-        // Live total calculator
+        // ── Live Total Calculator ────────────────────────────
         function calcTotal() {
             const cin = document.getElementById('checkIn').value;
             const cout = document.getElementById('checkOut').value;
             const sel = document.getElementById('roomSelect');
             const opt = sel.options[sel.selectedIndex];
-            if (!cin || !cout || !opt.value) return;
+
+            if (!cin || !cout || !opt || !opt.value) return;
 
             const nights = Math.ceil((new Date(cout) - new Date(cin)) / (1000 * 3600 * 24));
             if (nights <= 0) return;
 
-            const price = Number(opt.dataset.price);
+            const price = Number(opt.dataset.price || 0);
             const total = nights * price;
 
             document.getElementById('nightsCount').textContent = nights;
@@ -363,11 +460,5 @@
             document.getElementById('totalAmount').textContent = '₨' + total.toLocaleString();
             document.getElementById('costBox').style.display = 'block';
         }
-
-        // Init on load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateRoomInfo();
-            calcTotal();
-        });
     </script>
 @endpush

@@ -193,6 +193,51 @@
                             </div>
                         </div>
 
+                          <div class="card mb-3">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="ti ti-info-circle me-2 text-primary"></i>Quick Info
+                                </h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <ul class="list-group list-group-flush" style="font-size:13px;">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                        <span class="text-muted">Max Events Allowed</span>
+                                        <span class="badge bg-light-primary">9</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                        <span class="text-muted">Events Added</span>
+                                        <span class="badge bg-light-info">{{ \App\Models\Event::count() }} / 9</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                        <span class="text-muted">Main Image</span>
+                                        <span class="badge bg-light-warning">Required</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                        <span class="text-muted">Detail Images</span>
+                                        <span class="badge bg-light-secondary">Optional (3)</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                        <span class="text-muted">Image Size</span>
+                                        <span class="badge bg-light-secondary">Max 2MB</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                        <span class="text-muted">Formats</span>
+                                        <span class="badge bg-light-secondary">JPG, PNG, WEBP</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                        <span class="text-muted">Sort Order</span>
+                                        <span class="text-muted" style="font-size:12px;">0 = Show first</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                        <span class="text-muted">Status</span>
+                                        <span class="text-muted" style="font-size:12px;">Inactive = Hidden from
+                                            website</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
                         {{-- Buttons --}}
                         <div class="card">
                             <div class="card-body">

@@ -19,37 +19,19 @@
 @endsection
 
 @section('content')
-    @php
-        $isModel = $event instanceof \App\Models\Event;
-        $title = $isModel ? $event->title : $event->title;
-        $tag = $isModel ? $event->tag : $event->tag;
-        $date = $isModel ? $event->event_date : $event->event_date;
-        $description = $isModel ? $event->description : $event->description;
-        $shortDesc = $isModel ? $event->short_description : $event->short_description;
-        $img1 = $isModel ? $event->detail_image_1_url : $event->detail_image_1_url;
-        $img2 = $isModel ? $event->detail_image_2_url : $event->detail_image_2_url;
-        $img3 = $isModel ? $event->detail_image_3_url : $event->detail_image_3_url;
-        $sec1Title = $isModel ? $event->section_1_title : $event->section_1_title;
-        $sec1Text = $isModel ? $event->section_1_text : $event->section_1_text;
-        $sec2Title = $isModel ? $event->section_2_title : $event->section_2_title;
-        $sec2Text = $isModel ? $event->section_2_text : $event->section_2_text;
-        $heroImage = $isModel
-            ? $event->image_url ?? asset('landing-assets/img/blog/blog-details/blog-details-hero.jpg')
-            : asset('landing-assets/img/blog/blog-details/blog-details-hero.jpg');
-    @endphp
-
     <!-- Blog Details Hero -->
-    <section class="blog-details-hero set-bg" data-setbg="{{ $heroImage }}">
+    <section class="blog-details-hero set-bg" data-setbg="{{ $event->image_url }}"
+        style="background-image: url('{{ $event->image_url }}'); background-size: cover; background-position: center;">
         <div class="container">
             <div class="row">
                 <div class="col-lg-10 offset-lg-1">
                     <div class="bd-hero-text">
-                        <span>{{ $tag }}</span>
-                        <h2>{{ $title }}</h2>
+                        <span>{{ $event->tag }}</span>
+                        <h2>{{ $event->title }}</h2>
                         <ul>
                             <li class="b-time">
                                 <i class="icon_clock_alt"></i>
-                                {{ \Carbon\Carbon::parse($date)->format('d M, Y') }}
+                                {{ $event->event_date->format('d M, Y') }}
                             </li>
                             <li>
                                 <i class="icon_profile"></i>
@@ -71,22 +53,10 @@
                     <div class="blog-details-text">
 
                         <div class="bd-title">
-                            @if ($description)
-                                <p>{{ $description }}</p>
-                            @else
-                                <p>Nestled in the breathtaking hills of Shogran, Bellamonte Resort offers a perfect
-                                    combination of luxury, comfort, and natural beauty. Guests can enjoy peaceful mountain
-                                    views, fresh air, and a relaxing environment away from the busy city life.</p>
-                            @endif
-
-                            @if ($shortDesc)
-                                <p>{{ $shortDesc }}</p>
-                            @else
-                                <p>Whether you are planning a family vacation, honeymoon trip, corporate retreat, or weekend
-                                    getaway, Bellamonte Resort provides premium rooms, exceptional hospitality, and
-                                    unforgettable experiences.</p>
-                            @endif
-
+                            <p>{{ $event->description ?? 'Nestled in the breathtaking hills of Shogran, Bellamonte Resort offers a perfect combination of luxury, comfort, and natural beauty. Guests can enjoy peaceful mountain views, fresh air, and a relaxing environment away from the busy city life.' }}
+                            </p>
+                            <p>{{ $event->short_description ?? 'Whether you are planning a family vacation, honeymoon trip, corporate retreat, or weekend getaway, Bellamonte Resort provides premium rooms, exceptional hospitality, and unforgettable experiences.' }}
+                            </p>
                             <p>Visitors can also explore nearby tourist attractions, hiking trails, forests, and beautiful
                                 landscapes of Kaghan Valley while enjoying the peaceful atmosphere of the resort.</p>
                         </div>
@@ -94,26 +64,29 @@
                         <!-- Detail Images -->
                         <div class="bd-pic">
                             <div class="bp-item">
-                                <img src="{{ $img1 }}" alt="Event Image 1">
+                                <img src="{{ $event->detail_image_1_url }}" alt="Event Image 1"
+                                    style="width: 100%; height: 187px; object-fit: cover;">
                             </div>
                             <div class="bp-item">
-                                <img src="{{ $img2 }}" alt="Event Image 2">
+                                <img src="{{ $event->detail_image_2_url }}" alt="Event Image 2"
+                                    style="width: 100%; height: 187px; object-fit: cover;">
                             </div>
                             <div class="bp-item">
-                                <img src="{{ $img3 }}" alt="Event Image 3">
+                                <img src="{{ $event->detail_image_3_url }}" alt="Event Image 3"
+                                    style="width: 100%; height: 187px; object-fit: cover;">
                             </div>
                         </div>
 
                         <!-- Sections -->
                         <div class="bd-more-text">
                             <div class="bm-item">
-                                <h4>{{ $sec1Title ?? 'Luxury & Comfort' }}</h4>
-                                <p>{{ $sec1Text ?? 'Bellamonte Resort offers spacious and comfortable rooms with premium interiors, mountain-facing balconies, quality room service, and peaceful surroundings. Guests can enjoy a relaxing stay with modern amenities and excellent hospitality.' }}
+                                <h4>{{ $event->section_1_title ?? 'Luxury & Comfort' }}</h4>
+                                <p>{{ $event->section_1_text ?? 'Bellamonte Resort offers spacious and comfortable rooms with premium interiors, mountain-facing balconies, quality room service, and peaceful surroundings. Guests can enjoy a relaxing stay with modern amenities and excellent hospitality.' }}
                                 </p>
                             </div>
                             <div class="bm-item">
-                                <h4>{{ $sec2Title ?? 'Perfect Destination in Northern Pakistan' }}</h4>
-                                <p>{{ $sec2Text ?? 'Shogran is one of the most beautiful tourist destinations in Pakistan. Staying at Bellamonte Resort allows visitors to experience nature, adventure, and luxury together. From bonfire nights to sightseeing tours, every moment becomes memorable.' }}
+                                <h4>{{ $event->section_2_title ?? 'Perfect Destination in Northern Pakistan' }}</h4>
+                                <p>{{ $event->section_2_text ?? 'Shogran is one of the most beautiful tourist destinations in Pakistan. Staying at Bellamonte Resort allows visitors to experience nature, adventure, and luxury together. From bonfire nights to sightseeing tours, every moment becomes memorable.' }}
                                 </p>
                             </div>
                         </div>
@@ -137,25 +110,17 @@
             </div>
             <div class="row">
                 @foreach ($related as $rel)
-                    @php
-                        $relIsModel = $rel instanceof \App\Models\Event;
-                        $relId = $relIsModel ? $rel->id : $rel->id ?? null;
-                        $relTitle = $relIsModel ? $rel->title : $rel->title ?? '';
-                        $relTag = $relIsModel ? $rel->tag : $rel->tag ?? '';
-                        $relImageUrl = $relIsModel
-                            ? $rel->image_url
-                            : $rel->image_url ?? asset('landing-assets/img/blog/blog-1.jpg');
-                        $relDate = $relIsModel ? $rel->event_date : $rel->event_date ?? now();
-                        $relUrl = $relIsModel ? route('event.detail', $relId) : route('event.details');
-                    @endphp
                     <div class="col-md-4">
-                        <div class="blog-item set-bg" data-setbg="{{ $relImageUrl }}">
+                        <div class="blog-item set-bg" data-setbg="{{ $rel->image_url }}"
+                            style="background-image: url('{{ $rel->image_url }}'); background-size: cover; background-position: center;">
                             <div class="bi-text">
-                                <span class="b-tag">{{ $relTag }}</span>
-                                <h4><a href="{{ $relUrl }}">{{ $relTitle }}</a></h4>
+                                <span class="b-tag">{{ $rel->tag }}</span>
+                                <h4>
+                                    <a href="{{ route('event.detail', $rel->id) }}">{{ $rel->title }}</a>
+                                </h4>
                                 <div class="b-time">
                                     <i class="icon_clock_alt"></i>
-                                    {{ \Carbon\Carbon::parse($relDate)->format('d M, Y') }}
+                                    {{ $rel->event_date->format('d M, Y') }}
                                 </div>
                             </div>
                         </div>

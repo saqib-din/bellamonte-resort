@@ -171,8 +171,7 @@
                                 <h5 class="mb-0"><i class="ti ti-star me-2"></i>Services & Amenities</h5>
                             </div>
                             <div class="card-body">
-                                <label class="form-label">Services <small class="text-muted">(comma se alag
-                                        karein)</small></label>
+                                <label class="form-label">Services <small class="text-muted">(👉 “Separate the values with commas”)</small></label>
 
                                 <!-- Checkboxes for quick select -->
                                 <div class="row mb-3">

@@ -26,7 +26,7 @@
                     <label>Navigation</label>
                 </li>
 
-                {{-- ══ Dashboard — sab ko ══ --}}
+                {{-- ══ Dashboard — All Roles ══ --}}
                 <li class="pc-item">
                     <a href="{{ route('dashboard') }}" class="pc-link">
                         <span class="pc-micon">
@@ -52,6 +52,17 @@
                     </li>
                 @endif
 
+                {{-- ══ Customers — Admin + Manager + Receptionist ══ --}}
+                @if (in_array($role, ['admin', 'manager', 'receptionist']))
+                    <li class="pc-item">
+                        <a href="{{ route('customers.index') }}" class="pc-link">
+                            <span class="pc-micon">
+                                <i class="ti ti-users"></i>
+                            </span>
+                            <span class="pc-mtext">Customers</span>
+                        </a>
+                    </li>
+                @endif
 
                 {{-- ══ Bookings — Admin + Manager + Receptionist ══ --}}
                 @if (in_array($role, ['admin', 'manager', 'receptionist']))
@@ -67,19 +78,46 @@
                     </li>
                 @endif
 
-                {{-- ══ Customers — Admin + Manager + Receptionist ══ --}}
+                {{-- ══ Foods Menu — Admin + Manager + Receptionist ══ --}}
                 @if (in_array($role, ['admin', 'manager', 'receptionist']))
-                    <li class="pc-item">
-                        <a href="{{ route('customers.index') }}" class="pc-link">
+                    <li class="pc-item pc-hasmenu">
+                        <a href="#!" class="pc-link">
                             <span class="pc-micon">
-                                <i class="ti ti-users"></i>
+                                <i class="ti ti-tools-kitchen-2"></i>
                             </span>
-                            <span class="pc-mtext">Customers</span>
+                            <span class="pc-mtext">Foods Menu</span>
+                            <span class="pc-arrow">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round"
+                                    class="feather feather-chevron-right">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </span>
                         </a>
+                        <ul class="pc-submenu">
+                            @if (in_array($role, ['admin', 'manager']))
+                                <li class="pc-item">
+                                    <a class="pc-link" href="{{ route('food.categories.index') }}">
+                                        Categories
+                                    </a>
+                                </li>
+                                <li class="pc-item">
+                                    <a class="pc-link" href="{{ route('food.items.index') }}">
+                                        Items
+                                    </a>
+                                </li>
+                            @endif
+                            <li class="pc-item">
+                                <a class="pc-link" href="{{ route('food.orders.index') }}">
+                                    Orders
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 @endif
 
-                {{-- ══ Billing/Invoices — Admin + Manager + Accountant ══ --}}
+                {{-- ══ Billing — Admin + Manager + Accountant ══ --}}
                 @if (in_array($role, ['admin', 'manager', 'accountant']))
                     <li class="pc-item">
                         <a href="{{ route('billing.index') }}" class="pc-link">
@@ -93,6 +131,7 @@
                     </li>
                 @endif
 
+                {{-- ══ Events — Admin + Manager ══ --}}
                 @if (in_array($role, ['admin', 'manager']))
                     <li class="pc-item">
                         <a href="{{ route('events.index') }}" class="pc-link">
@@ -100,6 +139,20 @@
                                 <i class="ti ti-calendar-event"></i>
                             </span>
                             <span class="pc-mtext">Events</span>
+                        </a>
+                    </li>
+                @endif
+
+                {{-- ══ About Us — Admin + Manager ══ --}}
+                @if (in_array($role, ['admin', 'manager']))
+                    <li class="pc-item">
+                        <a href="{{ route('about.index') }}" class="pc-link">
+                            <span class="pc-micon">
+                                <svg class="pc-icon">
+                                    <use xlink:href="#custom-keyboard"></use>
+                                </svg>
+                            </span>
+                            <span class="pc-mtext">About Us</span>
                         </a>
                     </li>
                 @endif
@@ -118,7 +171,7 @@
                     </li>
                 @endif
 
-                {{-- ══ Settings — Sirf Admin ══ --}}
+                {{-- ══ Settings — Admin Only ══ --}}
                 @if ($role === 'admin')
                     <li class="pc-item">
                         <a href="{{ route('settings.index') }}" class="pc-link">
@@ -132,7 +185,7 @@
                     </li>
                 @endif
 
-                {{-- ══ Users — Sirf Admin ══ --}}
+                {{-- ══ Users — Admin Only ══ --}}
                 @if ($role === 'admin')
                     <li class="pc-item">
                         <a href="{{ route('users.index') }}" class="pc-link">
@@ -141,7 +194,7 @@
                                     <use xlink:href="#custom-user-square"></use>
                                 </svg>
                             </span>
-                            <span class="pc-mtext">User Profile</span>
+                            <span class="pc-mtext">Users</span>
                         </a>
                     </li>
                 @endif

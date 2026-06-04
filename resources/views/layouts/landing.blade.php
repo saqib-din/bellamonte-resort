@@ -72,8 +72,12 @@
             <a href="#"><i class="fa fa-instagram"></i></a>
         </div> --}}
         <ul class="top-widget">
-            <li><i class="fa fa-phone"></i>0329 6777222</li>
-            <li><i class="fa fa-envelope"></i>info@bellamonteresort.com</li>
+            <li><a href="tel:03296777222" style="color: inherit; text-decoration: none;">
+                    <i class="fa fa-phone"></i> 0329 6777222
+                </a></li>
+            <li><a href="mailto:bellamonteresort01@gmail.com" style="color: inherit; text-decoration: none;">
+                    <i class="fa fa-envelope"></i> bellamonteresort01@gmail.com
+                </a></li>
         </ul>
     </div>
 

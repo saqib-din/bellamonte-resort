@@ -62,19 +62,13 @@ class UserController extends Controller
             'name'     => 'required|string|max:100',
             'email'    => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:6|confirmed',
-            'role'     => 'required|in:manager,receptionist,accountant,staff',
+            'role'     => 'required|in:admin,manager,receptionist,accountant,staff',
             'phone'    => 'nullable|string|max:20',
             'status'   => 'required|in:active,inactive',
         ]);
 
-        // Admin role cannot be changed!
-        if ($user->isAdmin()) {
-            return redirect()->back()
-                ->with('error', '❌ Admin role cannot be changed!');
-        }
-
-        // No one can be assigned the Admin role!
-        if ($request->role === 'admin') {
+        // Sirf doosre ko admin role assign nahi kar sakte
+        if (!$user->isAdmin() && $request->role === 'admin') {
             return redirect()->back()
                 ->with('error', '❌ No one can be assigned the Admin role!');
         }

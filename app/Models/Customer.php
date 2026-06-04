@@ -31,6 +31,14 @@ class Customer extends Model
         return $this->hasMany(Booking::class);
     }
 
+
+    public function getImageUrlAttribute(): string
+    {
+        return $this->image
+            ? asset('uploads/customers/' . $this->image) // ✅ sahi folder
+            : asset('landing-assets/img/room/room-1.jpg');
+    }
+
     public function getStatusBadgeClass()
     {
         return match ($this->status) {

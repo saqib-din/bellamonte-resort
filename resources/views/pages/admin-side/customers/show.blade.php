@@ -41,7 +41,7 @@
                     <div class="card-body text-center p-4">
 
                         @if($customer->image)
-                            <img src="{{ asset('storage/' . $customer->image) }}"
+                            <img src="{{ asset('uploads/customers/' . $customer->image) }}"
                                 class="rounded-circle mb-3"
                                 style="width:110px;height:110px;object-fit:cover;">
                         @else

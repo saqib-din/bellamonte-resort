@@ -71,8 +71,15 @@
                                                             style="width:60px; height:45px; object-fit:cover; border-radius:6px;">
                                                     </td>
                                                     <td>
-                                                        <div style="max-width:220px; font-weight:600; font-size:13px;">
-                                                            {{ $event->title }}</div>
+                                                        <div style="max-width:220px; font-weight:600; font-size:13px;"
+                                                            title="{{ $event->title }}">
+                                                            @php
+                                                                $words = explode(' ', $event->title);
+                                                                echo count($words) > 4
+                                                                    ? implode(' ', array_slice($words, 0, 4)) . '...'
+                                                                    : $event->title;
+                                                            @endphp
+                                                        </div>
                                                     </td>
                                                     <td><span class="badge bg-light-primary">{{ $event->tag }}</span></td>
                                                     <td style="font-size:13px;">{{ $event->event_date->format('d M Y') }}
@@ -93,7 +100,7 @@
                                                             class="avtar avtar-xs btn-link-secondary" title="Edit">
                                                             <i class="ti ti-edit f-18"></i>
                                                         </a>
-                                                        <a href="#"
+                                                        {{-- <a href="#"
                                                             class="avtar avtar-xs btn-link-secondary bs-pass-para"
                                                             data-id="{{ $event->id }}" title="Delete">
                                                             <i class="ti ti-trash f-20"></i>
@@ -102,7 +109,7 @@
                                                             action="{{ route('events.destroy', $event->id) }}"
                                                             method="POST" style="display:none;">
                                                             @csrf @method('DELETE')
-                                                        </form>
+                                                        </form> --}}
                                                     </td>
                                                 </tr>
                                             @endforeach

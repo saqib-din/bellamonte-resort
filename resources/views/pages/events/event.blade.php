@@ -19,43 +19,36 @@
 @endsection
 
 @section('content')
-    <!-- Blog Section Begin -->
     <section class="blog-section blog-page spad">
         <div class="container">
             <div class="row">
 
-                @foreach ($events as $index => $event)
+                @forelse ($events as $event)
                     @php
-                        // Support both Eloquent model and dummy array/object
-                        $isModel = $event instanceof \App\Models\Event;
-                        $id = $isModel ? $event->id : $event['id'] ?? null;
-                        $title = $isModel ? $event->title : $event['title'] ?? '';
-                        $tag = $isModel ? $event->tag : $event['tag'] ?? '';
-                        $imageUrl = $isModel
-                            ? $event->image_url
-                            : $event['image_url'] ?? asset('landing-assets/img/blog/blog-1.jpg');
-                        $date = $isModel ? $event->event_date : $event['event_date'] ?? now();
-                        $detailUrl = $isModel ? route('event.detail', $id) : route('event.details');
+                        $img = $event->image
+                            ? asset('uploads/events/' . $event->image)
+                            : asset('landing-assets/img/blog/blog-1.jpg');
                     @endphp
-
                     <div class="col-lg-4 col-md-6">
-                        <div class="blog-item set-bg" data-setbg="{{ $imageUrl }}">
+                        <div class="blog-item set-bg" data-setbg="{{ $img }}"
+                            style="background-image: url('{{ $img }}'); background-size: cover; background-position: center;">
                             <div class="bi-text">
-                                <span class="b-tag">{{ $tag }}</span>
+                                <span class="b-tag">{{ $event->tag }}</span>
                                 <h4>
-                                    <a href="{{ $detailUrl }}">{{ $title }}</a>
+                                    <a href="{{ route('event.detail', $event->id) }}">{{ $event->title }}</a>
                                 </h4>
                                 <div class="b-time">
                                     <i class="icon_clock_alt"></i>
-                                    {{ \Carbon\Carbon::parse($date)->format('d M, Y') }}
+                                    {{ $event->event_date->format('d M, Y') }}
                                 </div>
                             </div>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    {{-- ... --}}
+                @endforelse
 
             </div>
         </div>
     </section>
-    <!-- Blog Section End -->
 @endsection

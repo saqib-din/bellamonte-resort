@@ -184,7 +184,7 @@
                             </div>
                             <div class="card-body text-center">
                                 @if (!empty($settings['hotel_logo']))
-                                    <img src="{{ asset('storage/' . $settings['hotel_logo']) }}"
+                                    <img src="{{ asset('uploads/settings/' . $settings['hotel_logo']) }}"
                                         class="img-fluid mb-3 rounded" style="max-height:120px;" id="logoPreview">
                                 @else
                                     <div class="bg-light rounded d-flex align-items-center justify-content-center mb-3 mx-auto"

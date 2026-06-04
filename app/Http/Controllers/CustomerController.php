@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
@@ -40,7 +39,10 @@ class CustomerController extends Controller
         $data = $request->except('image');
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('customers', 'public');
+            $file          = $request->file('image');
+            $filename      = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/customers'), $filename);
+            $data['image'] = $filename;
         }
 
         Customer::create($data);
@@ -80,10 +82,15 @@ class CustomerController extends Controller
         $data = $request->except('image');
 
         if ($request->hasFile('image')) {
+            // Purani delete karo
             if ($customer->image) {
-                Storage::disk('public')->delete($customer->image);
+                $old = public_path('uploads/customers/' . $customer->image);
+                if (file_exists($old)) unlink($old);
             }
-            $data['image'] = $request->file('image')->store('customers', 'public');
+            $file          = $request->file('image');
+            $filename      = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/customers'), $filename);
+            $data['image'] = $filename;
         }
 
         $customer->update($data);
@@ -95,9 +102,11 @@ class CustomerController extends Controller
     public function destroy(Customer $customer)
     {
         if ($customer->image) {
-            Storage::disk('public')->delete($customer->image);
+            $old = public_path('uploads/customers/' . $customer->image);
+            if (file_exists($old)) unlink($old);
         }
         $customer->delete();
+
         return redirect()->route('customers.index')
             ->with('success', 'Customer deleted successfully!');
     }
