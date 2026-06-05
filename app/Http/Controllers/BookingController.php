@@ -6,15 +6,88 @@ use App\Models\Room;
 use App\Models\Booking;
 use App\Models\Customer;
 use Illuminate\Support\Carbon;
+use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
     //
-    public function index()
+    public function index(Request $request)
     {
-        $bookings = Booking::with(['room', 'customer'])->latest()->get();
-        return view('pages.admin-side.booking.index', compact('bookings'));
+        if ($request->ajax()) {
+            $query = Booking::with('room')->select('bookings.*');
+
+            return DataTables::eloquent($query)
+                ->addColumn('booking_number', fn($b) => '<strong>' . e($b->booking_number) . '</strong>')
+                ->addColumn(
+                    'guest',
+                    fn($b) =>
+                    '<div><h6 class="mb-0">' . e($b->guest_name) . '</h6>' .
+                        '<small class="text-muted">' . e($b->guest_phone) . '</small></div>'
+                )
+                ->addColumn(
+                    'room',
+                    fn($b) =>
+                    '<span class="badge bg-light-primary">Room ' . e($b->room->room_number ?? '—') . '</span><br>' .
+                        '<small class="text-muted">' . e($b->room->type ?? '') . '</small>'
+                )
+                ->editColumn(
+                    'check_in',
+                    fn($b) =>
+                    '<i class="ti ti-calendar-event f-13 text-muted me-1"></i>' . $b->check_in->format('d M Y')
+                )
+                ->editColumn(
+                    'check_out',
+                    fn($b) =>
+                    '<i class="ti ti-calendar-event f-13 text-muted me-1"></i>' . $b->check_out->format('d M Y')
+                )
+                ->addColumn(
+                    'total',
+                    fn($b) =>
+                    '<strong class="text-success">₨' . number_format($b->total_amount) . '</strong>'
+                )
+                ->addColumn(
+                    'status_badge',
+                    fn($b) =>
+                    '<span class="badge ' . $b->getStatusBadgeClass() . '">' . e($b->status) . '</span>'
+                )
+                ->addColumn('action', function ($b) {
+                    $html = '';
+
+                    if ($b->status === 'Confirmed') {
+                        $html .= '<form action="' . route('admin.bookings.checkin', $b->id) . '" method="POST" class="d-inline">'
+                            . csrf_field()
+                            . '<button class="avtar avtar-xs btn-link-success" title="Check In" type="submit"><i class="ti ti-login f-18"></i></button></form>';
+                    }
+
+                    if ($b->status === 'Checked In') {
+                        $html .= '<form action="' . route('admin.bookings.checkout', $b->id) . '" method="POST" class="d-inline">'
+                            . csrf_field()
+                            . '<button class="avtar avtar-xs btn-link-warning" title="Check Out" type="submit"><i class="ti ti-logout f-18"></i></button></form>';
+                    }
+
+                    $html .= '<a href="' . route('admin.bookings.show', $b->id) . '" class="avtar avtar-xs btn-link-secondary" title="View"><i class="ti ti-eye f-18"></i></a>';
+                    $html .= '<a href="' . route('admin.bookings.edit', $b->id) . '" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></a>';
+                    $html .= '<a href="#" class="avtar avtar-xs btn-link-secondary bs-pass-para" data-id="' . $b->id . '" title="Delete"><i class="ti ti-trash f-18"></i></a>';
+                    $html .= '<form id="delete-form-' . $b->id . '" action="' . route('admin.bookings.destroy', $b->id) . '" method="POST" style="display:none;">'
+                        . csrf_field() . method_field('DELETE') . '</form>';
+
+                    return $html;
+                })
+                ->rawColumns(['booking_number', 'guest', 'room', 'check_in', 'check_out', 'total', 'status_badge', 'action'])
+                ->make(true);
+        }
+
+        $stats = [
+            'total'       => Booking::count(),
+            'checked_in'  => Booking::where('status', 'Checked In')->count(),
+            'confirmed'   => Booking::where('status', 'Confirmed')->count(),
+            'checked_out' => Booking::where('status', 'Checked Out')->count(),
+            'cancelled'   => Booking::where('status', 'Cancelled')->count(),
+            'revenue'     => Booking::where('payment_status', 'Paid')->sum('total_amount'),
+        ];
+
+        return view('pages.admin-side.booking.index', compact('stats'));
     }
 
     public function create()

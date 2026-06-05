@@ -7,13 +7,65 @@ use App\Models\Bill;
 use App\Models\Booking;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
 
 class BillController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $bills = Bill::with(['booking', 'customer'])->latest()->get();
-        return view('pages.admin-side.billing.index', compact('bills'));
+        if ($request->ajax()) {
+            $query = Bill::query()->select('bills.*');
+
+            return DataTables::eloquent($query)
+                ->addColumn('invoice_number', fn($b) => '<strong class="text-primary">' . e($b->invoice_number) . '</strong>')
+                ->addColumn(
+                    'guest',
+                    fn($b) =>
+                    '<h6 class="mb-0">' . e($b->guest_name) . '</h6>' .
+                        '<small class="text-muted">' . e($b->guest_phone) . '</small>'
+                )
+                ->addColumn(
+                    'room',
+                    fn($b) =>
+                    $b->room_number
+                        ? '<span class="badge bg-light-primary">Room ' . e($b->room_number) . '</span>' .
+                        '<small class="text-muted d-block">' . e($b->room_type) . '</small>'
+                        : '<span class="text-muted">—</span>'
+                )
+                ->editColumn('check_in', fn($b) => $b->check_in ? $b->check_in->format('d M Y') : '—')
+                ->editColumn('check_out', fn($b) => $b->check_out ? $b->check_out->format('d M Y') : '—')
+                ->addColumn('method', fn($b) => '<small>' . e($b->payment_method) . '</small>')
+                ->addColumn(
+                    'total',
+                    fn($b) =>
+                    '<strong class="text-dark">₨' . number_format($b->total_amount) . '</strong>'
+                )
+                ->addColumn(
+                    'status_badge',
+                    fn($b) =>
+                    '<span class="badge ' . $b->getStatusBadgeClass() . '">' . e($b->status) . '</span>'
+                )
+                ->addColumn('action', function ($b) {
+                    $html  = '<a href="' . route('billing.print', $b->id) . '" target="_blank" class="avtar avtar-xs btn-link-secondary" title="Print"><i class="ti ti-printer f-18"></i></a>';
+                    $html .= '<a href="' . route('billing.show', $b->id) . '" class="avtar avtar-xs btn-link-secondary" title="View"><i class="ti ti-eye f-18"></i></a>';
+                    $html .= '<a href="' . route('billing.edit', $b->id) . '" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></a>';
+                    $html .= '<a href="#" class="avtar avtar-xs btn-link-secondary bs-pass-para" data-id="' . $b->id . '" title="Delete"><i class="ti ti-trash f-18"></i></a>';
+                    $html .= '<form id="delete-form-' . $b->id . '" action="' . route('billing.destroy', $b->id) . '" method="POST" style="display:none;">'
+                        . csrf_field() . method_field('DELETE') . '</form>';
+                    return $html;
+                })
+                ->rawColumns(['invoice_number', 'guest', 'room', 'method', 'total', 'status_badge', 'action'])
+                ->make(true);
+        }
+
+        $stats = [
+            'total'     => Bill::count(),
+            'collected' => Bill::where('status', 'Paid')->sum('total_amount'),
+            'pending'   => Bill::whereIn('status', ['Unpaid', 'Partial'])->sum('balance_due'),
+            'partial'   => Bill::where('status', 'Partial')->count(),
+        ];
+
+        return view('pages.admin-side.billing.index', compact('stats'));
     }
 
     public function create()

@@ -30,7 +30,7 @@
                 <div class="col-md-3">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-primary">{{ $bills->count() }}</h4>
+                            <h4 class="mb-1 text-primary">{{ $stats['total'] }}</h4>
                             <p class="mb-0 text-muted f-12">Total Invoices</p>
                         </div>
                     </div>
@@ -38,8 +38,7 @@
                 <div class="col-md-3">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-success">
-                                {{ number_format($bills->where('status', 'Paid')->sum('total_amount')) }} Pkr</h4>
+                            <h4 class="mb-1 text-success">{{ number_format($stats['collected']) }} Pkr</h4>
                             <p class="mb-0 text-muted f-12">Total Collected</p>
                         </div>
                     </div>
@@ -47,9 +46,7 @@
                 <div class="col-md-3">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-danger">
-                                {{ number_format($bills->whereIn('status', ['Unpaid', 'Partial'])->sum('balance_due')) }} Pkr
-                            </h4>
+                            <h4 class="mb-1 text-danger">{{ number_format($stats['pending']) }} Pkr</h4>
                             <p class="mb-0 text-muted f-12">Total Pending</p>
                         </div>
                     </div>
@@ -57,7 +54,7 @@
                 <div class="col-md-3">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-warning">{{ $bills->where('status', 'Partial')->count() }}</h4>
+                            <h4 class="mb-1 text-warning">{{ $stats['partial'] }}</h4>
                             <p class="mb-0 text-muted f-12">Partial Paid</p>
                         </div>
                     </div>
@@ -78,7 +75,7 @@
                         </div>
                         <div class="card-body table-card">
                             <div class="table-responsive">
-                                <table class="table table-hover" id="pc-dt-simple">
+                                <table class="table table-hover" id="bills-table" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>Invoice #</th>
@@ -86,99 +83,14 @@
                                             <th>Room</th>
                                             <th>Check In</th>
                                             <th>Check Out</th>
-                                            {{-- <th>Nights</th> --}}
                                             <th>Method</th>
                                             <th>Total</th>
-                                            {{-- <th>Paid</th> --}}
-                                            {{-- <th>Balance</th> --}}
-
                                             <th>Status</th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($bills as $bill)
-                                            <tr>
-                                                <td><strong class="text-primary">{{ $bill->invoice_number }}</strong></td>
-
-                                                <td>
-                                                    <h6 class="mb-0">{{ $bill->guest_name }}</h6>
-                                                    <small class="text-muted">{{ $bill->guest_phone }}</small>
-                                                </td>
-
-                                                <td>
-                                                    @if ($bill->room_number)
-                                                        <span class="badge bg-light-primary">Room
-                                                            {{ $bill->room_number }}</span>
-                                                        <small class="text-muted d-block">{{ $bill->room_type }}</small>
-                                                    @else
-                                                        <span class="text-muted">—</span>
-                                                    @endif
-                                                </td>
-
-                                                <td>{{ $bill->check_in ? $bill->check_in->format('d M Y') : '—' }}</td>
-                                                <td>{{ $bill->check_out ? $bill->check_out->format('d M Y') : '—' }}</td>
-                                                {{-- <td><span class="badge bg-light-secondary">{{ $bill->nights }}n</span></td> --}}
-                                                <td><small>{{ $bill->payment_method }}</small></td>
-                                                <td><strong
-                                                        class="text-dark">₨{{ number_format($bill->total_amount) }}</strong>
-                                                </td>
-                                                {{-- <td><span
-                                                        class="text-success">₨{{ number_format($bill->amount_paid) }}</span>
-                                                </td> --}}
-                                                {{-- <td>
-                                                    @if ($bill->balance_due > 0)
-                                                        <span
-                                                            class="text-danger fw-500">₨{{ number_format($bill->balance_due) }}</span>
-                                                    @else
-                                                        <span class="text-muted">—</span>
-                                                    @endif
-                                                </td> --}}
-
-
-
-                                                <td>
-                                                    <span class="badge {{ $bill->getStatusBadgeClass() }}">
-                                                        {{ $bill->status }}
-                                                    </span>
-                                                </td>
-
-                                                <td class="text-end">
-                                                    <!-- Print -->
-                                                    <a href="{{ route('billing.print', $bill) }}" target="_blank"
-                                                        class="avtar avtar-xs btn-link-secondary" title="Print">
-                                                        <i class="ti ti-printer f-18"></i>
-                                                    </a>
-                                                    <!-- View -->
-                                                    <a href="{{ route('billing.show', $bill->id) }}"
-                                                        class="avtar avtar-xs btn-link-secondary" title="View">
-                                                        <i class="ti ti-eye f-18"></i>
-                                                    </a>
-                                                    <!-- Edit -->
-                                                    <a href="{{ route('billing.edit', $bill->id) }}"
-                                                        class="avtar avtar-xs btn-link-secondary" title="Edit">
-                                                        <i class="ti ti-edit f-18"></i>
-                                                    </a>
-                                                    <!-- Delete -->
-                                                    <a href="#" class="avtar avtar-xs btn-link-secondary bs-pass-para"
-                                                        data-id="{{ $bill->id }}" title="Delete">
-                                                        <i class="ti ti-trash f-18"></i>
-                                                    </a>
-                                                    <form id="delete-form-{{ $bill->id }}"
-                                                        action="{{ route('billing.destroy', $bill->id) }}" method="POST"
-                                                        style="display:none;">
-                                                        @csrf @method('DELETE')
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="12" class="text-center py-5 text-muted">
-                                                    <i class="ti ti-file-invoice f-40 d-block mb-2"></i>
-                                                    No invoices found — please create your first invoice!
-                                                </td>
-                                            </tr>
-                                        @endforelse
+                                        {{-- DataTables server-side AJAX se bharega --}}
                                     </tbody>
                                 </table>
                             </div>
@@ -191,13 +103,86 @@
     </div>
 @endsection
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+@endpush
+
 @push('scripts')
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            window.dt = new simpleDatatables.DataTable('#pc-dt-simple', {
-                sortable: true,
-                searchable: true,
-                fixedHeight: true
+        $(function() {
+            const table = $('#bills-table').DataTable({
+                processing: true,
+                serverSide: true, // <-- lakhs records ke liye sabse zaroori
+                responsive: true,
+                order: [
+                    [0, 'desc']
+                ],
+                ajax: "{{ route('billing.index') }}",
+                columns: [{
+                        data: 'invoice_number',
+                        name: 'invoice_number'
+                    },
+                    {
+                        data: 'guest',
+                        name: 'guest_name'
+                    },
+                    {
+                        data: 'room',
+                        name: 'room_number'
+                    },
+                    {
+                        data: 'check_in',
+                        name: 'check_in'
+                    },
+                    {
+                        data: 'check_out',
+                        name: 'check_out'
+                    },
+                    {
+                        data: 'method',
+                        name: 'payment_method'
+                    },
+                    {
+                        data: 'total',
+                        name: 'total_amount'
+                    },
+                    {
+                        data: 'status_badge',
+                        name: 'status'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-end'
+                    },
+                ],
+                language: {
+                    processing: '<div class="spinner-border text-primary" role="status"></div>',
+                    emptyTable: 'No invoices found — please create your first invoice!',
+                }
+            });
+
+            // Delete — event DELEGATION zaroori hai
+            $('#bills-table tbody').on('click', '.bs-pass-para', function(e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'This invoice will be deleted permanently!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('delete-form-' + id).submit();
+                    }
+                });
             });
         });
     </script>

@@ -4,14 +4,51 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $customers = Customer::withCount('bookings')->latest()->get();
-        return view('pages.admin-side.customers.index', compact('customers'));
+        // ---- Aggregate stats: fast indexed COUNT queries (collection load NAHI) ----
+        $stats = [
+            'total'       => Customer::count(),
+            'active'      => Customer::where('status', 'Active')->count(),
+            'blacklisted' => Customer::where('status', 'Blacklisted')->count(),
+            'bookings'    => Booking::count(),
+        ];
+
+        // ---- AJAX request → yajra DataTables server-side response ----
+        if ($request->ajax()) {
+            $query = Customer::query()->select([
+                'id',
+                'name',
+                'email',
+                'image',
+                'cnic',
+                'phone',
+                'city',
+                'nationality',
+                'gender',
+                'status',
+            ]);
+
+            return datatables()->eloquent($query)
+                ->addColumn('customer', fn($c) =>
+                view('pages.admin-side.customers.partials.customer-cell', ['c' => $c])->render())
+                ->addColumn('location', fn($c) =>
+                view('pages.admin-side.customers.partials.location-cell', ['c' => $c])->render())
+                ->editColumn('gender', fn($c) => $c->gender ?? '—')
+                ->addColumn('status_badge', fn($c) =>
+                '<span class="badge ' . $c->getStatusBadgeClass() . '">' . e($c->status) . '</span>')
+                ->addColumn('action', fn($c) =>
+                view('pages.admin-side.customers.partials.actions', ['c' => $c])->render())
+                ->rawColumns(['customer', 'location', 'status_badge', 'action'])
+                ->make(true);
+        }
+
+        return view('pages.admin-side.customers.index', compact('stats'));
     }
 
     public function create()
@@ -82,7 +119,6 @@ class CustomerController extends Controller
         $data = $request->except('image');
 
         if ($request->hasFile('image')) {
-            // Purani delete karo
             if ($customer->image) {
                 $old = public_path('uploads/customers/' . $customer->image);
                 if (file_exists($old)) unlink($old);

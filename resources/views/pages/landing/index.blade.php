@@ -6,21 +6,19 @@
             <div class="row">
                 <div class="col-lg-6">
                     <div class="hero-text">
-                        <h1>{{ $hero->hero_title ?? 'Bellamonte Resort A Luxury Hotel' }}</h1>
-
-                        <p>
-                            {{ $hero->description ?? 'Experience luxury, comfort, and breathtaking mountain views at Bellamonte Resort Shogran, Pakistan, offering premium rooms, peaceful stays, and unforgettable hospitality for families, couples, and travelers.' }}
-                        </p>
+                        <h1>Bellamonte Resort A Luxury Hotel</h1>
+                        <p>Experience luxury, comfort, and breathtaking mountain views at Bellamonte Resort Shogran,
+                            Pakistan, offering premium rooms, peaceful stays, and unforgettable hospitality for families,
+                            couples, and travelers.</p>
+                        <a href="#" class="primary-btn">Discover Now</a>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="hero-slider owl-carousel">
-            <div class="hs-item set-bg"
-                style="height:770px;background-size:cover;background-position:center center;background-repeat:no-repeat;"
-                data-setbg="{{ !empty($hero?->image) ? asset('uploads/hero/' . $hero->image) : asset('landing-assets/img/hero/hero-1.jpg') }}">
-            </div>
+            <div class="hs-item set-bg" data-setbg="{{ asset('landing-assets/img/hero/hero-1.jpg') }}"></div>
+            <div class="hs-item set-bg" data-setbg="{{ asset('landing-assets/img/hero/hero-2.jpg') }}"></div>
+            <div class="hs-item set-bg" data-setbg="{{ asset('landing-assets/img/hero/hero-3.jpg') }}"></div>
         </div>
     </section>
 @endsection
@@ -54,7 +52,7 @@
                     <div class="about-pic">
                         <div class="row">
                             <div class="col-sm-6">
-                                <img src="{{ asset('landing-assets/img/shogran.webp') }}" alt="Bellamonte Resort"
+                                <img src="{{ asset('landing-assets/img/shogran4.webp') }}" alt="Bellamonte Resort"
                                     style="
             height: 23em;
             width: 100%;
@@ -65,7 +63,7 @@
                             </div>
 
                             <div class="col-sm-6">
-                                <img src="{{ asset('landing-assets/img/shogran2.jpg') }}" alt=""
+                                <img src="{{ asset('landing-assets/img/shogran12.png') }}" alt=""
                                     style="
             height: 23em;
             width: 100%;

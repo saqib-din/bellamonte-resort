@@ -31,7 +31,7 @@
                 <div class="col-md-3">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-primary">{{ $customers->count() }}</h4>
+                            <h4 class="mb-1 text-primary">{{ $stats['total'] }}</h4>
                             <p class="mb-0 text-muted f-12">Total Customers</p>
                         </div>
                     </div>
@@ -39,7 +39,7 @@
                 <div class="col-md-3">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-success">{{ $customers->where('status', 'Active')->count() }}</h4>
+                            <h4 class="mb-1 text-success">{{ $stats['active'] }}</h4>
                             <p class="mb-0 text-muted f-12">Active</p>
                         </div>
                     </div>
@@ -47,7 +47,7 @@
                 <div class="col-md-3">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-danger">{{ $customers->where('status', 'Blacklisted')->count() }}</h4>
+                            <h4 class="mb-1 text-danger">{{ $stats['blacklisted'] }}</h4>
                             <p class="mb-0 text-muted f-12">Blacklisted</p>
                         </div>
                     </div>
@@ -55,7 +55,7 @@
                 <div class="col-md-3">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-info">{{ $customers->sum('bookings_count') }}</h4>
+                            <h4 class="mb-1 text-info">{{ $stats['bookings'] }}</h4>
                             <p class="mb-0 text-muted f-12">Total Bookings</p>
                         </div>
                     </div>
@@ -77,7 +77,7 @@
 
                         <div class="card-body table-card">
                             <div class="table-responsive">
-                                <table class="table table-hover" id="pc-dt-simple">
+                                <table class="table table-hover" id="customers-table" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
@@ -86,93 +86,12 @@
                                             <th>Phone</th>
                                             <th>City / Nationality</th>
                                             <th>Gender</th>
-                                            {{-- <th>Total Stays</th> --}}
                                             <th>Status</th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($customers as $customer)
-                                            <tr>
-                                                <td>{{ $customer->id }}</td>
-
-                                                <!-- Name + Photo -->
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="flex-shrink-0">
-                                                            @if ($customer->image)
-                                                                <img src="{{ asset('uploads/customers/' . $customer->image) }}"
-                                                                    alt="{{ $customer->name }}"
-                                                                    style="width:40px;height:40px;object-fit:cover;"
-                                                                    class="rounded-circle">
-                                                            @else
-                                                                <div class="avtar avtar-s bg-light-primary rounded-circle d-flex align-items-center justify-content-center"
-                                                                    style="width:40px;height:40px;">
-                                                                    <span class="fw-bold text-primary">
-                                                                        {{ strtoupper(substr($customer->name, 0, 1)) }}
-                                                                    </span>
-                                                                </div>
-                                                            @endif
-                                                        </div>
-                                                        <div class="flex-grow-1 ms-3">
-                                                            <h6 class="mb-0">{{ $customer->name }}</h6>
-                                                            <small
-                                                                class="text-muted">{{ $customer->email ?? 'No email' }}</small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-
-                                                <td>{{ $customer->cnic }}</td>
-                                                <td>{{ $customer->phone }}</td>
-                                                <td>
-                                                    <div class="flex-grow-1 ms-3">
-                                                        <h6 class="mb-0">{{ $customer->city ?? '—' }}</h6>
-                                                        <small class="text-muted">{{ $customer->nationality }}</small>
-                                                    </div>
-                                                </td>
-                                                <td>{{ $customer->gender ?? '—' }}</td>
-
-                                                {{-- <td>
-                                            <span class="badge bg-light-info">
-                                                {{ $customer->bookings_count }} stays
-                                            </span>
-                                        </td> --}}
-
-                                                <td>
-                                                    <span class="badge {{ $customer->getStatusBadgeClass() }}">
-                                                        {{ $customer->status }}
-                                                    </span>
-                                                </td>
-
-                                                <td class="text-end">
-                                                    <a href="{{ route('customers.show', $customer->id) }}"
-                                                        class="avtar avtar-xs btn-link-secondary" title="View">
-                                                        <i class="ti ti-eye f-20"></i>
-                                                    </a>
-                                                    <a href="{{ route('customers.edit', $customer->id) }}"
-                                                        class="avtar avtar-xs btn-link-secondary" title="Edit">
-                                                        <i class="ti ti-edit f-20"></i>
-                                                    </a>
-                                                    <a href="#" class="avtar avtar-xs btn-link-secondary bs-pass-para"
-                                                        data-id="{{ $customer->id }}" title="Delete">
-                                                        <i class="ti ti-trash f-20"></i>
-                                                    </a>
-                                                    <form id="delete-form-{{ $customer->id }}"
-                                                        action="{{ route('customers.destroy', $customer->id) }}"
-                                                        method="POST" style="display:none;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="10" class="text-center py-5 text-muted">
-                                                    <i class="ti ti-users f-40 d-block mb-2"></i>
-                                                    No customer found — please add a customer first!
-                                                </td>
-                                            </tr>
-                                        @endforelse
+                                        {{-- DataTables server-side AJAX se bharega --}}
                                     </tbody>
                                 </table>
                             </div>
@@ -185,13 +104,83 @@
     </div>
 @endsection
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+@endpush
+
 @push('scripts')
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            window.dt = new simpleDatatables.DataTable('#pc-dt-simple', {
-                sortable: true,
-                searchable: true,
-                fixedHeight: true
+        $(function() {
+            const table = $('#customers-table').DataTable({
+                processing: true,
+                serverSide: true, // <-- lakhs records ke liye sabse zaroori
+                responsive: true,
+                order: [
+                    [0, 'desc']
+                ],
+                ajax: "{{ route('customers.index') }}",
+                columns: [{
+                        data: 'id',
+                        name: 'id'
+                    },
+                    {
+                        data: 'customer',
+                        name: 'name'
+                    },
+                    {
+                        data: 'cnic',
+                        name: 'cnic'
+                    },
+                    {
+                        data: 'phone',
+                        name: 'phone'
+                    },
+                    {
+                        data: 'location',
+                        name: 'city',
+                        orderable: false
+                    },
+                    {
+                        data: 'gender',
+                        name: 'gender'
+                    },
+                    {
+                        data: 'status_badge',
+                        name: 'status'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-end'
+                    },
+                ],
+                language: {
+                    processing: '<div class="spinner-border text-primary" role="status"></div>',
+                    emptyTable: 'No customer found — please add a customer first!',
+                }
+            });
+
+            // Delete — event DELEGATION zaroori hai (rows har page pe naye render hote hain)
+            $('#customers-table tbody').on('click', '.bs-pass-para', function(e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'This customer will be deleted permanently!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('delete-form-' + id).submit();
+                    }
+                });
             });
         });
     </script>

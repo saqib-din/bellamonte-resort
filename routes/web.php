@@ -129,6 +129,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/contacts/{contact}',   [ContactController::class, 'delete'])->name('contacts.delete');
 });
 
-Route::get('/ping', fn() => response('ok', 200));
+// Route::get('/ping', fn() => response('ok', 200));
 
 require __DIR__ . '/auth.php';

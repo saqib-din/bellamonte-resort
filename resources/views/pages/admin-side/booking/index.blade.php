@@ -31,7 +31,7 @@
                 <div class="col-md-2 col-sm-4">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-primary">{{ $bookings->count() }}</h4>
+                            <h4 class="mb-1 text-primary">{{ $stats['total'] }}</h4>
                             <p class="mb-0 text-muted f-12">Total</p>
                         </div>
                     </div>
@@ -39,7 +39,7 @@
                 <div class="col-md-2 col-sm-4">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-success">{{ $bookings->where('status', 'Checked In')->count() }}</h4>
+                            <h4 class="mb-1 text-success">{{ $stats['checked_in'] }}</h4>
                             <p class="mb-0 text-muted f-12">Checked In</p>
                         </div>
                     </div>
@@ -47,7 +47,7 @@
                 <div class="col-md-2 col-sm-4">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-primary">{{ $bookings->where('status', 'Confirmed')->count() }}</h4>
+                            <h4 class="mb-1 text-primary">{{ $stats['confirmed'] }}</h4>
                             <p class="mb-0 text-muted f-12">Confirmed</p>
                         </div>
                     </div>
@@ -55,7 +55,7 @@
                 <div class="col-md-2 col-sm-4">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-secondary">{{ $bookings->where('status', 'Checked Out')->count() }}</h4>
+                            <h4 class="mb-1 text-secondary">{{ $stats['checked_out'] }}</h4>
                             <p class="mb-0 text-muted f-12">Checked Out</p>
                         </div>
                     </div>
@@ -63,7 +63,7 @@
                 <div class="col-md-2 col-sm-4">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-danger">{{ $bookings->where('status', 'Cancelled')->count() }}</h4>
+                            <h4 class="mb-1 text-danger">{{ $stats['cancelled'] }}</h4>
                             <p class="mb-0 text-muted f-12">Cancelled</p>
                         </div>
                     </div>
@@ -71,8 +71,7 @@
                 <div class="col-md-2 col-sm-4">
                     <div class="card text-center">
                         <div class="card-body py-3">
-                            <h4 class="mb-1 text-success">
-                                {{ number_format($bookings->where('payment_status', 'Paid')->sum('total_amount')) }} Pkr</h4>
+                            <h4 class="mb-1 text-success">{{ number_format($stats['revenue']) }} Pkr</h4>
                             <p class="mb-0 text-muted f-12">Revenue</p>
                         </div>
                     </div>
@@ -91,144 +90,27 @@
                                 </a>
                             </div>
                         </div>
+
                         <div class="card-body table-card">
                             <div class="table-responsive">
-                                <table class="table table-hover" id="pc-dt-simple">
+                                <table class="table table-hover" id="bookings-table" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>Booking #</th>
                                             <th>Guest</th>
-                                            {{-- <th>Room</th> --}}
+                                            <th>Room</th>
                                             <th>Check In</th>
                                             <th>Check Out</th>
                                             {{-- <th>Nights</th> --}}
-                                            <th>Advance</th>
+                                            {{-- <th>Advance</th> --}}
                                             <th>Total</th>
-                                            <th>Payment</th>
+                                            {{-- <th>Payment</th> --}}
                                             <th>Status</th>
                                             <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($bookings as $booking)
-                                            <tr>
-                                                <td><strong>{{ $booking->booking_number }}</strong></td>
-
-                                                <td>
-                                                    <div>
-                                                        <h6 class="mb-0">{{ $booking->guest_name }}</h6>
-                                                        <small class="text-muted">{{ $booking->guest_phone }}</small>
-                                                    </div>
-                                                </td>
-                                                {{-- 
-                                                <td>
-                                                    <span class="badge bg-light-primary">
-                                                        Room {{ $booking->room->room_number ?? '—' }}
-                                                    </span><br>
-                                                    <small class="text-muted">{{ $booking->room->type ?? '' }}</small>
-                                                </td> --}}
-
-                                                <td>
-                                                    <i class="ti ti-calendar-event f-13 text-muted me-1"></i>
-                                                    {{ $booking->check_in->format('d M Y') }}
-                                                </td>
-
-                                                <td>
-                                                    <i class="ti ti-calendar-event f-13 text-muted me-1"></i>
-                                                    {{ $booking->check_out->format('d M Y') }}
-                                                </td>
-
-                                                {{-- <td>
-                                                    <span class="badge bg-light-secondary">{{ $booking->nights }}
-                                                        nights</span>
-                                                </td> --}}
-
-
-
-                                                <td>
-                                                    @if ($booking->advance_paid > 0)
-                                                        <span
-                                                            class="text-info">₨{{ number_format($booking->advance_paid) }}</span>
-                                                    @else
-                                                        <span class="text-muted">—</span>
-                                                    @endif
-                                                </td>
-
-                                                <td>
-                                                    <strong
-                                                        class="text-success">₨{{ number_format($booking->total_amount) }}</strong>
-                                                </td>
-
-                                                <td>
-                                                    <span class="badge {{ $booking->getPaymentBadgeClass() }}">
-                                                        {{ $booking->payment_status }}
-                                                    </span>
-                                                </td>
-
-                                                <td>
-                                                    <span class="badge {{ $booking->getStatusBadgeClass() }}">
-                                                        {{ $booking->status }}
-                                                    </span>
-                                                </td>
-
-                                                <td class="text-end">
-                                                    <!-- Check In -->
-                                                    @if ($booking->status === 'Confirmed')
-                                                        <form action="{{ route('admin.bookings.checkin', $booking->id) }}"
-                                                            method="POST" class="d-inline">
-                                                            @csrf
-                                                            <button class="avtar avtar-xs btn-link-success" title="Check In"
-                                                                type="submit">
-                                                                <i class="ti ti-login f-18"></i>
-                                                            </button>
-                                                        </form>
-                                                    @endif
-
-                                                    <!-- Check Out -->
-                                                    @if ($booking->status === 'Checked In')
-                                                        <form action="{{ route('admin.bookings.checkout', $booking->id) }}"
-                                                            method="POST" class="d-inline">
-                                                            @csrf
-                                                            <button class="avtar avtar-xs btn-link-warning"
-                                                                title="Check Out" type="submit">
-                                                                <i class="ti ti-logout f-18"></i>
-                                                            </button>
-                                                        </form>
-                                                    @endif
-
-                                                    <!-- View -->
-                                                    <a href="{{ route('admin.bookings.show', $booking->id) }}"
-                                                        class="avtar avtar-xs btn-link-secondary" title="View">
-                                                        <i class="ti ti-eye f-18"></i>
-                                                    </a>
-
-                                                    <!-- Edit -->
-                                                    <a href="{{ route('admin.bookings.edit', $booking->id) }}"
-                                                        class="avtar avtar-xs btn-link-secondary" title="Edit">
-                                                        <i class="ti ti-edit f-18"></i>
-                                                    </a>
-
-                                                    <!-- Delete -->
-                                                    <a href="#" class="avtar avtar-xs btn-link-secondary bs-pass-para"
-                                                        data-id="{{ $booking->id }}" title="Delete">
-                                                        <i class="ti ti-trash f-18"></i>
-                                                    </a>
-                                                    <form id="delete-form-{{ $booking->id }}"
-                                                        action="{{ route('admin.bookings.destroy', $booking->id) }}"
-                                                        method="POST" style="display:none;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="11" class="text-center py-5 text-muted">
-                                                    <i class="ti ti-calendar-off f-40 d-block mb-2"></i>
-                                                    No booking found — please add a booking first!
-                                                </td>
-                                            </tr>
-                                        @endforelse
+                                        {{-- DataTables server-side AJAX se bharega --}}
                                     </tbody>
                                 </table>
                             </div>
@@ -241,15 +123,96 @@
     </div>
 @endsection
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+@endpush
+
 @push('scripts')
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            window.dt = new simpleDatatables.DataTable('#pc-dt-simple', {
-                sortable: true,
-                searchable: true,
-                fixedHeight: true
+        $(function() {
+            const table = $('#bookings-table').DataTable({
+                processing: true,
+                serverSide: true, // <-- lakhs records ke liye sabse zaroori
+                responsive: true,
+                order: [
+                    [0, 'desc']
+                ],
+                ajax: "{{ route('admin.bookings.index') }}",
+                columns: [{
+                        data: 'booking_number',
+                        name: 'booking_number'
+                    },
+                    {
+                        data: 'guest',
+                        name: 'guest_name'
+                    },
+                    {
+                        data: 'room',
+                        name: 'room.room_number',
+                        orderable: false
+                    },
+                    {
+                        data: 'check_in',
+                        name: 'check_in'
+                    },
+                    {
+                        data: 'check_out',
+                        name: 'check_out'
+                    },
+                    // {
+                    //     data: 'nights',
+                    //     name: 'nights'
+                    // },
+                    // {
+                    //     data: 'advance',
+                    //     name: 'advance_paid'
+                    // },
+                    {
+                        data: 'total',
+                        name: 'total_amount'
+                    },
+                    // {
+                    //     data: 'payment_badge',
+                    //     name: 'payment_status'
+                    // },
+                    {
+                        data: 'status_badge',
+                        name: 'status'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-end'
+                    },
+                ],
+                language: {
+                    processing: '<div class="spinner-border text-primary" role="status"></div>',
+                    emptyTable: 'No booking found — please add a booking first!',
+                }
             });
-         
+
+            // Delete — event DELEGATION zaroori hai (rows har page pe naye render hote hain)
+            $('#bookings-table tbody').on('click', '.bs-pass-para', function(e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'This booking will be deleted permanently!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('delete-form-' + id).submit();
+                    }
+                });
+            });
         });
     </script>
 @endpush
