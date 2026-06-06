@@ -284,14 +284,14 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="mb-3">
+                                {{-- <div class="mb-3">
                                     <label class="form-label">Advance Paid (₨)</label>
                                     <div class="input-group">
                                         <span class="input-group-text">₨</span>
                                         <input type="number" name="advance_paid" class="form-control"
                                             value="{{ old('advance_paid', 0) }}" min="0">
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
 

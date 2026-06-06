@@ -165,6 +165,21 @@
     </section>
     <!-- Services Section End -->
 
+    <style>
+        .hp-room-item.set-bg {
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+       
+
+        .hp-room-item.set-bg {
+            /* Background image ko light/transparent dikhao */
+            opacity: 0.95;
+            /* Poore element ki opacity kam hogi */
+        }
+    </style>
     <!-- Home Room Section Begin -->
     <section class="hp-room-section">
         <div class="container-fluid">

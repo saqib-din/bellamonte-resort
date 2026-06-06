@@ -32,9 +32,8 @@ Route::get('/about-us', [AboutController::class, 'show'])
     ->name('about.us');
 
 // Public Routes
-Route::get('/events/list',              [EventController::class, 'show'])->name('events.list');
-Route::get('/events-details',      [EventController::class, 'details'])->name('event.details');
-Route::get('/events/{id}',         [EventController::class, 'details'])->name('event.detail')
+Route::get('/events/list', [EventController::class, 'show'])->name('events.list');
+Route::get('/events/{id}', [EventController::class, 'details'])->name('event.detail')
     ->where('id', '[0-9]+');
 
 Route::get('/contact-us', [ContactController::class, 'show'])

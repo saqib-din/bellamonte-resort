@@ -78,6 +78,20 @@
                     </li>
                 @endif
 
+                {{-- ══ Billing — Admin + Manager + Accountant ══ --}}
+                @if (in_array($role, ['admin', 'manager', 'accountant']))
+                    <li class="pc-item">
+                        <a href="{{ route('billing.index') }}" class="pc-link">
+                            <span class="pc-micon">
+                                <svg class="pc-icon">
+                                    <use xlink:href="#custom-mouse-circle"></use>
+                                </svg>
+                            </span>
+                            <span class="pc-mtext">Invoices</span>
+                        </a>
+                    </li>
+                @endif
+
                 {{-- ══ Foods Menu — Admin + Manager + Receptionist ══ --}}
                 @if (in_array($role, ['admin', 'manager', 'receptionist']))
                     <li class="pc-item pc-hasmenu">
@@ -114,20 +128,6 @@
                                 </a>
                             </li>
                         </ul>
-                    </li>
-                @endif
-
-                {{-- ══ Billing — Admin + Manager + Accountant ══ --}}
-                @if (in_array($role, ['admin', 'manager', 'accountant']))
-                    <li class="pc-item">
-                        <a href="{{ route('billing.index') }}" class="pc-link">
-                            <span class="pc-micon">
-                                <svg class="pc-icon">
-                                    <use xlink:href="#custom-mouse-circle"></use>
-                                </svg>
-                            </span>
-                            <span class="pc-mtext">Invoices</span>
-                        </a>
                     </li>
                 @endif
 

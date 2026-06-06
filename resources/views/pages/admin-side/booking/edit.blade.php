@@ -358,14 +358,14 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="mb-3">
+                                {{-- <div class="mb-3">
                                     <label class="form-label">Advance Paid (₨)</label>
                                     <div class="input-group">
                                         <span class="input-group-text">₨</span>
                                         <input type="number" name="advance_paid" class="form-control"
                                             value="{{ old('advance_paid', $booking->advance_paid) }}" min="0">
                                     </div>
-                                </div>
+                                </div> --}}
 
                                 <!-- Remaining balance -->
                                 <div class="alert alert-info py-2 mb-0">

@@ -46,9 +46,7 @@ class EventController extends Controller
         $event   = Event::active()->findOrFail($id);
         $related = Event::active()
             ->where('id', '!=', $id)
-            ->latest()
-            ->take(3)
-            ->get();
+            ->latest()->take(3)->get();
 
         return view('pages.events.details', compact('event', 'related'));
     }
