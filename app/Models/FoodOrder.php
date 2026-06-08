@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class FoodOrder extends Model
 {
@@ -11,6 +12,7 @@ class FoodOrder extends Model
         'booking_id',
         'customer_id',
         'guest_name',
+        'father_name',
         'guest_phone',
         'room_number',
         'order_type',
@@ -25,6 +27,22 @@ class FoodOrder extends Model
         'balance_due',
         'notes'
     ];
+
+    // ── Auto-generate UUID on create ───────────────────
+    protected static function booted(): void
+    {
+        static::creating(function (FoodOrder $order) {
+            if (empty($order->uuid)) {
+                $order->uuid = (string) Str::uuid();
+            }
+        });
+    }
+
+    // UUID se route binding (id ki jagah)
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
 
     // ── Relationships ──────────────────────────────────
     public function items()

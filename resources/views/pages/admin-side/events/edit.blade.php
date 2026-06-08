@@ -1,8 +1,3 @@
-{{--
-    resources/views/admin/events/create.blade.php
-    resources/views/admin/events/edit.blade.php
-    (Same form — just change @isset($event) for edit mode)
---}}
 @extends('layouts.admin')
 
 @section('content')
@@ -30,8 +25,8 @@
 
             @include('components.alerts')
 
-            <form action="{{ isset($event) ? route('events.update', $event->id) : route('events.store') }}"
-                method="POST" enctype="multipart/form-data">
+            <form action="{{ isset($event) ? route('events.update', $event) : route('events.store') }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
                 @if (isset($event))
                     @method('PUT')
@@ -193,7 +188,7 @@
                             </div>
                         </div>
 
-                          <div class="card mb-3">
+                        <div class="card mb-3">
                             <div class="card-header">
                                 <h5 class="mb-0">
                                     <i class="ti ti-info-circle me-2 text-primary"></i>Quick Info

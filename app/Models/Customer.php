@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Booking;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class Customer extends Model
 {
     protected $fillable = [
         'name',
+        'father_name',
         'cnic',
         'phone',
         'email',
@@ -22,20 +24,35 @@ class Customer extends Model
         'status',
         'notes',
     ];
+
     protected $casts = [
         'dob' => 'date',
     ];
-    // ADD THIS
+
+    // ── Auto-generate UUID on create ───────────────────
+    protected static function booted(): void
+    {
+        static::creating(function (Customer $customer) {
+            if (empty($customer->uuid)) {
+                $customer->uuid = (string) Str::uuid();
+            }
+        });
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
     public function bookings()
     {
         return $this->hasMany(Booking::class);
     }
 
-
     public function getImageUrlAttribute(): string
     {
         return $this->image
-            ? asset('uploads/customers/' . $this->image) // ✅ sahi folder
+            ? asset('uploads/customers/' . $this->image) 
             : asset('landing-assets/img/room/room-1.jpg');
     }
 

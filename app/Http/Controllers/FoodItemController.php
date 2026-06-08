@@ -61,7 +61,7 @@ class FoodItemController extends Controller
             ]);
 
             return back()->with(
-                'success',
+                'error',
                 'Item is used in orders, so it has been marked unavailable.'
             );
         }

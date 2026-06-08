@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-// use App\Http\Controllers\Controller;
 use App\Models\Bill;
 use App\Models\Booking;
 use App\Models\Customer;
@@ -38,7 +37,7 @@ class BillController extends Controller
                 ->addColumn(
                     'total',
                     fn($b) =>
-                    '<strong class="text-dark">₨' . number_format($b->total_amount) . '</strong>'
+                    '<strong class="text-muted">₨ ' . number_format($b->total_amount) . '</strong>'
                 )
                 ->addColumn(
                     'status_badge',
@@ -46,11 +45,11 @@ class BillController extends Controller
                     '<span class="badge ' . $b->getStatusBadgeClass() . '">' . e($b->status) . '</span>'
                 )
                 ->addColumn('action', function ($b) {
-                    $html  = '<a href="' . route('billing.print', $b->id) . '" target="_blank" class="avtar avtar-xs btn-link-secondary" title="Print"><i class="ti ti-printer f-18"></i></a>';
-                    $html .= '<a href="' . route('billing.show', $b->id) . '" class="avtar avtar-xs btn-link-secondary" title="View"><i class="ti ti-eye f-18"></i></a>';
-                    $html .= '<a href="' . route('billing.edit', $b->id) . '" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></a>';
+                    $html  = '<a href="' . route('billing.print', $b) . '" target="_blank" class="avtar avtar-xs btn-link-secondary" title="Print"><i class="ti ti-printer f-18"></i></a>';
+                    $html .= '<a href="' . route('billing.show', $b) . '" class="avtar avtar-xs btn-link-secondary" title="View"><i class="ti ti-eye f-18"></i></a>';
+                    $html .= '<a href="' . route('billing.edit', $b) . '" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></a>';
                     $html .= '<a href="#" class="avtar avtar-xs btn-link-secondary bs-pass-para" data-id="' . $b->id . '" title="Delete"><i class="ti ti-trash f-18"></i></a>';
-                    $html .= '<form id="delete-form-' . $b->id . '" action="' . route('billing.destroy', $b->id) . '" method="POST" style="display:none;">'
+                    $html .= '<form id="delete-form-' . $b->id . '" action="' . route('billing.destroy', $b) . '" method="POST" style="display:none;">'
                         . csrf_field() . method_field('DELETE') . '</form>';
                     return $html;
                 })
@@ -58,14 +57,7 @@ class BillController extends Controller
                 ->make(true);
         }
 
-        $stats = [
-            'total'     => Bill::count(),
-            'collected' => Bill::where('status', 'Paid')->sum('total_amount'),
-            'pending'   => Bill::whereIn('status', ['Unpaid', 'Partial'])->sum('balance_due'),
-            'partial'   => Bill::where('status', 'Partial')->count(),
-        ];
-
-        return view('pages.admin-side.billing.index', compact('stats'));
+        return view('pages.admin-side.billing.index');
     }
 
     public function create()
@@ -80,28 +72,49 @@ class BillController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'guest_name'     => 'required|string|max:100',
-            'room_charges'   => 'required|numeric|min:0',
-            'extra_charges'  => 'nullable|numeric|min:0',
-            'discount'       => 'nullable|numeric|min:0',
-            'tax_percent'    => 'nullable|numeric|min:0|max:100',
-            'amount_paid'    => 'nullable|numeric|min:0',
-            'payment_method' => 'required',
-            'issue_date'     => 'required|date',
+            'guest_name'      => 'required|string|max:100',
+            'father_name'     => 'nullable|string|max:100',
+            'room_charges'    => 'required|numeric|min:0',
+            'extra_charges'   => 'nullable|numeric|min:0',
+            'discount'        => 'nullable|numeric|min:0',
+            'tax_percent'     => 'nullable|numeric|min:0|max:100',
+            'amount_paid'     => 'nullable|numeric|min:0',
+            'payment_method'  => 'required',
+            'issue_date'      => 'required|date',
+
+            // ── Vehicle ──
+            'has_vehicle'     => 'nullable|boolean',
+            'vehicle_number'  => 'nullable|string|max:30',
+            'vehicle_type'    => 'nullable|in:Car,SUV,Van,Bike,Jeep,Other',
+            'vehicle_model'   => 'nullable|string|max:50',
+            'vehicle_color'   => 'nullable|string|max:30',
+            'driver_name'     => 'nullable|string|max:100',
+            'parking_charges' => 'nullable|numeric|min:0',
         ]);
 
         $bill = new Bill();
 
-        $bill->invoice_number = 'INV-' . date('Y') . '-' . str_pad(Bill::count() + 1, 4, '0', STR_PAD_LEFT);
+        $bill->invoice_number = $this->generateInvoiceNumber();
         $bill->booking_id     = $request->booking_id;
         $bill->customer_id    = $request->customer_id;
         $bill->guest_name     = $request->guest_name;
+        $bill->father_name    = $request->father_name;
         $bill->guest_phone    = $request->guest_phone;
         $bill->room_number    = $request->room_number;
         $bill->room_type      = $request->room_type;
         $bill->check_in       = $request->check_in;
         $bill->check_out      = $request->check_out;
         $bill->nights         = $request->nights ?? 1;
+
+        // ── Vehicle Details ──
+        $hasVehicle = $request->boolean('has_vehicle');
+        $bill->has_vehicle     = $hasVehicle;
+        $bill->vehicle_number  = $hasVehicle ? $request->vehicle_number : null;
+        $bill->vehicle_type    = $hasVehicle ? $request->vehicle_type : null;
+        $bill->vehicle_model   = $hasVehicle ? $request->vehicle_model : null;
+        $bill->vehicle_color   = $hasVehicle ? $request->vehicle_color : null;
+        $bill->driver_name     = $hasVehicle ? $request->driver_name : null;
+        $bill->parking_charges = $hasVehicle ? ($request->parking_charges ?? 0) : 0;
 
         $bill->room_charges   = $request->room_charges;
         $bill->extra_charges  = $request->extra_charges ?? 0;
@@ -112,7 +125,6 @@ class BillController extends Controller
         $bill->payment_method = $request->payment_method;
         $bill->issue_date     = $request->issue_date;
 
-        // calculate correctly (NO static call)
         $bill->calculate();
 
         $bill->save();
@@ -143,37 +155,55 @@ class BillController extends Controller
     public function update(Request $request, Bill $bill)
     {
         $request->validate([
-            'guest_name'     => 'required|string|max:100',
-            'room_charges'   => 'required|numeric|min:0',
-            'extra_charges'  => 'nullable|numeric|min:0',
-            'discount'       => 'nullable|numeric|min:0',
-            'tax_percent'    => 'nullable|numeric|min:0|max:100',
-            'amount_paid'    => 'nullable|numeric|min:0',
-            'payment_method' => 'required',
-            'issue_date'     => 'required|date',
+            'guest_name'      => 'required|string|max:100',
+            'father_name'     => 'nullable|string|max:100',
+            'room_charges'    => 'required|numeric|min:0',
+            'extra_charges'   => 'nullable|numeric|min:0',
+            'discount'        => 'nullable|numeric|min:0',
+            'tax_percent'     => 'nullable|numeric|min:0|max:100',
+            'amount_paid'     => 'nullable|numeric|min:0',
+            'payment_method'  => 'required',
+            'issue_date'      => 'required|date',
+
+            // ── Vehicle ──
+            'has_vehicle'     => 'nullable|boolean',
+            'vehicle_number'  => 'nullable|string|max:30',
+            'vehicle_type'    => 'nullable|in:Car,SUV,Van,Bike,Jeep,Other',
+            'vehicle_model'   => 'nullable|string|max:50',
+            'vehicle_color'   => 'nullable|string|max:30',
+            'driver_name'     => 'nullable|string|max:100',
+            'parking_charges' => 'nullable|numeric|min:0',
         ]);
 
-        $bill->update([
-            'booking_id'     => $request->booking_id,
-            'customer_id'    => $request->customer_id,
-            'guest_name'     => $request->guest_name,
-            'guest_phone'    => $request->guest_phone,
-            'room_number'    => $request->room_number,
-            'room_type'      => $request->room_type,
-            'check_in'       => $request->check_in,
-            'check_out'      => $request->check_out,
-            'nights'         => $request->nights ?? 1,
-            'room_charges'   => $request->room_charges,
-            'extra_charges'  => $request->extra_charges ?? 0,
-            'discount'       => $request->discount ?? 0,
-            'tax_percent'    => $request->tax_percent ?? 0,
-            'amount_paid'    => $request->amount_paid ?? 0,
-            'payment_method' => $request->payment_method,
-            'issue_date'     => $request->issue_date,
-        ]);
+        $hasVehicle = $request->boolean('has_vehicle');
 
-        // reload model values then calculate
-        $bill->refresh();
+        $bill->booking_id     = $request->booking_id;
+        $bill->customer_id    = $request->customer_id;
+        $bill->guest_name     = $request->guest_name;
+        $bill->father_name    = $request->father_name;
+        $bill->guest_phone    = $request->guest_phone;
+        $bill->room_number    = $request->room_number;
+        $bill->room_type      = $request->room_type;
+        $bill->check_in       = $request->check_in;
+        $bill->check_out      = $request->check_out;
+        $bill->nights         = $request->nights ?? 1;
+
+        $bill->has_vehicle     = $hasVehicle;
+        $bill->vehicle_number  = $hasVehicle ? $request->vehicle_number : null;
+        $bill->vehicle_type    = $hasVehicle ? $request->vehicle_type : null;
+        $bill->vehicle_model   = $hasVehicle ? $request->vehicle_model : null;
+        $bill->vehicle_color   = $hasVehicle ? $request->vehicle_color : null;
+        $bill->driver_name     = $hasVehicle ? $request->driver_name : null;
+        $bill->parking_charges = $hasVehicle ? ($request->parking_charges ?? 0) : 0;
+
+        $bill->room_charges   = $request->room_charges;
+        $bill->extra_charges  = $request->extra_charges ?? 0;
+        $bill->discount       = $request->discount ?? 0;
+        $bill->tax_percent    = $request->tax_percent ?? 0;
+        $bill->amount_paid    = $request->amount_paid ?? 0;
+        $bill->payment_method = $request->payment_method;
+        $bill->issue_date     = $request->issue_date;
+
         $bill->calculate();
         $bill->save();
 
@@ -186,5 +216,18 @@ class BillController extends Controller
         $bill->delete();
         return redirect()->route('billing.index')
             ->with('success', 'Invoice deleted successfully!');
+    }
+
+    private function generateInvoiceNumber(): string
+    {
+        $prefix = 'INV-' . date('Y') . '-';
+
+        $last = Bill::where('invoice_number', 'like', $prefix . '%')
+            ->orderByDesc('id')
+            ->value('invoice_number');
+
+        $next = $last ? ((int) substr($last, -4)) + 1 : 1;
+
+        return $prefix . str_pad($next, 4, '0', STR_PAD_LEFT);
     }
 }

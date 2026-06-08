@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Event extends Model
 {
@@ -31,6 +32,37 @@ class Event extends Model
         'event_date' => 'date',
         'is_active'  => 'boolean',
     ];
+
+    // ── Auto-generate uuid + slug ────────────────────
+    protected static function booted(): void
+    {
+        static::creating(function (Event $event) {
+            if (empty($event->uuid)) {
+                $event->uuid = (string) Str::uuid();
+            }
+
+            if (empty($event->slug)) {
+                $event->slug = static::generateUniqueSlug($event->title);
+            }
+        });
+    }
+
+    protected static function generateUniqueSlug(string $title): string
+    {
+        $base = Str::slug($title) ?: 'event';
+        $slug = $base;
+        $i = 1;
+        while (static::where('slug', $slug)->exists()) {
+            $slug = $base . '-' . $i++;
+        }
+        return $slug;
+    }
+
+    // public URLs slug se chalein → /events/summer-festival-2026
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     // ── Scopes ──────────────────────────────────────
     public function scopeActive($query)

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -29,6 +30,22 @@ class User extends Authenticatable
         'password'          => 'hashed',
     ];
 
+    // ─── UUID ─────────────────────────────────────────────────
+    protected static function booted(): void
+    {
+        static::creating(function ($user) {
+            if (empty($user->uuid)) {
+                $user->uuid = (string) Str::uuid();
+            }
+        });
+    }
+
+
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
     // ─── Role Checks ──────────────────────────────────────────
 
     public function isAdmin(): bool
@@ -39,6 +56,11 @@ class User extends Authenticatable
     public function isManager(): bool
     {
         return $this->role === 'manager';
+    }
+
+    public function canManage(): bool
+    {
+        return $this->hasAnyRole(['admin', 'manager']);
     }
 
     public function hasRole(string $role): bool
@@ -55,7 +77,7 @@ class User extends Authenticatable
 
     public function getRoleBadgeClass(): string
     {
-        return match($this->role) {
+        return match ($this->role) {
             'admin'        => 'bg-light-danger',
             'manager'      => 'bg-light-primary',
             'receptionist' => 'bg-light-success',
@@ -76,7 +98,7 @@ class User extends Authenticatable
 
     public function getRoleLabel(): string
     {
-        return match($this->role) {
+        return match ($this->role) {
             'admin'        => '👑 Admin',
             'manager'      => '🏢 Manager',
             'receptionist' => '🛎️ Receptionist',

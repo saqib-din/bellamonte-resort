@@ -25,7 +25,7 @@
 
             @include('components.alerts')
 
-            <form action="{{ route('admin.rooms.update', $room->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.rooms.update', $room) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="row">

@@ -41,7 +41,7 @@
 
             @include('components.alerts')
 
-            <form action="{{ route('admin.bookings.update', $booking->id) }}" method="POST" id="bookingForm">
+            <form action="{{ route('admin.bookings.update', $booking) }}" method="POST" id="bookingForm">
                 @csrf
                 @method('PUT')
                 <div class="row">
@@ -129,6 +129,17 @@
                                             class="form-control @error('guest_name') is-invalid @enderror"
                                             value="{{ old('guest_name', $booking->guest_name) }}" placeholder="Full name">
                                         @error('guest_name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Father Name</label>
+                                        <input type="text" name="father_name" id="fatherName"
+                                            class="form-control @error('father_name') is-invalid @enderror"
+                                            value="{{ old('father_name', $booking->father_name) }}"
+                                            placeholder="Father name (optional)">
+                                        @error('father_name')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -430,7 +441,7 @@
                                     <button type="submit" class="btn btn-primary">
                                         <i class="ti ti-device-floppy me-2"></i>Update Booking
                                     </button>
-                                    <a href="{{ route('admin.bookings.show', $booking->id) }}"
+                                    <a href="{{ route('admin.bookings.show', $booking) }}"
                                         class="btn btn-outline-secondary">
                                         <i class="ti ti-eye me-2"></i>View Booking
                                     </a>

@@ -35,7 +35,7 @@
                             <div class="bi-text">
                                 <span class="b-tag">{{ $event->tag }}</span>
                                 <h4>
-                                    <a href="{{ route('event.detail', $event->id) }}">{{ $event->title }}</a>
+                                    <a href="{{ route('event.detail', $event) }}">{{ $event->title }}</a>
                                 </h4>
                                 <div class="b-time">
                                     <i class="icon_clock_alt"></i>

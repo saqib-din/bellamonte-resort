@@ -11,9 +11,9 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'admin@bellamonte.com'],
+            ['email' => 'admin@whitecastle.com'],
             [
-                'name'     => 'Bellamonte Resort',
+                'name'     => 'White Castle',
                 'password' => Hash::make('12345678'),
                 'role'     => 'admin', 
                 'status'   => 'active',   

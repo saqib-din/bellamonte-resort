@@ -26,42 +26,6 @@
 
             @include('components.alerts')
 
-            <!-- Stats -->
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card text-center">
-                        <div class="card-body py-3">
-                            <h4 class="mb-1 text-primary">{{ $stats['total'] }}</h4>
-                            <p class="mb-0 text-muted f-12">Total Customers</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-center">
-                        <div class="card-body py-3">
-                            <h4 class="mb-1 text-success">{{ $stats['active'] }}</h4>
-                            <p class="mb-0 text-muted f-12">Active</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-center">
-                        <div class="card-body py-3">
-                            <h4 class="mb-1 text-danger">{{ $stats['blacklisted'] }}</h4>
-                            <p class="mb-0 text-muted f-12">Blacklisted</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-center">
-                        <div class="card-body py-3">
-                            <h4 class="mb-1 text-info">{{ $stats['bookings'] }}</h4>
-                            <p class="mb-0 text-muted f-12">Total Bookings</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Table -->
             <div class="row">
                 <div class="col-sm-12">
@@ -91,7 +55,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {{-- DataTables server-side AJAX se bharega --}}
+                                        {{-- DataTables server-side AJAX  --}}
                                     </tbody>
                                 </table>
                             </div>
@@ -115,7 +79,7 @@
         $(function() {
             const table = $('#customers-table').DataTable({
                 processing: true,
-                serverSide: true, // <-- lakhs records ke liye sabse zaroori
+                serverSide: true, // <-- lakhs records
                 responsive: true,
                 order: [
                     [0, 'desc']
@@ -164,7 +128,6 @@
                 }
             });
 
-            // Delete — event DELEGATION zaroori hai (rows har page pe naye render hote hain)
             $('#customers-table tbody').on('click', '.bs-pass-para', function(e) {
                 e.preventDefault();
                 const id = $(this).data('id');

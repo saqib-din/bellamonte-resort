@@ -1,8 +1,3 @@
-{{--
-    resources/views/admin/events/create.blade.php
-    resources/views/admin/events/edit.blade.php
-    (Same form — just change @isset($event) for edit mode)
---}}
 @extends('layouts.admin')
 
 @section('content')
@@ -30,7 +25,7 @@
 
             @include('components.alerts')
 
-            <form action="{{ isset($event) ? route('events.update', $event->id) : route('events.store') }}" method="POST"
+            <form action="{{ isset($event) ? route('events.update', $event) : route('events.store') }}" method="POST"
                 enctype="multipart/form-data">
                 @csrf
                 @if (isset($event))

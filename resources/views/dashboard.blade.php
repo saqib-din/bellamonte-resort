@@ -292,12 +292,15 @@
                                     <div class="d-flex align-items-start">
                                         <div class="me-3">
                                             <div class="user-upload wid-75">
-                                                <img src="{{ asset('admin/assets/images/bella.png') }}" alt="Logo"
-                                                    class="img-fluid" style="max-width:140px;" />
+                                                <img src="{{ asset('admin/assets/images/whitecastle.jpeg') }}"
+                                                    alt="Logo" class="img-fluid" style="max-width:140px;" />
                                             </div>
                                         </div>
                                         <div class="content-stack">
-                                            <h2 class="text-white mb-1">Bellamonte Resort App</h2>
+                                            <h2 class="text-white mb-1">The White Castle Resort</h2>
+                                            <p class="text-white">White Castle Resort Shogran offers luxury rooms, mountain
+                                                views, hotel booking, family stays, and premium hospitality services in
+                                                Shogran.</p>
                                             <div class="quick-stat mt-2">
                                                 <i class="ti ti-calendar"></i>
                                                 <span>{{ date('l, F j, Y') }}</span>
@@ -354,14 +357,14 @@
                             </div>
 
                             <div class="bm-stat-footer">
-                                @if (auth()->check() && auth()->user()->role === 'admin')
-                                    <a href="#" class="text-primary f-12">
+                                @if (auth()->check() && auth()->user()->canManage())
+                                    <a href="{{ route('admin.rooms.index') }}" class="text-primary f-12">
                                         <i class="ti ti-eye me-1"></i> View all rooms
                                     </a>
                                 @else
                                     <span class="text-muted f-12">
                                         <i class="ti ti-lock me-1"></i>
-                                        Only Admin can view rooms
+                                        Only Admin / Manager can view rooms
                                     </span>
                                 @endif
                             </div>
@@ -418,14 +421,14 @@
                                 </div>
                             </div>
                             <div class="bm-stat-footer">
-                                @if (auth()->check() && auth()->user()->role === 'admin')
+                                @if (auth()->check() && auth()->user()->canManage())
                                     <a href="{{ route('customers.index') }}" class="text-info f-12">
                                         <i class="ti ti-eye me-1"></i> View all customers
                                     </a>
                                 @else
                                     <span class="text-muted f-12">
                                         <i class="ti ti-lock me-1"></i>
-                                        Only Admin can view customers
+                                        Only Admin / Manager can view customers
                                     </span>
                                 @endif
                             </div>
@@ -447,7 +450,7 @@
                                     </p>
                                 </div>
                                 <div class="avtar avtar-m bg-light-success rounded">
-                                   <i class="ti ti-currency-dollar f-24"></i>
+                                    <i class="ti ti-currency-dollar f-24"></i>
                                 </div>
                             </div>
                             <div class="bm-stat-footer">
@@ -484,16 +487,81 @@
                                 </div>
                             </div>
                             <div class="bm-stat-footer">
-                                @if (auth()->check() && auth()->user()->role === 'admin')
+                                @if (auth()->check() && auth()->user()->canManage())
                                     <a href="{{ route('billing.index') }}" class="text-danger f-12">
                                         <i class="ti ti-eye me-1"></i> View all invoices
                                     </a>
                                 @else
                                     <span class="text-muted f-12">
                                         <i class="ti ti-lock me-1"></i>
-                                        Only Admin can view invoices
+                                        Only Admin / Manager can view invoices
                                     </span>
                                 @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- total food orders --}}
+                <div class="col-xl-3 col-sm-6">
+                    <div class="card bm-stat-card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div>
+                                    <p class="bm-stat-label">Total Food Orders</p>
+                                    <h3 class="bm-stat-value text-primary">{{ $totalFoodOrders }}</h3>
+                                    <p class="bm-stat-sub">
+                                        <span class="text-muted">Pending:</span>
+                                        <strong class="text-warning ms-1">{{ $pendingFoodOrders }}</strong>
+                                        <span class="text-muted ms-2">Served:</span>
+                                        <strong class="text-info ms-1">{{ $servedFoodOrders }}</strong>
+                                    </p>
+                                </div>
+                                <div class="avtar avtar-m bg-light-primary rounded">
+                                    <i class="ti ti-tools-kitchen-2 f-24"></i>
+                                </div>
+                            </div>
+                            <div class="bm-stat-footer">
+                                @if (auth()->check() && auth()->user()->canManage())
+                                    <a href="{{ route('food.orders.index') }}" class="text-primary f-12">
+                                        <i class="ti ti-eye me-1"></i> View all food orders
+                                    </a>
+                                @else
+                                    <span class="text-muted f-12">
+                                        <i class="ti ti-lock me-1"></i>
+                                        Only Admin / Manager can view food orders
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- food revenue --}}
+                <div class="col-xl-3 col-sm-6">
+                    <div class="card bm-stat-card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div>
+                                    <p class="bm-stat-label">Food Revenue</p>
+                                    <h3 class="bm-stat-value text-success">{{ number_format($foodRevenueThisMonth) }} Pkr
+                                    </h3>
+                                    <p class="bm-stat-sub">
+                                        <span class="text-muted">Today:</span>
+                                        <strong class="text-success ms-1">{{ number_format($foodRevenueToday) }}
+                                            Pkr</strong>
+                                    </p>
+                                </div>
+                                <div class="avtar avtar-m bg-light-success rounded">
+                                    <i class="ti ti-cash f-24"></i>
+                                </div>
+                            </div>
+                            <div class="bm-stat-footer">
+                                <span class="text-muted f-12">
+                                    <i class="ti ti-clock me-1"></i>
+                                    Pending: <strong class="text-danger">{{ number_format($foodPendingAmount) }}
+                                        Pkr</strong>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -521,14 +589,14 @@
                             </div>
 
                             <div class="bm-stat-footer">
-                                @if (auth()->check() && auth()->user()->role === 'admin')
+                                @if (auth()->check() && auth()->user()->canManage())
                                     <a href="{{ route('events.index') }}" class="text-info f-12">
                                         <i class="ti ti-eye me-1"></i> View all events
                                     </a>
                                 @else
                                     <span class="text-muted f-12">
                                         <i class="ti ti-lock me-1"></i>
-                                        Only Admin can view events
+                                        Only Admin / Manager can view events
                                     </span>
                                 @endif
                             </div>
@@ -563,19 +631,17 @@
                             </div>
 
                             <div class="bm-stat-footer">
-                                @if (auth()->check() && auth()->user()->role === 'admin')
+                                @if (auth()->check() && auth()->user()->canManage())
                                     <a href="{{ route('contacts.index') }}" class="text-warning f-12">
                                         <i class="ti ti-eye me-1"></i> View all contacts
                                     </a>
                                 @else
                                     <span class="text-muted f-12">
                                         <i class="ti ti-lock me-1"></i>
-                                        Only Admin can view contacts
+                                        Only Admin / Manager can view contacts
                                     </span>
                                 @endif
                             </div>
-
-
 
                         </div>
                     </div>
@@ -608,14 +674,14 @@
                             </div>
 
                             <div class="bm-stat-footer">
-                                @if (auth()->check() && auth()->user()->role === 'admin')
-                                    <a href="#" class="text-success f-12">
+                                @if (auth()->check() && auth()->user()->canManage())
+                                    <a href="{{ route('users.index') }}" class="text-success f-12">
                                         <i class="ti ti-eye me-1"></i> View all users
                                     </a>
                                 @else
                                     <span class="text-muted f-12">
                                         <i class="ti ti-lock me-1"></i>
-                                        Only Admin can view users
+                                        Only Admin / Manager can view users
                                     </span>
                                 @endif
                             </div>
@@ -623,7 +689,6 @@
                         </div>
                     </div>
                 </div>
-
 
             </div>
         </div>

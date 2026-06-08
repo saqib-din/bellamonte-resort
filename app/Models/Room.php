@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 
 class Room extends Model
 {
     protected $fillable = [
 
+        'uuid',
         'room_number',
         'type',
         'floor',
@@ -23,6 +25,28 @@ class Room extends Model
         'image',
         'status',
     ];
+
+    /*
+    | Boot - auto generate uuid
+    */
+
+    protected static function booted()
+    {
+        static::creating(function ($room) {
+            if (empty($room->uuid)) {
+                $room->uuid = (string) Str::uuid();
+            }
+        });
+    }
+
+    /*
+    | Route binding by uuid
+    */
+
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
 
     /*
     | Relationships

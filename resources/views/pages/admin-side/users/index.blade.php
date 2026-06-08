@@ -126,8 +126,9 @@
                                                     @if (auth()->user()->isAdmin())
                                                         {{-- Toggle Status --}}
                                                         @if ($user->id !== auth()->id())
-                                                            <form action="{{ route('admin.users.toggle', $user->id) }}"
+                                                            <form action="{{ route('admin.users.toggle', $user) }}"
                                                                 method="POST" class="d-inline">
+
                                                                 @csrf
                                                                 <button type="submit"
                                                                     class="avtar avtar-xs {{ $user->status === 'active' ? 'btn-link-warning' : 'btn-link-success' }}"
@@ -139,7 +140,7 @@
                                                         @endif
 
                                                         {{-- Edit --}}
-                                                        <a href="{{ route('users.edit', $user->id) }}"
+                                                        <a href="{{ route('users.edit', $user) }}"
                                                             class="avtar avtar-xs btn-link-secondary" title="Edit">
                                                             <i class="ti ti-edit f-18"></i>
                                                         </a>
@@ -153,17 +154,11 @@
                                                                 <i class="ti ti-trash f-18"></i>
                                                             </a>
                                                             <form id="delete-form-{{ $user->id }}"
-                                                                action="{{ route('users.destroy', $user->id) }}"
+                                                                action="{{ route('users.destroy', $user) }}"
                                                                 method="POST" style="display:none;">
                                                                 @csrf
                                                                 @method('DELETE')
                                                             </form>
-                                                        {{-- @else
-                                                            <span class="avtar avtar-xs text-muted"
-                                                                title="Aap khud ko delete nahi kar sakte"
-                                                                style="cursor:not-allowed;opacity:0.3;">
-                                                                <i class="ti ti-trash f-18"></i>
-                                                            </span> --}}
                                                         @endif
                                                     @endif
                                                 </td>
@@ -188,27 +183,3 @@
         </div>
     </div>
 @endsection
-
-@push('scripts')
-    {{-- <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            new simpleDatatables.DataTable('#pc-dt-simple', {
-                sortable: true,
-                searchable: true,
-                fixedHeight: true
-            });
-
-            document.querySelectorAll('.bs-pass-para').forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const name = this.dataset.name;
-                    if (confirm(name +
-                            ' ka account delete karna chahte hain?\nYeh action wapas nahi ho sakta!'
-                            )) {
-                        document.getElementById('delete-form-' + this.dataset.id).submit();
-                    }
-                });
-            });
-        });
-    </script> --}}
-@endpush

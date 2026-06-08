@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice {{ $bill->invoice_number }} — BM Resort</title>
+    <title>Invoice {{ $bill->invoice_number }} — White Castle Resort</title>
     <style>
         * {
             margin: 0;
@@ -15,7 +15,7 @@
         body {
             font-family: 'Georgia', serif;
             font-size: 14px;
-            color: #1a1a1a;
+            color: #000;
             background: #fff;
         }
 
@@ -23,7 +23,7 @@
             max-width: 750px;
             margin: 30px auto;
             padding: 40px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #000;
         }
 
         /* Header */
@@ -37,12 +37,12 @@
         .hotel-name {
             font-size: 26px;
             font-weight: bold;
-            color: #c9a84c;
+            color: #000;
             letter-spacing: 1px;
         }
 
         .hotel-info {
-            color: #666;
+            color: #333;
             font-size: 12px;
             margin-top: 4px;
             line-height: 1.6;
@@ -54,55 +54,56 @@
 
         .invoice-title h2 {
             font-size: 22px;
-            color: #1a1a1a;
+            color: #000;
             letter-spacing: 3px;
         }
 
         .invoice-number {
             font-size: 14px;
-            color: #444;
+            color: #000;
             margin-top: 4px;
         }
 
         .invoice-date {
             font-size: 12px;
-            color: #888;
+            color: #444;
         }
 
-        /* Status Badge */
+        /* Status Badge — outline only, B&W friendly */
         .badge {
             display: inline-block;
             padding: 3px 12px;
-            border-radius: 20px;
+            border: 1px solid #000;
+            border-radius: 4px;
             font-size: 11px;
             font-weight: bold;
+            text-transform: uppercase;
+            color: #000;
         }
 
         .badge-paid {
-            background: #d4edda;
-            color: #155724;
+            background: #fff;
         }
 
         .badge-unpaid {
-            background: #f8d7da;
-            color: #721c24;
+            background: #000;
+            color: #fff;
         }
 
         .badge-partial {
-            background: #fff3cd;
-            color: #856404;
+            background: #e0e0e0;
         }
 
         /* Divider */
         .divider {
             border: none;
-            border-top: 2px solid #c9a84c;
+            border-top: 2px solid #000;
             margin: 20px 0;
         }
 
         .divider-thin {
             border: none;
-            border-top: 1px solid #e0e0e0;
+            border-top: 1px solid #999;
             margin: 16px 0;
         }
 
@@ -119,7 +120,7 @@
 
         .info-block h5 {
             font-size: 11px;
-            color: #888;
+            color: #444;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 8px;
@@ -127,12 +128,49 @@
 
         .info-block p {
             margin-bottom: 4px;
-            color: #222;
+            color: #000;
             font-size: 13px;
         }
 
         .info-block strong {
             font-size: 15px;
+            color: #000;
+        }
+
+        /* Vehicle block */
+        .vehicle-box {
+            border: 1px solid #999;
+            border-radius: 4px;
+            padding: 14px 16px;
+            margin-bottom: 24px;
+        }
+
+        .vehicle-box h5 {
+            font-size: 11px;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .vehicle-grid {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .vehicle-grid .v-item {
+            width: 33.33%;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #000;
+        }
+
+        .vehicle-grid .v-item span {
+            display: block;
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* Table */
@@ -143,7 +181,7 @@
         }
 
         thead tr {
-            background: #f9f5ec;
+            background: #e8e8e8;
         }
 
         th {
@@ -152,8 +190,8 @@
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: #555;
-            border-bottom: 2px solid #c9a84c;
+            color: #000;
+            border-bottom: 2px solid #000;
         }
 
         th.text-right,
@@ -164,32 +202,36 @@
         td {
             padding: 10px 14px;
             font-size: 13px;
-            border-bottom: 1px solid #f0f0f0;
+            color: #000;
+            border-bottom: 1px solid #ddd;
         }
 
         tfoot td,
         tfoot th {
-            border-top: 2px solid #ddd;
+            border-top: 2px solid #999;
         }
 
         .total-row td,
         .total-row th {
             font-weight: bold;
             font-size: 15px;
-            background: #f9f5ec;
+            background: #e8e8e8;
+            color: #000;
         }
 
         .paid-row td {
-            color: #2e7d32;
+            color: #000;
         }
 
         .balance-row td {
-            color: #c62828;
+            color: #000;
             font-weight: bold;
+            background: #f0f0f0;
         }
 
         .discount-row td {
-            color: #2e7d32;
+            color: #000;
+            font-style: italic;
         }
 
         /* Summary bottom */
@@ -203,7 +245,7 @@
         .payment-info p {
             margin-bottom: 4px;
             font-size: 13px;
-            color: #444;
+            color: #000;
         }
 
         /* Footer */
@@ -211,15 +253,15 @@
             text-align: center;
             margin-top: 30px;
             padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-            color: #888;
+            border-top: 1px solid #000;
+            color: #333;
             font-size: 12px;
             line-height: 1.8;
         }
 
         .footer .thankyou {
             font-size: 15px;
-            color: #c9a84c;
+            color: #000;
             font-style: italic;
             margin-bottom: 4px;
         }
@@ -232,8 +274,8 @@
         }
 
         .btn-print {
-            background: #c9a84c;
-            color: white;
+            background: #000;
+            color: #fff;
             border: none;
             padding: 10px 30px;
             font-size: 14px;
@@ -243,7 +285,7 @@
         }
 
         .btn-print:hover {
-            background: #b8934a;
+            background: #333;
         }
 
         @media print {
@@ -253,12 +295,19 @@
 
             body {
                 margin: 0;
+                color: #000;
             }
 
             .invoice-box {
                 margin: 0;
                 border: none;
                 padding: 20px;
+            }
+
+            /* Force backgrounds/borders to print on B&W */
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
     </style>
@@ -267,8 +316,8 @@
 <body>
 
     <div class="print-btn">
-        <button class="btn-print" onclick="window.print()">🖨️ Print Invoice</button>
-        <button class="btn-print" style="background:#666;margin-left:10px;" onclick="window.close()">✕ Close</button>
+        <button class="btn-print" onclick="window.print()">Print Invoice</button>
+        <button class="btn-print" style="background:#666;margin-left:10px;" onclick="window.close()">Close</button>
     </div>
 
     <div class="invoice-box">
@@ -276,7 +325,7 @@
         <!-- Header -->
         <div class="header">
             <div>
-                <div class="hotel-name">🏨 Bellamonte Resort</div>
+                <div class="hotel-name">White Castle Resort</div>
                 <div class="hotel-info">
                     Hotel Management System<br>
                     Shogran, Pakistan<br>
@@ -300,11 +349,14 @@
             <div class="info-block">
                 <h5>Bill To</h5>
                 <strong>{{ $bill->guest_name }}</strong>
+                @if ($bill->father_name)
+                    <p style="color:#333;font-size:12px;">S/O {{ $bill->father_name }}</p>
+                @endif
                 @if ($bill->guest_phone)
-                    <p>📞 {{ $bill->guest_phone }}</p>
+                    <p>Phone: {{ $bill->guest_phone }}</p>
                 @endif
                 @if ($bill->customer)
-                    <p style="color:#888;font-size:12px;">CNIC: {{ $bill->customer->cnic ?? '—' }}</p>
+                    <p style="color:#444;font-size:12px;">CNIC: {{ $bill->customer->cnic ?? '—' }}</p>
                 @endif
             </div>
             <div class="info-block" style="text-align:right;">
@@ -324,6 +376,33 @@
             </div>
         </div>
 
+        <!-- Vehicle Details -->
+        @if ($bill->has_vehicle)
+            <div class="vehicle-box">
+                <h5>Vehicle Details</h5>
+                <div class="vehicle-grid">
+                    @if ($bill->vehicle_number)
+                        <div class="v-item"><span>Vehicle No.</span>{{ $bill->vehicle_number }}</div>
+                    @endif
+                    @if ($bill->vehicle_type)
+                        <div class="v-item"><span>Type</span>{{ $bill->vehicle_type }}</div>
+                    @endif
+                    @if ($bill->vehicle_model)
+                        <div class="v-item"><span>Model</span>{{ $bill->vehicle_model }}</div>
+                    @endif
+                    @if ($bill->vehicle_color)
+                        <div class="v-item"><span>Color</span>{{ $bill->vehicle_color }}</div>
+                    @endif
+                    @if ($bill->driver_name)
+                        <div class="v-item"><span>Driver</span>{{ $bill->driver_name }}</div>
+                    @endif
+                    @if ($bill->parking_charges > 0)
+                        <div class="v-item"><span>Parking</span>Rs. {{ number_format($bill->parking_charges) }}</div>
+                    @endif
+                </div>
+            </div>
+        @endif
+
         <hr class="divider-thin">
 
         <!-- Charges Table -->
@@ -331,7 +410,7 @@
             <thead>
                 <tr>
                     <th>Description</th>
-                    <th class="text-right">Amount (₨)</th>
+                    <th class="text-right">Amount (Rs.)</th>
                 </tr>
             </thead>
             <tbody>
@@ -339,8 +418,8 @@
                     <td>
                         Room Charges
                         @if ($bill->nights > 1)
-                            <span style="color:#888;font-size:12px;">
-                                (₨{{ number_format($bill->room_charges / $bill->nights) }}
+                            <span style="color:#444;font-size:12px;">
+                                (Rs.{{ number_format($bill->room_charges / $bill->nights) }}
                                 × {{ $bill->nights }} nights)
                             </span>
                         @endif
@@ -351,6 +430,17 @@
                     <tr>
                         <td>Extra Services (Food, Laundry, etc.)</td>
                         <td class="text-right">{{ number_format($bill->extra_charges) }}</td>
+                    </tr>
+                @endif
+                @if ($bill->parking_charges > 0)
+                    <tr>
+                        <td>
+                            Parking Charges
+                            @if ($bill->vehicle_number)
+                                <span style="color:#444;font-size:12px;">({{ $bill->vehicle_number }})</span>
+                            @endif
+                        </td>
+                        <td class="text-right">{{ number_format($bill->parking_charges) }}</td>
                     </tr>
                 @endif
                 @if ($bill->discount > 0)
@@ -369,16 +459,16 @@
             <tfoot>
                 <tr class="total-row">
                     <td>TOTAL AMOUNT</td>
-                    <td class="text-right" style="color:#c9a84c;">₨ {{ number_format($bill->total_amount) }}</td>
+                    <td class="text-right">Rs. {{ number_format($bill->total_amount) }}</td>
                 </tr>
                 <tr class="paid-row">
                     <td>Amount Paid</td>
-                    <td class="text-right">₨ {{ number_format($bill->amount_paid) }}</td>
+                    <td class="text-right">Rs. {{ number_format($bill->amount_paid) }}</td>
                 </tr>
                 @if ($bill->balance_due > 0)
                     <tr class="balance-row">
                         <td>Balance Due</td>
-                        <td class="text-right">₨ {{ number_format($bill->balance_due) }}</td>
+                        <td class="text-right">Rs. {{ number_format($bill->balance_due) }}</td>
                     </tr>
                 @endif
             </tfoot>
@@ -393,17 +483,17 @@
                 @endif
             </div>
             <div style="text-align:right;">
-                <p style="font-size:12px;color:#888;">Authorized Signature</p>
-                <div style="margin-top:30px;border-top:1px solid #ccc;padding-top:4px;font-size:12px;color:#888;">BM
-                    Resort</div>
+                <p style="font-size:12px;color:#444;">Authorized Signature</p>
+                <div style="margin-top:30px;border-top:1px solid #000;padding-top:4px;font-size:12px;color:#444;">
+                    White Castle Resort</div>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
             <div class="thankyou">Thank you for staying with us.</div>
-            <div>Bellamonte Resort — Shogran, Pakistan | bellamonteresort01@gmail.com | 0329 6777222</div>
-            <div style="margin-top:6px;font-size:11px;color:#bbb;">
+            <div>White Castle Resort — Shogran, Pakistan | thewhitecastle4444@gmail.com | 0329 6777222</div>
+            <div style="margin-top:6px;font-size:11px;color:#777;">
                 Generated on {{ now()->format('d M Y, h:i A') }}
             </div>
         </div>

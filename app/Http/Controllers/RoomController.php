@@ -30,10 +30,8 @@ class RoomController extends Controller
         return view('pages.rooms.list', compact('rooms'));
     }
 
-    public function details($id)
+    public function details(Room $room)
     {
-        $room = Room::findOrFail($id);
-
         return view('pages.rooms.details', compact('room'));
     }
 
@@ -121,17 +119,13 @@ class RoomController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit(Room $room)
     {
-        $room = Room::findOrFail($id);
-
         return view('pages.admin-side.rooms.edit', compact('room'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Room $room)
     {
-        $room = Room::findOrFail($id);
-
         $validated = $request->validate([
             'room_number'     => 'required|integer|min:1|max:9999|unique:rooms,room_number,' . $room->id,
             'type'            => 'required|string|max:100',
@@ -199,18 +193,14 @@ class RoomController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Room $room)
     {
-        $room = Room::findOrFail($id);
-
         return view('pages.admin-side.rooms.show', compact('room'));
     }
 
 
-    public function destroy($id)
+    public function destroy(Room $room)
     {
-        $room = Room::findOrFail($id);
-
         if ($room->image && file_exists(public_path('uploads/rooms/' . $room->image))) {
 
             unlink(public_path('uploads/rooms/' . $room->image));

@@ -42,30 +42,18 @@
                                     <div class="col-md-6">
                                         <label class="form-label">Hotel Name <span class="text-danger">*</span></label>
                                         <input type="text" name="hotel_name" class="form-control"
-                                            value="{{ $settings['hotel_name'] ?? '' }}" placeholder="BM Resort">
+                                            value="{{ $settings['hotel_name'] ?? '' }}" placeholder="White Castle Resort">
                                     </div>
-                                    {{-- <div class="col-md-6">
-                                    <label class="form-label">Tagline</label>
-                                    <input type="text" name="hotel_tagline" class="form-control"
-                                        value="{{ $settings['hotel_tagline'] ?? '' }}"
-                                        placeholder="Luxury · Elegance · Comfort">
-                                </div> --}}
                                     <div class="col-md-6">
                                         <label class="form-label">Email</label>
                                         <input type="email" name="hotel_email" class="form-control"
-                                            value="{{ $settings['hotel_email'] ?? '' }}" placeholder="info@bmresort.com">
+                                            value="{{ $settings['hotel_email'] ?? '' }}" placeholder="info@whitecastle.com">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Phone</label>
                                         <input type="text" name="hotel_phone" class="form-control"
                                             value="{{ $settings['hotel_phone'] ?? '' }}" placeholder="0300-1234567">
                                     </div>
-                                    {{-- <div class="col-md-6">
-                                    <label class="form-label">City</label>
-                                    <input type="text" name="hotel_city" class="form-control"
-                                        value="{{ $settings['hotel_city'] ?? '' }}"
-                                        placeholder="Lahore">
-                                </div> --}}
                                     <div class="col-md-6">
                                         <label class="form-label">Country</label>
                                         <input type="text" name="hotel_country" class="form-control"
@@ -77,69 +65,9 @@
                                             value="{{ $settings['hotel_address'] ?? '' }}"
                                             placeholder="Street, Area, City, Pakistan">
                                     </div>
-                                    {{-- <div class="col-md-6">
-                                    <label class="form-label">Website</label>
-                                    <input type="text" name="hotel_website" class="form-control"
-                                        value="{{ $settings['hotel_website'] ?? '' }}"
-                                        placeholder="www.bmresort.com">
-                                </div> --}}
-                                    {{-- <div class="col-md-6">
-                                    <label class="form-label">Footer Text (Invoice par)</label>
-                                    <input type="text" name="footer_text" class="form-control"
-                                        value="{{ $settings['footer_text'] ?? '' }}"
-                                        placeholder="Thank you for staying with us!">
-                                </div> --}}
                                 </div>
                             </div>
                         </div>
-
-                        {{-- <!-- Check-in / Check-out & Invoice -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="ti ti-clock me-2"></i>Timing & Invoice Settings</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-3">
-                                    <label class="form-label">Default Check-in Time</label>
-                                    <input type="time" name="checkin_time" class="form-control"
-                                        value="{{ $settings['checkin_time'] ?? '14:00' }}">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Default Check-out Time</label>
-                                    <input type="time" name="checkout_time" class="form-control"
-                                        value="{{ $settings['checkout_time'] ?? '12:00' }}">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Invoice Prefix</label>
-                                    <input type="text" name="invoice_prefix" class="form-control"
-                                        value="{{ $settings['invoice_prefix'] ?? 'INV' }}"
-                                        placeholder="INV">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Default Tax (%)</label>
-                                    <div class="input-group">
-                                        <input type="number" name="default_tax" class="form-control"
-                                            value="{{ $settings['default_tax'] ?? '0' }}"
-                                            min="0" max="100">
-                                        <span class="input-group-text">%</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Currency Symbol</label>
-                                    <input type="text" name="currency" class="form-control"
-                                        value="{{ $settings['currency'] ?? '₨' }}"
-                                        placeholder="₨">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Currency Code</label>
-                                    <input type="text" name="currency_code" class="form-control"
-                                        value="{{ $settings['currency_code'] ?? 'PKR' }}"
-                                        placeholder="PKR">
-                                </div>
-                            </div>
-                        </div>
-                    </div> --}}
 
                         <!-- Social Media -->
                         <div class="card mb-4">

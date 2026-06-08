@@ -1,5 +1,21 @@
 @extends('layouts.admin')
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/css/tom-select.bootstrap5.min.css">
+    <style>
+        .ts-wrapper .ts-control {
+            border-radius: 6px;
+            min-height: 38px;
+            padding: 4px 8px;
+        }
+
+        .ts-wrapper.focus .ts-control {
+            border-color: #4680ff;
+            box-shadow: 0 0 0 0.2rem rgba(70, 128, 255, .25);
+        }
+    </style>
+@endpush
+
 @section('content')
     <div class="pc-container">
         <div class="pc-content">
@@ -41,11 +57,11 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Booking Select</label>
-                                        <select name="booking_id" id="bookingSelect" class="form-select"
-                                            onchange="fillFromBooking()">
+                                        <select name="booking_id" id="bookingSelect" class="form-select">
                                             <option value="">-- Booking Select --</option>
                                             @foreach ($bookings as $booking)
                                                 <option value="{{ $booking->id }}" data-guest="{{ $booking->guest_name }}"
+                                                    data-father="{{ $booking->father_name }}"
                                                     data-phone="{{ $booking->guest_phone }}"
                                                     data-room="{{ $booking->room->room_number ?? '' }}"
                                                     data-type="{{ $booking->room->type ?? '' }}"
@@ -62,8 +78,8 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <small class="text-muted">Select a booking to auto-fill all details
-                                            automatically.</small>
+                                        <small class="text-muted">Search & select a booking to auto-fill all
+                                            details.</small>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Customer (Optional)</label>
@@ -98,11 +114,16 @@
                                         @enderror
                                     </div>
                                     <div class="col-md-6">
+                                        <label class="form-label">Father Name</label>
+                                        <input type="text" name="father_name" id="fatherName" class="form-control"
+                                            value="{{ old('father_name') }}" placeholder="Father name (optional)">
+                                    </div>
+                                    <div class="col-md-6">
                                         <label class="form-label">Phone</label>
                                         <input type="text" name="guest_phone" id="guestPhone" class="form-control"
                                             value="{{ old('guest_phone') }}" placeholder="0300-1234567">
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <label class="form-label">Room Number</label>
                                         <input type="text" name="room_number" id="roomNumber" class="form-control"
                                             value="{{ old('room_number') }}" placeholder="101">
@@ -117,7 +138,7 @@
                                         <input type="number" name="nights" id="nights" class="form-control"
                                             value="{{ old('nights', 1) }}" min="1" onchange="calcTotal()">
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <label class="form-label">Check In</label>
                                         <input type="date" name="check_in" id="checkIn" class="form-control"
                                             value="{{ old('check_in') }}">
@@ -126,6 +147,64 @@
                                         <label class="form-label">Check Out</label>
                                         <input type="date" name="check_out" id="checkOut" class="form-control"
                                             value="{{ old('check_out') }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vehicle Details -->
+                        <div class="card mb-4">
+                            <div class="card-header d-flex align-items-center justify-content-between">
+                                <h5 class="mb-0"><i class="ti ti-car me-2"></i>Vehicle Details</h5>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" name="has_vehicle" value="1"
+                                        id="hasVehicle" {{ old('has_vehicle') ? 'checked' : '' }}
+                                        onchange="toggleVehicle()">
+                                    <label class="form-check-label f-13" for="hasVehicle">Guest has a vehicle</label>
+                                </div>
+                            </div>
+                            <div class="card-body" id="vehicleFields" style="display:none;">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Vehicle Number</label>
+                                        <input type="text" name="vehicle_number" class="form-control text-uppercase"
+                                            value="{{ old('vehicle_number') }}" placeholder="LEA-1234">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Vehicle Type</label>
+                                        <select name="vehicle_type" class="form-select">
+                                            <option value="">-- Select --</option>
+                                            @foreach (['Car', 'SUV', 'Van', 'Bike', 'Jeep', 'Other'] as $vt)
+                                                <option value="{{ $vt }}"
+                                                    {{ old('vehicle_type') == $vt ? 'selected' : '' }}>{{ $vt }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Vehicle Model</label>
+                                        <input type="text" name="vehicle_model" class="form-control"
+                                            value="{{ old('vehicle_model') }}" placeholder="Corolla 2022">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Vehicle Color</label>
+                                        <input type="text" name="vehicle_color" class="form-control"
+                                            value="{{ old('vehicle_color') }}" placeholder="White">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Driver Name</label>
+                                        <input type="text" name="driver_name" class="form-control"
+                                            value="{{ old('driver_name') }}" placeholder="Optional">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Parking Charges (₨)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">₨</span>
+                                            <input type="number" name="parking_charges" id="parkingCharges"
+                                                class="form-control" value="{{ old('parking_charges', 0) }}"
+                                                min="0" oninput="calcTotal()">
+                                        </div>
+                                        <small class="text-muted">Total mein add ho jayega.</small>
                                     </div>
                                 </div>
                             </div>
@@ -196,7 +275,7 @@
                                     style="background:var(--bs-gray-100,#f8f9fa);border:1px solid #e0e0e0;">
                                     <div class="row text-center">
                                         <div class="col-3">
-                                            <div class="text-muted f-12">Room + Extra</div>
+                                            <div class="text-muted f-12">Room + Extra + Parking</div>
                                             <div class="fw-500" id="calcSubtotal">₨0</div>
                                         </div>
                                         <div class="col-2">
@@ -250,17 +329,17 @@
                                     </li>
                                     <hr class="my-2">
                                     <li class="mb-2">
+                                        <i class="ti ti-car text-info me-1"></i>
+                                        <strong>Vehicle Details</strong>
+                                        <p class="text-muted mb-0 ms-3">Toggle on if the guest has a vehicle. Parking
+                                            charges are added automatically to the total.</p>
+                                    </li>
+                                    <hr class="my-2">
+                                    <li class="mb-2">
                                         <i class="ti ti-calculator text-warning me-1"></i>
                                         <strong>Live Calculator</strong>
                                         <p class="text-muted mb-0 ms-3">Total amount is calculated in real-time as you
                                             enter room charges, extra charges, discount and tax.</p>
-                                    </li>
-                                    <hr class="my-2">
-                                    <li class="mb-2">
-                                        <i class="ti ti-receipt text-success me-1"></i>
-                                        <strong>Extra Charges</strong>
-                                        <p class="text-muted mb-0 ms-3">Include additional costs like food orders, laundry,
-                                            or room service in the extra charges field.</p>
                                     </li>
                                     <hr class="my-2">
                                     <li class="mb-2">
@@ -319,6 +398,11 @@
                                     <span class="text-muted f-13">Extra Charges</span>
                                     <span id="prev-extra">₨0</span>
                                 </div>
+                                <div class="d-flex justify-content-between mb-2" id="prev-parking-row"
+                                    style="display:none;">
+                                    <span class="text-muted f-13">Parking Charges</span>
+                                    <span id="prev-parking">₨0</span>
+                                </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="text-muted f-13">Discount</span>
                                     <span id="prev-dis" class="text-success">-₨0</span>
@@ -365,14 +449,48 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.min.js"></script>
+
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ── Booking Select with Search ──────────────────
+            new TomSelect('#bookingSelect', {
+                placeholder: 'Search booking...',
+                allowEmptyOption: true,
+                onChange: function(value) {
+                    fillFromBooking();
+                }
+            });
+
+            // ── Customer Select with Search ─────────────────
+            new TomSelect('#customerSelect', {
+                placeholder: 'Search customer...',
+                allowEmptyOption: true
+            });
+
+            toggleVehicle(); 
+            calcTotal();
+        });
+
+        // Vehicle section show / hide
+        function toggleVehicle() {
+            const on = document.getElementById('hasVehicle').checked;
+            document.getElementById('vehicleFields').style.display = on ? 'block' : 'none';
+            if (!on) {
+                document.getElementById('parkingCharges').value = 0;
+            }
+            calcTotal();
+        }
+
         // Auto fill from booking
         function fillFromBooking() {
             const sel = document.getElementById('bookingSelect');
             const opt = sel.options[sel.selectedIndex];
-            if (!opt.value) return;
+            if (!opt || !opt.value) return;
 
             document.getElementById('guestName').value = opt.dataset.guest || '';
+            document.getElementById('fatherName').value = opt.dataset.father || '';
             document.getElementById('guestPhone').value = opt.dataset.phone || '';
             document.getElementById('roomNumber').value = opt.dataset.room || '';
             document.getElementById('roomType').value = opt.dataset.type || '';
@@ -381,14 +499,12 @@
             document.getElementById('nights').value = opt.dataset.nights || 1;
             document.getElementById('roomCharges').value = opt.dataset.amount || 0;
 
-            // Customer select
-            const custSel = document.getElementById('customerSelect');
-            for (let i = 0; i < custSel.options.length; i++) {
-                if (custSel.options[i].value == opt.dataset.customer) {
-                    custSel.selectedIndex = i;
-                    break;
-                }
+            // Customer select sync (TomSelect ke through)
+            const custTS = document.getElementById('customerSelect').tomselect;
+            if (custTS && opt.dataset.customer) {
+                custTS.setValue(opt.dataset.customer);
             }
+
             calcTotal();
         }
 
@@ -396,11 +512,12 @@
         function calcTotal() {
             const room = parseFloat(document.getElementById('roomCharges').value) || 0;
             const extra = parseFloat(document.getElementById('extraCharges').value) || 0;
+            const parking = parseFloat(document.getElementById('parkingCharges').value) || 0;
             const dis = parseFloat(document.getElementById('discount').value) || 0;
             const taxPct = parseFloat(document.getElementById('taxPercent').value) || 0;
             const paid = parseFloat(document.getElementById('amountPaid').value) || 0;
 
-            const subtotal = room + extra;
+            const subtotal = room + extra + parking; 
             const afterDis = subtotal - dis;
             const tax = Math.round(afterDis * (taxPct / 100) * 100) / 100;
             const total = Math.round((afterDis + tax) * 100) / 100;
@@ -408,14 +525,12 @@
 
             const fmt = n => '₨' + n.toLocaleString();
 
-            // Bottom row
             document.getElementById('calcSubtotal').textContent = fmt(subtotal);
             document.getElementById('calcDiscount').textContent = '-' + fmt(dis);
             document.getElementById('calcTax').textContent = fmt(tax);
             document.getElementById('calcTotal').textContent = fmt(total);
             document.getElementById('calcBalance').textContent = fmt(balance > 0 ? balance : 0);
 
-            // Right preview
             document.getElementById('prev-room').textContent = fmt(room);
             document.getElementById('prev-extra').textContent = fmt(extra);
             document.getElementById('prev-dis').textContent = '-' + fmt(dis);
@@ -423,8 +538,14 @@
             document.getElementById('prev-total').textContent = fmt(total);
             document.getElementById('prev-paid').textContent = fmt(paid);
             document.getElementById('prev-bal').textContent = fmt(balance > 0 ? balance : 0);
-        }
 
-        document.addEventListener('DOMContentLoaded', calcTotal);
+            const parkingRow = document.getElementById('prev-parking-row');
+            if (parking > 0) {
+                parkingRow.style.display = 'flex';
+                document.getElementById('prev-parking').textContent = fmt(parking);
+            } else {
+                parkingRow.style.display = 'none';
+            }
+        }
     </script>
 @endpush

@@ -48,12 +48,15 @@
 </head>
 
 <body>
-    <div class="center bold" style="font-size:16px">🏨 Bellamonte Resort</div>
+    <div class="center bold" style="font-size:16px">🏨 White Castle Resort</div>
     <div class="center">Food Order Receipt</div>
     <div class="divider"></div>
     <div class="row"><span>Order #</span><span class="bold">{{ $foodOrder->order_number }}</span></div>
     <div class="row"><span>Date</span><span>{{ $foodOrder->created_at->format('d/m/Y h:i A') }}</span></div>
     <div class="row"><span>Guest</span><span>{{ $foodOrder->guest_name }}</span></div>
+    @if ($foodOrder->father_name)
+        <div class="row"><span>Father</span><span>{{ $foodOrder->father_name }}</span></div>
+    @endif
     @if ($foodOrder->room_number)
         <div class="row"><span>Room</span><span>{{ $foodOrder->room_number }}</span></div>
     @endif
@@ -73,7 +76,8 @@
     @endif
     @if ($foodOrder->tax_amount > 0)
         <div class="row"><span>Tax
-                ({{ $foodOrder->tax_percent }}%)</span><span>₨{{ number_format($foodOrder->tax_amount) }}</span></div>
+                ({{ $foodOrder->tax_percent }}%)</span><span>₨{{ number_format($foodOrder->tax_amount) }}</span>
+        </div>
     @endif
     <div class="divider"></div>
     <div class="total-row"><span>TOTAL</span><span>₨{{ number_format($foodOrder->total_amount) }}</span></div>

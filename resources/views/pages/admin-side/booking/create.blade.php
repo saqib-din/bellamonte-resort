@@ -114,6 +114,16 @@
                                     </div>
 
                                     <div class="col-md-6">
+                                        <label class="form-label">Father Name</label>
+                                        <input type="text" name="father_name" id="fatherName"
+                                            class="form-control @error('father_name') is-invalid @enderror"
+                                            value="{{ old('father_name') }}" placeholder="Father name (optional)">
+                                        @error('father_name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
                                         <label class="form-label">Phone <span class="text-danger">*</span></label>
                                         <input type="text" name="guest_phone" id="guestPhone"
                                             class="form-control @error('guest_phone') is-invalid @enderror"
@@ -344,7 +354,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="d-grid gap-2">
-                                    
+
                                     <button type="submit" class="btn btn-primary">
                                         <i class="ti ti-check me-2"></i>Confirm Booking
                                     </button>

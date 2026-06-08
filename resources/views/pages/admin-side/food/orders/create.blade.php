@@ -1,5 +1,21 @@
 @extends('layouts.admin')
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/css/tom-select.bootstrap5.min.css">
+    <style>
+        .ts-wrapper .ts-control {
+            border-radius: 6px;
+            min-height: 38px;
+            padding: 4px 8px;
+        }
+
+        .ts-wrapper.focus .ts-control {
+            border-color: #4680ff;
+            box-shadow: 0 0 0 0.2rem rgba(70, 128, 255, .25);
+        }
+    </style>
+@endpush
+
 @section('content')
     <div class="pc-container">
         <div class="pc-content">
@@ -42,12 +58,11 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Booking Select (Optional)</label>
-                                        <select name="booking_id" id="bookingSelect" class="form-select"
-                                            onchange="fillFromBooking()">
+                                        <select name="booking_id" id="bookingSelect" class="form-select">
                                             <option value="">-- Select Booking --</option>
                                             @foreach ($bookings as $booking)
-                                                <option value="{{ $booking->id }}"
-                                                    data-guest="{{ $booking->guest_name }}"
+                                                <option value="{{ $booking->id }}" data-guest="{{ $booking->guest_name }}"
+                                                    data-father="{{ $booking->father_name }}"
                                                     data-phone="{{ $booking->guest_phone }}"
                                                     data-room="{{ $booking->room->room_number ?? '' }}"
                                                     data-customer="{{ $booking->customer_id }}">
@@ -56,7 +71,8 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <small class="text-muted">Select a booking to auto-fill guest details.</small>
+                                        <small class="text-muted">Search & select a booking to auto-fill guest
+                                            details.</small>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Customer (Optional)</label>
@@ -91,16 +107,19 @@
                                         @enderror
                                     </div>
                                     <div class="col-md-4">
-                                        <label class="form-label">Phone (Optional)</label>
-                                        <input type="text" name="guest_phone" id="guestPhone"
-                                            class="form-control" value="{{ old('guest_phone') }}"
-                                            placeholder="0316-8336096">
+                                        <label class="form-label">Father Name (Optional)</label>
+                                        <input type="text" name="father_name" id="fatherName" class="form-control"
+                                            value="{{ old('father_name') }}" placeholder="Father name">
                                     </div>
                                     <div class="col-md-4">
+                                        <label class="form-label">Phone (Optional)</label>
+                                        <input type="text" name="guest_phone" id="guestPhone" class="form-control"
+                                            value="{{ old('guest_phone') }}" placeholder="0316-8336096">
+                                    </div>
+                                    <div class="col-md-6">
                                         <label class="form-label">Room Number (Optional)</label>
-                                        <input type="text" name="room_number" id="roomNumber"
-                                            class="form-control" value="{{ old('room_number') }}"
-                                            placeholder="101">
+                                        <input type="text" name="room_number" id="roomNumber" class="form-control"
+                                            value="{{ old('room_number') }}" placeholder="101">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Order Type <span class="text-danger">*</span></label>
@@ -129,10 +148,8 @@
                                     @foreach ($categories as $index => $cat)
                                         <li class="nav-item" role="presentation">
                                             <button class="nav-link {{ $index === 0 ? 'active' : '' }}"
-                                                id="tab-{{ $cat->id }}"
-                                                data-bs-toggle="tab"
-                                                data-bs-target="#cat-{{ $cat->id }}"
-                                                type="button" role="tab">
+                                                id="tab-{{ $cat->id }}" data-bs-toggle="tab"
+                                                data-bs-target="#cat-{{ $cat->id }}" type="button" role="tab">
                                                 {{ $cat->icon }} {{ $cat->name }}
                                             </button>
                                         </li>
@@ -154,7 +171,8 @@
                                                                 <div class="f-24 mb-1">🍴</div>
                                                                 <h6 class="mb-1 f-14">{{ $item->name }}</h6>
                                                                 @if ($item->description)
-                                                                    <small class="text-muted d-block mb-1">{{ Str::limit($item->description, 40) }}</small>
+                                                                    <small
+                                                                        class="text-muted d-block mb-1">{{ Str::limit($item->description, 40) }}</small>
                                                                 @endif
                                                                 <span class="badge bg-light-success text-success fw-bold">
                                                                     ₨{{ number_format($item->price) }}
@@ -164,7 +182,8 @@
                                                     </div>
                                                 @empty
                                                     <div class="col-12">
-                                                        <p class="text-muted text-center py-3">No items in this category.</p>
+                                                        <p class="text-muted text-center py-3">No items in this category.
+                                                        </p>
                                                     </div>
                                                 @endforelse
                                             </div>
@@ -176,7 +195,8 @@
                                 <div class="border rounded p-3" style="background:var(--bs-gray-100,#f8f9fa)">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <h6 class="mb-0"><i class="ti ti-shopping-cart me-2"></i>Order Cart</h6>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearCart()">
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                            onclick="clearCart()">
                                             <i class="ti ti-x me-1"></i>Clear
                                         </button>
                                     </div>
@@ -206,17 +226,16 @@
                                         <label class="form-label">Discount (₨) (Optional)</label>
                                         <div class="input-group">
                                             <span class="input-group-text">₨</span>
-                                            <input type="number" name="discount" id="discount"
-                                                class="form-control" value="{{ old('discount', 0) }}"
-                                                min="0" oninput="calcTotal()">
+                                            <input type="number" name="discount" id="discount" class="form-control"
+                                                value="{{ old('discount', 0) }}" min="0" oninput="calcTotal()">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label">Tax (%) (Optional)</label>
                                         <div class="input-group">
                                             <input type="number" name="tax_percent" id="taxPercent"
-                                                class="form-control" value="{{ old('tax_percent', 0) }}"
-                                                min="0" max="100" oninput="calcTotal()">
+                                                class="form-control" value="{{ old('tax_percent', 0) }}" min="0"
+                                                max="100" oninput="calcTotal()">
                                             <span class="input-group-text">%</span>
                                         </div>
                                     </div>
@@ -225,8 +244,8 @@
                                         <div class="input-group">
                                             <span class="input-group-text">₨</span>
                                             <input type="number" name="amount_paid" id="amountPaid"
-                                                class="form-control" value="{{ old('amount_paid', 0) }}"
-                                                min="0" oninput="calcTotal()">
+                                                class="form-control" value="{{ old('amount_paid', 0) }}" min="0"
+                                                oninput="calcTotal()">
                                         </div>
                                     </div>
                                 </div>
@@ -266,8 +285,7 @@
                                 <h5 class="mb-0"><i class="ti ti-notes me-2"></i>Notes (Optional)</h5>
                             </div>
                             <div class="card-body">
-                                <textarea name="notes" class="form-control" rows="3"
-                                    placeholder="Special instructions, allergies, etc.">{{ old('notes') }}</textarea>
+                                <textarea name="notes" class="form-control" rows="3" placeholder="Special instructions, allergies, etc.">{{ old('notes') }}</textarea>
                             </div>
                         </div>
 
@@ -356,69 +374,73 @@
 @endsection
 
 @push('scripts')
-<script>
-    /* ─── Cart State ─────────────────────────────────── */
-    let cart = {}; // { id: { name, price, qty } }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.min.js"></script>
+    <script>
+        /* ─── Cart State ─────────────────────────────────── */
+        let cart = {}; // { id: { name, price, qty } }
 
-    function addToCart(id, name, price) {
-        if (cart[id]) {
-            cart[id].qty++;
-        } else {
-            cart[id] = { name, price, qty: 1 };
-        }
-        renderCart();
-        calcTotal();
-
-        // Highlight effect
-        const cards = document.querySelectorAll('.menu-item-card');
-        cards.forEach(c => {
-            if (c.getAttribute('onclick').includes(`addToCart(${id},`)) {
-                c.style.borderColor = '#4680ff';
-                setTimeout(() => c.style.borderColor = '', 600);
+        function addToCart(id, name, price) {
+            if (cart[id]) {
+                cart[id].qty++;
+            } else {
+                cart[id] = {
+                    name,
+                    price,
+                    qty: 1
+                };
             }
-        });
-    }
+            renderCart();
+            calcTotal();
 
-    function changeQty(id, delta) {
-        if (!cart[id]) return;
-        cart[id].qty += delta;
-        if (cart[id].qty <= 0) delete cart[id];
-        renderCart();
-        calcTotal();
-    }
+            // Highlight effect
+            const cards = document.querySelectorAll('.menu-item-card');
+            cards.forEach(c => {
+                if (c.getAttribute('onclick').includes(`addToCart(${id},`)) {
+                    c.style.borderColor = '#4680ff';
+                    setTimeout(() => c.style.borderColor = '', 600);
+                }
+            });
+        }
 
-    function clearCart() {
-        cart = {};
-        renderCart();
-        calcTotal();
-    }
+        function changeQty(id, delta) {
+            if (!cart[id]) return;
+            cart[id].qty += delta;
+            if (cart[id].qty <= 0) delete cart[id];
+            renderCart();
+            calcTotal();
+        }
 
-    function renderCart() {
-        const cartDiv   = document.getElementById('cartItems');
-        const inputDiv  = document.getElementById('cartInputs');
-        const emptyMsg  = document.getElementById('emptyCart');
-        const previewDiv = document.getElementById('previewItems');
-        const ids = Object.keys(cart);
+        function clearCart() {
+            cart = {};
+            renderCart();
+            calcTotal();
+        }
 
-        if (ids.length === 0) {
-            cartDiv.innerHTML = `<p class="text-muted text-center py-3" id="emptyCart">
+        function renderCart() {
+            const cartDiv = document.getElementById('cartItems');
+            const inputDiv = document.getElementById('cartInputs');
+            const previewDiv = document.getElementById('previewItems');
+            const ids = Object.keys(cart);
+
+            if (ids.length === 0) {
+                cartDiv.innerHTML = `<p class="text-muted text-center py-3" id="emptyCart">
                 <i class="ti ti-shopping-cart-off f-24 d-block mb-1"></i>
                 Click items from the menu above to add them</p>`;
-            inputDiv.innerHTML = '';
-            previewDiv.innerHTML = '<p class="text-muted f-13 text-center">No items yet</p>';
-            return;
-        }
+                inputDiv.innerHTML = '';
+                previewDiv.innerHTML = '<p class="text-muted f-13 text-center">No items yet</p>';
+                return;
+            }
 
-        let cartHTML  = '';
-        let prevHTML  = '';
-        let inputHTML = '';
-        let idx = 0;
+            let cartHTML = '';
+            let prevHTML = '';
+            let inputHTML = '';
+            let idx = 0;
 
-        ids.forEach(id => {
-            const item     = cart[id];
-            const lineTotal = item.price * item.qty;
+            ids.forEach(id => {
+                const item = cart[id];
+                const lineTotal = item.price * item.qty;
 
-            cartHTML += `
+                cartHTML += `
                 <div class="d-flex align-items-center justify-content-between mb-2 py-2 border-bottom">
                     <div>
                         <span class="fw-500">${item.name}</span>
@@ -436,72 +458,91 @@
                     </div>
                 </div>`;
 
-            prevHTML += `
+                prevHTML += `
                 <div class="d-flex justify-content-between mb-1">
                     <span class="f-13 text-muted">${item.name} × ${item.qty}</span>
                     <span class="f-13">₨${lineTotal.toLocaleString()}</span>
                 </div>`;
 
-            inputHTML += `
+                inputHTML += `
                 <input type="hidden" name="items[${idx}][food_item_id]" value="${id}">
                 <input type="hidden" name="items[${idx}][quantity]" value="${item.qty}">`;
-            idx++;
-        });
+                idx++;
+            });
 
-        cartDiv.innerHTML  = cartHTML;
-        inputDiv.innerHTML = inputHTML;
-        previewDiv.innerHTML = prevHTML;
-    }
+            cartDiv.innerHTML = cartHTML;
+            inputDiv.innerHTML = inputHTML;
+            previewDiv.innerHTML = prevHTML;
+        }
 
-    /* ─── Calculator ─────────────────────────────────── */
-    function getCartSubtotal() {
-        return Object.values(cart).reduce((sum, i) => sum + i.price * i.qty, 0);
-    }
+        /* ─── Calculator ─────────────────────────────────── */
+        function getCartSubtotal() {
+            return Object.values(cart).reduce((sum, i) => sum + i.price * i.qty, 0);
+        }
 
-    function calcTotal() {
-        const sub    = getCartSubtotal();
-        const dis    = parseFloat(document.getElementById('discount').value) || 0;
-        const taxPct = parseFloat(document.getElementById('taxPercent').value) || 0;
-        const paid   = parseFloat(document.getElementById('amountPaid').value) || 0;
-        const afterDis = sub - dis;
-        const tax    = Math.round(afterDis * (taxPct / 100) * 100) / 100;
-        const total  = Math.round((afterDis + tax) * 100) / 100;
-        const balance = Math.max(0, total - paid);
+        function calcTotal() {
+            const sub = getCartSubtotal();
+            const dis = parseFloat(document.getElementById('discount').value) || 0;
+            const taxPct = parseFloat(document.getElementById('taxPercent').value) || 0;
+            const paid = parseFloat(document.getElementById('amountPaid').value) || 0;
+            const afterDis = sub - dis;
+            const tax = Math.round(afterDis * (taxPct / 100) * 100) / 100;
+            const total = Math.round((afterDis + tax) * 100) / 100;
+            const balance = Math.max(0, total - paid);
 
-        const fmt = n => '₨' + n.toLocaleString();
+            const fmt = n => '₨' + n.toLocaleString();
 
-        document.getElementById('calcSubtotal').textContent = fmt(sub);
-        document.getElementById('calcDiscount').textContent = '-' + fmt(dis);
-        document.getElementById('calcTax').textContent      = fmt(tax);
-        document.getElementById('calcTotal').textContent    = fmt(total);
-        document.getElementById('calcBalance').textContent  = fmt(balance);
+            document.getElementById('calcSubtotal').textContent = fmt(sub);
+            document.getElementById('calcDiscount').textContent = '-' + fmt(dis);
+            document.getElementById('calcTax').textContent = fmt(tax);
+            document.getElementById('calcTotal').textContent = fmt(total);
+            document.getElementById('calcBalance').textContent = fmt(balance);
 
-        document.getElementById('prev-sub').textContent   = fmt(sub);
-        document.getElementById('prev-dis').textContent   = '-' + fmt(dis);
-        document.getElementById('prev-tax').textContent   = fmt(tax);
-        document.getElementById('prev-total').textContent = fmt(total);
-        document.getElementById('prev-paid').textContent  = fmt(paid);
-        document.getElementById('prev-bal').textContent   = fmt(balance);
-    }
+            document.getElementById('prev-sub').textContent = fmt(sub);
+            document.getElementById('prev-dis').textContent = '-' + fmt(dis);
+            document.getElementById('prev-tax').textContent = fmt(tax);
+            document.getElementById('prev-total').textContent = fmt(total);
+            document.getElementById('prev-paid').textContent = fmt(paid);
+            document.getElementById('prev-bal').textContent = fmt(balance);
+        }
 
-    /* ─── Booking autofill ───────────────────────────── */
-    function fillFromBooking() {
-        const sel = document.getElementById('bookingSelect');
-        const opt = sel.options[sel.selectedIndex];
-        if (!opt.value) return;
+        /* ─── Booking autofill ───────────────────────────── */
+        function fillFromBooking() {
+            const sel = document.getElementById('bookingSelect');
+            const opt = sel.options[sel.selectedIndex];
+            if (!opt || !opt.value) return;
 
-        document.getElementById('guestName').value  = opt.dataset.guest || '';
-        document.getElementById('guestPhone').value = opt.dataset.phone || '';
-        document.getElementById('roomNumber').value = opt.dataset.room  || '';
+            document.getElementById('guestName').value = opt.dataset.guest || '';
+            document.getElementById('fatherName').value = opt.dataset.father || '';
+            document.getElementById('guestPhone').value = opt.dataset.phone || '';
+            document.getElementById('roomNumber').value = opt.dataset.room || '';
 
-        const custSel = document.getElementById('customerSelect');
-        for (let i = 0; i < custSel.options.length; i++) {
-            if (custSel.options[i].value == opt.dataset.customer) {
-                custSel.selectedIndex = i; break;
+            // Customer sync (TomSelect ke through)
+            const custTS = document.getElementById('customerSelect').tomselect;
+            if (custTS && opt.dataset.customer) {
+                custTS.setValue(opt.dataset.customer);
             }
         }
-    }
 
-    document.addEventListener('DOMContentLoaded', calcTotal);
-</script>
+        /* ─── Init ───────────────────────────────────────── */
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Booking Select with search
+            new TomSelect('#bookingSelect', {
+                placeholder: 'Search booking...',
+                allowEmptyOption: true,
+                onChange: function() {
+                    fillFromBooking();
+                }
+            });
+
+            // Customer Select with search
+            new TomSelect('#customerSelect', {
+                placeholder: 'Search customer...',
+                allowEmptyOption: true
+            });
+
+            calcTotal();
+        });
+    </script>
 @endpush

@@ -25,7 +25,7 @@
 
             @include('components.alerts')
 
-            <form action="{{ route('users.update', $user->id) }}" method="POST">
+            <form action="{{ route('users.update', $user) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="row">
@@ -210,8 +210,6 @@
                                 </div>
                             </div>
                         @else
-                            {{-- Non-admin users will not see the role section --}}
-                            {{-- Pass current role in hidden field to avoid validation failure --}}
                             @if (isset($user))
                                 <input type="hidden" name="role" value="{{ $user->role }}">
                             @endif

@@ -8,13 +8,66 @@ use App\Models\FoodCategory;
 use App\Models\Booking;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Yajra\DataTables\Facades\DataTables;
+
 
 class FoodOrderController extends Controller
 {
-    public function index()
+
+    public function index(Request $request)
     {
-        $orders = FoodOrder::with(['items', 'customer'])->latest()->get();
-        return view('pages.admin-side.food.orders.index', compact('orders'));
+        if ($request->ajax()) {
+
+            $query = FoodOrder::with(['items', 'customer'])
+                ->select('food_orders.*')
+                ->latest();
+
+            return DataTables::eloquent($query)
+
+                ->addColumn('order_no', fn($o) =>
+                view('pages.admin-side.food.orders.partials.order-cell', ['order' => $o])->render())
+
+                ->addColumn('guest', fn($o) =>
+                view('pages.admin-side.food.orders.partials.guest-cell', ['order' => $o])->render())
+
+                ->addColumn('room', fn($o) =>
+                $o->room_number
+                    ? '<span class="badge bg-light-primary">Room ' . e($o->room_number) . '</span>'
+                    : '<span class="text-muted">—</span>')
+
+                ->addColumn('type', fn($o) =>
+                '<span class="badge ' . $o->order_type_badge_class . '">' . e($o->order_type) . '</span>')
+
+                ->addColumn('items_count', fn($o) =>
+                '<small class="text-muted">' . $o->items->count() . ' item(s)</small>')
+
+                ->addColumn('total', fn($o) =>
+                '<strong class="text-dark">₨ ' . number_format($o->total_amount) . '</strong>')
+
+                ->addColumn('balance', fn($o) =>
+                $o->balance_due > 0
+                    ? '<span class="text-danger fw-500">₨ ' . number_format($o->balance_due) . '</span>'
+                    : '<span class="text-muted">—</span>')
+
+                ->addColumn('status', fn($o) =>
+                '<span class="badge ' . $o->status_badge_class . '">' . e($o->status) . '</span>')
+
+                ->addColumn('action', fn($o) =>
+                view('pages.admin-side.food.orders.partials.action', ['order' => $o])->render())
+
+                ->filterColumn('order_no', function ($q, $keyword) {
+                    $q->where('order_number', 'like', "%{$keyword}%");
+                })
+                ->filterColumn('guest', function ($q, $keyword) {
+                    $q->where('guest_name', 'like', "%{$keyword}%")
+                        ->orWhere('guest_phone', 'like', "%{$keyword}%");
+                })
+
+                ->rawColumns(['order_no', 'guest', 'room', 'type', 'items_count', 'total', 'balance', 'status', 'action'])
+                ->make(true);
+        }
+
+        return view('pages.admin-side.food.orders.index');
     }
 
     public function create()
@@ -35,6 +88,7 @@ class FoodOrderController extends Controller
     {
         $request->validate([
             'guest_name'     => 'required|string|max:255',
+            'father_name'    => 'nullable|string|max:255',
             'order_type'     => 'required|string',
             'payment_method' => 'required|string',
             'items'          => 'required|array|min:1',
@@ -72,6 +126,7 @@ class FoodOrderController extends Controller
             'booking_id'     => $request->booking_id ?: null,
             'customer_id'    => $request->customer_id ?: null,
             'guest_name'     => $request->guest_name,
+            'father_name'    => $request->father_name,
             'guest_phone'    => $request->guest_phone,
             'room_number'    => $request->room_number,
             'order_type'     => $request->order_type,
@@ -132,6 +187,7 @@ class FoodOrderController extends Controller
     {
         $request->validate([
             'guest_name'     => 'required|string|max:255',
+            'father_name'    => 'nullable|string|max:255',
             'order_type'     => 'required|string',
             'payment_method' => 'required|string',
             'items'          => 'required|array|min:1',
@@ -165,6 +221,7 @@ class FoodOrderController extends Controller
             'booking_id'     => $request->booking_id ?: null,
             'customer_id'    => $request->customer_id ?: null,
             'guest_name'     => $request->guest_name,
+            'father_name'    => $request->father_name,
             'guest_phone'    => $request->guest_phone,
             'room_number'    => $request->room_number,
             'order_type'     => $request->order_type,

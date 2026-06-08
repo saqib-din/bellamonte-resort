@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
-    //
     public function index(Request $request)
     {
         if ($request->ajax()) {
@@ -44,7 +43,7 @@ class BookingController extends Controller
                 ->addColumn(
                     'total',
                     fn($b) =>
-                    '<strong class="text-success">₨' . number_format($b->total_amount) . '</strong>'
+                    '<strong class="text-success">₨ ' . number_format($b->total_amount) . '</strong>'
                 )
                 ->addColumn(
                     'status_badge',
@@ -55,21 +54,21 @@ class BookingController extends Controller
                     $html = '';
 
                     if ($b->status === 'Confirmed') {
-                        $html .= '<form action="' . route('admin.bookings.checkin', $b->id) . '" method="POST" class="d-inline">'
+                        $html .= '<form action="' . route('admin.bookings.checkin', $b) . '" method="POST" class="d-inline">'
                             . csrf_field()
                             . '<button class="avtar avtar-xs btn-link-success" title="Check In" type="submit"><i class="ti ti-login f-18"></i></button></form>';
                     }
 
                     if ($b->status === 'Checked In') {
-                        $html .= '<form action="' . route('admin.bookings.checkout', $b->id) . '" method="POST" class="d-inline">'
+                        $html .= '<form action="' . route('admin.bookings.checkout', $b) . '" method="POST" class="d-inline">'
                             . csrf_field()
                             . '<button class="avtar avtar-xs btn-link-warning" title="Check Out" type="submit"><i class="ti ti-logout f-18"></i></button></form>';
                     }
 
-                    $html .= '<a href="' . route('admin.bookings.show', $b->id) . '" class="avtar avtar-xs btn-link-secondary" title="View"><i class="ti ti-eye f-18"></i></a>';
-                    $html .= '<a href="' . route('admin.bookings.edit', $b->id) . '" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></a>';
+                    $html .= '<a href="' . route('admin.bookings.show', $b) . '" class="avtar avtar-xs btn-link-secondary" title="View"><i class="ti ti-eye f-18"></i></a>';
+                    $html .= '<a href="' . route('admin.bookings.edit', $b) . '" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></a>';
                     $html .= '<a href="#" class="avtar avtar-xs btn-link-secondary bs-pass-para" data-id="' . $b->id . '" title="Delete"><i class="ti ti-trash f-18"></i></a>';
-                    $html .= '<form id="delete-form-' . $b->id . '" action="' . route('admin.bookings.destroy', $b->id) . '" method="POST" style="display:none;">'
+                    $html .= '<form id="delete-form-' . $b->id . '" action="' . route('admin.bookings.destroy', $b) . '" method="POST" style="display:none;">'
                         . csrf_field() . method_field('DELETE') . '</form>';
 
                     return $html;
@@ -78,16 +77,7 @@ class BookingController extends Controller
                 ->make(true);
         }
 
-        $stats = [
-            'total'       => Booking::count(),
-            'checked_in'  => Booking::where('status', 'Checked In')->count(),
-            'confirmed'   => Booking::where('status', 'Confirmed')->count(),
-            'checked_out' => Booking::where('status', 'Checked Out')->count(),
-            'cancelled'   => Booking::where('status', 'Cancelled')->count(),
-            'revenue'     => Booking::where('payment_status', 'Paid')->sum('total_amount'),
-        ];
-
-        return view('pages.admin-side.booking.index', compact('stats'));
+        return view('pages.admin-side.booking.index');
     }
 
     public function create()
@@ -100,51 +90,53 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'room_id'        => 'required|exists:rooms,id',
-            'customer_id'    => 'required|exists:customers,id',
-            'guest_name'     => 'required|string|max:100',
-            'guest_phone'    => 'required|string|max:20',
-            'guest_cnic'     => 'nullable|string|max:20',
-            'guest_email'    => 'nullable|email|max:100',
-            'adults'         => 'required|integer|min:1',
-            'children'       => 'nullable|integer|min:0',
-            'check_in'       => 'required|date',
-            'check_out'      => 'required|date|after:check_in',
-            'payment_method' => 'required',
-            'payment_status' => 'required',
+            'room_id'          => 'required|exists:rooms,id',
+            'customer_id'      => 'required|exists:customers,id',
+            'guest_name'       => 'required|string|max:100',
+            'father_name'      => 'nullable|string|max:100',
+            'guest_phone'      => 'required|string|max:20',
+            'guest_cnic'       => 'nullable|string|max:20',
+            'guest_email'      => 'nullable|email|max:100',
+            'adults'           => 'required|integer|min:1',
+            'children'         => 'nullable|integer|min:0',
+            'check_in'         => 'required|date',
+            'check_out'        => 'required|date|after:check_in',
+            'payment_method'   => 'required',
+            'payment_status'   => 'required',
             // 'advance_paid'   => 'nullable|numeric|min:0',
-            'status'         => 'required',
+            'status'           => 'required',
             'special_requests' => 'nullable|string',
-            'notes'          => 'nullable|string',
+            'notes'            => 'nullable|string',
         ]);
 
-        $room   = Room::findOrFail($request->room_id);
+        $room     = Room::findOrFail($request->room_id);
         $checkin  = Carbon::parse($request->check_in);
         $checkout = Carbon::parse($request->check_out);
         $nights   = $checkin->diffInDays($checkout);
         $total    = $nights * $room->price_per_night;
 
         $booking = Booking::create([
-            'booking_number'  => Booking::generateBookingNumber(),
-            'room_id'         => $request->room_id,
-            'customer_id'     => $request->customer_id,
-            'guest_name'      => $request->guest_name,
-            'guest_phone'     => $request->guest_phone,
-            'guest_cnic'      => $request->guest_cnic,
-            'guest_email'     => $request->guest_email,
-            'adults'          => $request->adults,
-            'children'        => $request->children ?? 0,
-            'check_in'        => $request->check_in,
-            'check_out'       => $request->check_out,
-            'nights'          => $nights,
-            'room_price'      => $room->price_per_night,
-            'total_amount'    => $total,
-            'payment_status'  => $request->payment_status,
-            'payment_method'  => $request->payment_method,
-            // 'advance_paid'    => $request->advance_paid ?? 0,
-            'status'          => $request->status,
+            'booking_number'   => Booking::generateBookingNumber(),
+            'room_id'          => $request->room_id,
+            'customer_id'      => $request->customer_id,
+            'guest_name'       => $request->guest_name,
+            'father_name'      => $request->father_name,
+            'guest_phone'      => $request->guest_phone,
+            'guest_cnic'       => $request->guest_cnic,
+            'guest_email'      => $request->guest_email,
+            'adults'           => $request->adults,
+            'children'         => $request->children ?? 0,
+            'check_in'         => $request->check_in,
+            'check_out'        => $request->check_out,
+            'nights'           => $nights,
+            'room_price'       => $room->price_per_night,
+            'total_amount'     => $total,
+            'payment_status'   => $request->payment_status,
+            'payment_method'   => $request->payment_method,
+            // 'advance_paid'  => $request->advance_paid ?? 0,
+            'status'           => $request->status,
             'special_requests' => $request->special_requests,
-            'notes'           => $request->notes,
+            'notes'            => $request->notes,
         ]);
 
         // Mark room as occupied
@@ -175,12 +167,13 @@ class BookingController extends Controller
             'room_id'        => 'required|exists:rooms,id',
             'customer_id'    => 'required|exists:customers,id',
             'guest_name'     => 'required|string|max:100',
+            'father_name'    => 'nullable|string|max:100',
             'guest_phone'    => 'required|string|max:20',
             'check_in'       => 'required|date',
             'check_out'      => 'required|date|after:check_in',
             'payment_status' => 'required',
             'payment_method' => 'required',
-            // 'advance_paid'   => 'nullable|numeric|min:0',
+            // 'advance_paid' => 'nullable|numeric|min:0',
             'status'         => 'required',
         ]);
 
@@ -195,25 +188,26 @@ class BookingController extends Controller
         }
 
         $booking->update([
-            'room_id'         => $request->room_id,
-            'customer_id'     => $request->customer_id,
-            'guest_name'      => $request->guest_name,
-            'guest_phone'     => $request->guest_phone,
-            'guest_cnic'      => $request->guest_cnic,
-            'guest_email'     => $request->guest_email,
-            'adults'          => $request->adults,
-            'children'        => $request->children ?? 0,
-            'check_in'        => $request->check_in,
-            'check_out'       => $request->check_out,
-            'nights'          => $nights,
-            'room_price'      => $room->price_per_night,
-            'total_amount'    => $total,
-            'payment_status'  => $request->payment_status,
-            'payment_method'  => $request->payment_method,
-            // 'advance_paid'    => $request->advance_paid ?? 0,
-            'status'          => $request->status,
+            'room_id'          => $request->room_id,
+            'customer_id'      => $request->customer_id,
+            'guest_name'       => $request->guest_name,
+            'father_name'      => $request->father_name,
+            'guest_phone'      => $request->guest_phone,
+            'guest_cnic'       => $request->guest_cnic,
+            'guest_email'      => $request->guest_email,
+            'adults'           => $request->adults,
+            'children'         => $request->children ?? 0,
+            'check_in'         => $request->check_in,
+            'check_out'        => $request->check_out,
+            'nights'           => $nights,
+            'room_price'       => $room->price_per_night,
+            'total_amount'     => $total,
+            'payment_status'   => $request->payment_status,
+            'payment_method'   => $request->payment_method,
+            // 'advance_paid'  => $request->advance_paid ?? 0,
+            'status'           => $request->status,
             'special_requests' => $request->special_requests,
-            'notes'           => $request->notes,
+            'notes'            => $request->notes,
         ]);
 
         // Room status update
@@ -233,8 +227,6 @@ class BookingController extends Controller
         if ($booking->status === 'Checked In') {
             $booking->room->update(['status' => 'Available']);
         }
-
-
 
         $booking->delete();
         return redirect()->route('admin.bookings.index')

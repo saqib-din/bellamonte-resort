@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Booking extends Model
 {
@@ -12,6 +12,7 @@ class Booking extends Model
         'room_id',
         'customer_id',
         'guest_name',
+        'father_name',     
         'guest_phone',
         'guest_cnic',
         'guest_email',
@@ -29,6 +30,29 @@ class Booking extends Model
         'special_requests',
         'notes',
     ];
+
+    protected $casts = [
+        'check_in'  => 'date',
+        'check_out' => 'date',
+    ];
+
+    // ── Auto-generate uuid ───────────────────────────
+    protected static function booted(): void
+    {
+        static::creating(function (Booking $booking) {
+            if (empty($booking->uuid)) {
+                $booking->uuid = (string) Str::uuid();
+            }
+        });
+    }
+
+    // public URLs uuid se → /bookings/9b1deb4d-...
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
+    // ── Relations ────────────────────────────────────
     public function customer()
     {
         return $this->belongsTo(Customer::class);
@@ -44,28 +68,23 @@ class Booking extends Model
         return $this->hasOne(Bill::class);
     }
 
+    // ── Helpers ──────────────────────────────────────
     public static function generateBookingNumber()
     {
         $last = self::orderBy('id', 'desc')->first();
-
         $nextId = $last ? $last->id + 1 : 1;
 
         return 'BK-' . date('Y') . '-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
     }
 
-    protected $casts = [
-        'check_in' => 'date',
-        'check_out' => 'date',
-    ];
-
     public function getPaymentBadgeClass()
     {
         return match ($this->payment_status) {
-            'Paid'      => 'bg-light-success',
-            'Pending'   => 'bg-light-warning',
-            'Partial'   => 'bg-light-info',
-            'Refunded'  => 'bg-light-danger',
-            default     => 'bg-light-secondary',
+            'Paid'     => 'bg-light-success',
+            'Pending'  => 'bg-light-warning',
+            'Partial'  => 'bg-light-info',
+            'Refunded' => 'bg-light-danger',
+            default    => 'bg-light-secondary',
         };
     }
 
@@ -83,6 +102,6 @@ class Booking extends Model
 
     public function getRemainingBalance()
     {
-        return $this->total_amount - $this->paid_amount;
+        return $this->total_amount - $this->advance_paid;
     }
 }

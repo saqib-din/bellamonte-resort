@@ -21,7 +21,7 @@
                                 </div>
                                 <div class="d-flex gap-2">
                                     @if ($booking->status === 'Confirmed')
-                                        <form action="{{ route('admin.bookings.checkin', $booking->id) }}" method="POST">
+                                        <form action="{{ route('admin.bookings.checkin', $booking) }}" method="POST">
                                             @csrf
                                             <button class="btn btn-success">
                                                 <i class="ti ti-login me-1"></i> Check In
@@ -29,14 +29,14 @@
                                         </form>
                                     @endif
                                     @if ($booking->status === 'Checked In')
-                                        <form action="{{ route('admin.bookings.checkout', $booking->id) }}" method="POST">
+                                        <form action="{{ route('admin.bookings.checkout', $booking) }}" method="POST">
                                             @csrf
                                             <button class="btn btn-warning">
                                                 <i class="ti ti-logout me-1"></i> Check Out
                                             </button>
                                         </form>
                                     @endif
-                                    <a href="{{ route('admin.bookings.edit', $booking->id) }}" class="btn btn-primary">
+                                    <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-primary">
                                         <i class="ti ti-edit me-1"></i> Edit
                                     </a>
                                     <a href="{{ route('admin.bookings.index') }}" class="btn btn-outline-secondary">
@@ -141,6 +141,10 @@
                                             <td><strong>{{ $booking->guest_name }}</strong></td>
                                         </tr>
                                         <tr>
+                                            <td class="text-muted fw-500">Father Name</td>
+                                            <td>{{ $booking->father_name ?? '—' }}</td>
+                                        </tr>
+                                        <tr>
                                             <td class="text-muted fw-500">Phone</td>
                                             <td>{{ $booking->guest_phone }}</td>
                                         </tr>
@@ -210,7 +214,7 @@
                             <h5 class="mb-0"><i class="ti ti-bolt me-2"></i>Quick Actions</h5>
                         </div>
                         <div class="card-body d-grid gap-2">
-                            <a href="{{ route('admin.bookings.edit', $booking->id) }}" class="btn btn-outline-primary">
+                            <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-outline-primary">
                                 <i class="ti ti-edit me-1"></i> Edit Booking
                             </a>
                             <a href="{{ route('admin.bookings.index') }}" class="btn btn-outline-secondary">

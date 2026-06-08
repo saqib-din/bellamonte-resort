@@ -26,8 +26,8 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="ap-title">
-                            <h2>{{ $data['welcome_title'] ?? 'Welcome To Bellamonte Resort.' }}</h2>
-                            <p>{{ $data['welcome_description'] ?? 'Located in the beautiful hills of Shogran, Pakistan, Bellamonte Resort offers luxury accommodation, breathtaking mountain views, peaceful surroundings, and comfortable rooms for a memorable stay with family and friends.' }}
+                            <h2>{{ $data['welcome_title'] ?? 'Welcome To White Castle Resort.' }}</h2>
+                            <p>{{ $data['welcome_description'] ?? 'Perched in the beautiful hills of Shogran, Pakistan, White Castle Resort offers luxury accommodation, breathtaking mountain views, peaceful surroundings, and comfortable rooms for a memorable stay with family and friends.' }}
                             </p>
                         </div>
                     </div>
@@ -90,8 +90,8 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="video-text">
-                        <h2>{{ $data['video_title'] ?? 'Discover Our Hotel & Services.' }}</h2>
-                        <p>{{ $data['video_subtitle'] ?? "It's Hurricane Season But We Are Visiting Hilton Head Island" }}
+                        <h2>{{ $data['video_title'] ?? 'Discover Our Resort & Services.' }}</h2>
+                        <p>{{ $data['video_subtitle'] ?? 'Experience comfort, fine dining, and breathtaking mountain views at White Castle Resort, Shogran.' }}
                         </p>
                         <a href="{{ $videoUrl }}" class="play-btn video-popup">
                             <img src="{{ asset('landing-assets/img/play.png') }}" alt="">

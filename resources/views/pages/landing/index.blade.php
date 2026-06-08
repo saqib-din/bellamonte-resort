@@ -6,18 +6,19 @@
             <div class="row">
                 <div class="col-lg-6">
                     <div class="hero-text">
-                        <h1>Bellamonte Resort A Luxury Hotel</h1>
-                        <p>Experience luxury, comfort, and breathtaking mountain views at Bellamonte Resort Shogran,
-                            Pakistan, offering premium rooms, peaceful stays, and unforgettable hospitality for families,
-                            couples, and travelers.</p>
-                        <a href="#" class="primary-btn">Discover Now</a>
+                        <h1>White Castle — Luxury Above Clouds
+                        </h1>
+                        <p>Nestled in the heights of Shogran, White Castle Resort blends premium comfort with breathtaking
+                            mountain views — an unforgettable retreat for families, couples, and travelers.</p>
+
+                        {{-- <a href="#" class="primary-btn">Discover Now</a> --}}
                     </div>
                 </div>
             </div>
         </div>
         <div class="hero-slider owl-carousel">
             <div class="hs-item set-bg" data-setbg="{{ asset('landing-assets/img/hero/hero-1.jpg') }}"></div>
-            <div class="hs-item set-bg" data-setbg="{{ asset('landing-assets/img/hero/hero-2.jpg') }}"></div>
+            {{-- <div class="hs-item set-bg" data-setbg="{{ asset('landing-assets/img/hero/hero-2.jpg') }}"></div> --}}
             <div class="hs-item set-bg" data-setbg="{{ asset('landing-assets/img/hero/hero-3.jpg') }}"></div>
         </div>
     </section>
@@ -32,18 +33,18 @@
                     <div class="about-text">
                         <div class="section-title">
                             <span>About Us</span>
-                            <h2>{{ $data['welcome_title'] ?? 'Welcome To Bellamonte Resort.' }}</h2>
+                            <h2>{{ $data['welcome_title'] ?? 'Welcome To White Castle Resort.' }}</h2>
 
                         </div>
 
                         <p class="f-para">
-                            {{ $data['welcome_description'] ?? 'Located in the beautiful hills of Shogran, Pakistan, Bellamonte Resort offers luxury accommodation, breathtaking mountain views, peaceful surroundings, and comfortable rooms for a memorable stay with family and friends.' }}
+                            {{ $data['welcome_description'] ?? 'Perched in the beautiful hills of Shogran, Pakistan, White Castle Resort offers luxury accommodation, breathtaking mountain views, peaceful surroundings, and comfortable rooms for a memorable stay with family and friends.' }}
                         </p>
 
                         <p class="s-para">
-                            Whether you are planning a relaxing vacation, honeymoon, or family trip,
-                            our resort offers comfortable rooms, mountain views, delicious dining,
-                            and a memorable stay in nature.
+                            Whether you are planning a relaxing vacation, a romantic honeymoon, or a family getaway,
+                            White Castle Resort offers elegant rooms, stunning mountain views, delicious dining,
+                            and an unforgettable stay surrounded by nature.
                         </p>
                         <a href="{{ route('about.us') }}" class="primary-btn about-btn">Read More</a>
                     </div>
@@ -52,7 +53,7 @@
                     <div class="about-pic">
                         <div class="row">
                             <div class="col-sm-6">
-                                <img src="{{ asset('landing-assets/img/shogran4.webp') }}" alt="Bellamonte Resort"
+                                <img src="{{ asset('landing-assets/img/shogran4.webp') }}" alt="White Castle Resort"
                                     style="
             height: 23em;
             width: 100%;
@@ -63,7 +64,7 @@
                             </div>
 
                             <div class="col-sm-6">
-                                <img src="{{ asset('landing-assets/img/shogran12.png') }}" alt=""
+                                <img src="{{ asset('landing-assets/img/shogran12.png') }}" alt="White Castle Resort"
                                     style="
             height: 23em;
             width: 100%;
@@ -172,12 +173,10 @@
             position: relative;
         }
 
-       
+
 
         .hp-room-item.set-bg {
-            /* Background image ko light/transparent dikhao */
             opacity: 0.95;
-            /* Poore element ki opacity kam hogi */
         }
     </style>
     <!-- Home Room Section Begin -->
@@ -217,14 +216,14 @@
                                                     <td>{{ $room->bed_type ?? 'King Beds' }}</td>
                                                 </tr>
 
-                                                {{-- <tr>
+                                                <tr>
                                                     <td class="r-o">Services:</td>
-                                                    <td>{{ $room->services ?? 'Wifi, Television, Bathroom' }}</td>
-                                                </tr> --}}
+                                                    <td>{{ $room->status ?? 'Wifi, Television, Bathroom' }}</td>
+                                                </tr>
                                             </tbody>
                                         </table>
 
-                                        <a href="{{ route('rooms.details', $room->id) }}" class="primary-btn">
+                                        <a href="{{ route('rooms.details', $room) }}" class="primary-btn">
                                             More Details
                                         </a>
                                     </div>
@@ -377,7 +376,7 @@
                         : asset('landing-assets/img/blog/blog-1.jpg'))
                     : $event->image_url;
 
-                $getLink = fn($event) => $useDb ? route('event.detail', $event->id) : route('event.details');
+                $getLink = fn($event) => $useDb ? route('event.detail', $event) : route('event.details');
             @endphp
 
             <div class="row">

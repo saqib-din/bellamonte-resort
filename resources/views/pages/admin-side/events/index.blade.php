@@ -92,11 +92,11 @@
                                                         </span>
                                                     </td>
                                                     <td class="text-end">
-                                                        {{-- <a href="{{ route('events.details', $event->id) }}" target="_blank"
+                                                        {{-- <a href="{{ route('event.detail', $event) }}" target="_blank"
                                                             class="avtar avtar-xs btn-link-secondary" title="View">
                                                             <i class="ti ti-eye f-18"></i>
                                                         </a> --}}
-                                                        <a href="{{ route('events.edit', $event->id) }}"
+                                                        <a href="{{ route('events.edit', $event) }}"
                                                             class="avtar avtar-xs btn-link-secondary" title="Edit">
                                                             <i class="ti ti-edit f-18"></i>
                                                         </a>
@@ -106,8 +106,8 @@
                                                             <i class="ti ti-trash f-20"></i>
                                                         </a>
                                                         <form id="delete-form-{{ $event->id }}"
-                                                            action="{{ route('events.destroy', $event->id) }}"
-                                                            method="POST" style="display:none;">
+                                                            action="{{ route('events.destroy', $event) }}" method="POST"
+                                                            style="display:none;">
                                                             @csrf @method('DELETE')
                                                         </form> --}}
                                                     </td>

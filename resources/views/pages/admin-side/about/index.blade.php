@@ -41,11 +41,11 @@
                                 <div class="mb-3">
                                     <label class="form-label">Title</label>
                                     <input type="text" name="welcome_title" class="form-control"
-                                        value="{{ old('welcome_title', $data['welcome_title'] ?? 'Welcome To Bellamonte Resort.') }}">
+                                        value="{{ old('welcome_title', $data['welcome_title'] ?? 'Welcome To White Castle Resort.') }}">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Description</label>
-                                    <textarea name="welcome_description" class="form-control" rows="4">{{ old('welcome_description', $data['welcome_description'] ?? '') }}</textarea>
+                                    <textarea name="welcome_description" class="form-control" rows="4" placeholder="Enter a description ">{{ old('welcome_description', $data['welcome_description'] ?? '') }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -124,7 +124,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Subtitle</label>
-                                        <input type="text" name="video_subtitle" class="form-control"
+                                        <input type="text" name="video_subtitle" class="form-control" placeholder="Enter a subtitle"
                                             value="{{ old('video_subtitle', $data['video_subtitle'] ?? '') }}">
                                     </div>
                                     <div class="col-md-6">
@@ -172,10 +172,6 @@
                         </div>
 
                     </div>
-
-
-                    <!-- RIGHT -->
-
 
                     <!-- RIGHT -->
                     <div class="col-lg-4">

@@ -20,7 +20,7 @@
                                     <h2 class="mb-0">Room {{ $room->room_number }} — {{ $room->type }}</h2>
                                 </div>
                                 <div>
-                                    <a href="{{ route('admin.rooms.edit', $room->id) }}" class="btn btn-primary me-2">
+                                    <a href="{{ route('admin.rooms.edit', $room) }}" class="btn btn-primary me-2">
                                         <i class="ti ti-edit me-1"></i> Edit
                                     </a>
                                     <a href="{{ route('admin.rooms.index') }}" class="btn btn-outline-secondary">

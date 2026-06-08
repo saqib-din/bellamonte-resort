@@ -4,19 +4,19 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="description"
-        content="Bellamonte Resort Shogran offers luxury rooms, mountain views, hotel booking, family stays, and premium hospitality services in Shogran." />
+        content="White Castle Resort Shogran offers luxury rooms, mountain views, hotel booking, family stays, and premium hospitality services in Shogran." />
 
     <meta name="keywords"
-        content="Bellamonte Resort, Shogran Hotel, luxury resort, hotel booking, mountain resort, family hotel, Shogran tourism, Pakistan hotels, vacation resort, rooms booking" />
+        content="White Castle Resort, Shogran Hotel, luxury resort, hotel booking, mountain resort, family hotel, Shogran tourism, Pakistan hotels, vacation resort, rooms booking" />
 
-    <meta name="author" content="Bellamonte Resort" />
+    <meta name="author" content="White Castle Resort" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Bellamonte Resort</title>
+    <title>The White Castle Resort</title>
 
     {{-- Icon Bellamonte --}}
-    <link rel="shortcut icon" href="{{ asset('admin/assets/images/bella.png') }}" />
-    <link rel="apple-touch-icon-precomposed" href="{{ asset('admin/assets/images/bella.png') }}" />
+    <link rel="shortcut icon" href="{{ asset('admin/assets/images/whitecastle.jpeg') }}" />
+    <link rel="apple-touch-icon-precomposed" href="{{ asset('admin/assets/images/whitecastle.jpeg') }}" />
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css?family=Lora:400,700&display=swap" rel="stylesheet" />

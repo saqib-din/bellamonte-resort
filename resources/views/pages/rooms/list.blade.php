@@ -56,14 +56,10 @@
                                             <td class="r-o">Bed:</td>
                                             <td>{{ $room->bed_type ?? 'Standard' }}</td>
                                         </tr>
-                                        {{-- <tr>
-                                            <td class="r-o">Services:</td>
-                                            <td>{{ $room->services ?? 'Wifi, TV, Bathroom' }}</td>
-                                        </tr> --}}
                                     </tbody>
                                 </table>
 
-                                <a href="{{ route('rooms.details', $room->id) }}" class="primary-btn">
+                                <a href="{{ route('rooms.details', $room) }}" class="primary-btn">
                                     More Details
                                 </a>
                             </div>
@@ -119,7 +115,6 @@
                                         </tbody>
                                     </table>
 
-                                    {{-- <a href="{{ route('rooms.details') }}" class="primary-btn">More Details</a> --}}
                                 </div>
 
                             </div>

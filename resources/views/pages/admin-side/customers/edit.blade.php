@@ -25,7 +25,7 @@
 
             @include('components.alerts')
 
-            <form action="{{ route('customers.update', $customer->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('customers.update', $customer) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="row">
@@ -45,6 +45,17 @@
                                             class="form-control @error('name') is-invalid @enderror"
                                             value="{{ old('name', $customer->name) }}">
                                         @error('name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Father Name</label>
+                                        <input type="text" name="father_name"
+                                            class="form-control @error('father_name') is-invalid @enderror"
+                                            value="{{ old('father_name', $customer->father_name) }}"
+                                            placeholder="Father name">
+                                        @error('father_name')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>

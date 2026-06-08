@@ -1,5 +1,3 @@
-{{-- resources/views/admin/contacts/index.blade.php --}}
-
 @extends('layouts.admin')
 
 @section('content')
@@ -39,13 +37,14 @@
 
                             {{-- ── Empty State ── --}}
                             @if ($contacts->count() == 0)
-                                <div class="text-center" style="min-height: 300px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                                <div class="text-center"
+                                    style="min-height: 300px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                                     <img src="{{ asset('admin/assets/images/application/img-empty-mail.png') }}"
                                         alt="No mail" class="img-fluid mb-4" style="max-width:200px;">
                                     <h2><b>There is No Mail</b></h2>
                                 </div>
 
-                            {{-- ── Contacts Table ── --}}
+                                {{-- ── Contacts Table ── --}}
                             @else
                                 <div class="table-responsive">
                                     <table class="table table-hover" id="pc-dt-simple">
@@ -69,43 +68,42 @@
                                                     <td>{{ $contact->subject ?? '—' }}</td>
                                                     <td>{{ $contact->phone ?? '—' }}</td>
                                                     <td>
-                                                        <span class="badge bg-light-{{ $contact->is_replied ? 'success' : 'danger' }}">
+                                                        <span
+                                                            class="badge bg-light-{{ $contact->is_replied ? 'success' : 'danger' }}">
                                                             {{ $contact->is_replied ? 'Yes' : 'No' }}
                                                         </span>
                                                     </td>
                                                     <td class="text-end">
 
                                                         {{-- View Button --}}
-                                                        <a href="#"
-                                                            class="avtar avtar-xs btn-link-secondary"
+                                                        <a href="#" class="avtar avtar-xs btn-link-secondary"
                                                             data-bs-toggle="modal"
-                                                            data-bs-target="#viewModal{{ $contact->id }}"
-                                                            title="View">
+                                                            data-bs-target="#viewModal{{ $contact->id }}" title="View">
                                                             <i class="ti ti-eye f-20"></i>
                                                         </a>
 
                                                         {{-- Reply Button (only if not replied) --}}
                                                         @if (!$contact->is_replied)
-                                                            <a href="#"
-                                                                class="avtar avtar-xs btn-link-secondary"
+                                                            <a href="#" class="avtar avtar-xs btn-link-secondary"
                                                                 data-bs-toggle="modal"
                                                                 data-bs-target="#replyModal{{ $contact->id }}"
                                                                 title="Reply">
-                                                                <i class="align-text-bottom me-1 ti ti-arrow-back-up f-20"></i>
+                                                                <i
+                                                                    class="align-text-bottom me-1 ti ti-arrow-back-up f-20"></i>
                                                             </a>
                                                         @endif
 
                                                         {{-- Delete Button --}}
-                                                          <a href="#" class="avtar avtar-xs btn-link-secondary bs-pass-para"
-                                                        data-id="{{ $contact->id }}" title="Delete">
-                                                        <i class="ti ti-trash f-20"></i>
-                                                    </a>
+                                                        <a href="#"
+                                                            class="avtar avtar-xs btn-link-secondary bs-pass-para"
+                                                            data-id="{{ $contact->id }}" title="Delete">
+                                                            <i class="ti ti-trash f-20"></i>
+                                                        </a>
 
                                                         {{-- Hidden Delete Form --}}
                                                         <form id="delete-form-{{ $contact->id }}"
                                                             action="{{ route('contacts.delete', $contact->id) }}"
-                                                            method="POST"
-                                                            style="display: none;">
+                                                            method="POST" style="display: none;">
                                                             @csrf
                                                             @method('DELETE')
                                                         </form>
@@ -116,8 +114,8 @@
                                                 {{-- ════════════════════════════════════
                                                      VIEW MODAL
                                                 ════════════════════════════════════ --}}
-                                                <div class="modal fade" id="viewModal{{ $contact->id }}"
-                                                    tabindex="-1" aria-hidden="true">
+                                                <div class="modal fade" id="viewModal{{ $contact->id }}" tabindex="-1"
+                                                    aria-hidden="true">
                                                     <div class="modal-dialog modal-lg modal-dialog-centered">
                                                         <div class="modal-content border-0 shadow-lg rounded-4">
 
@@ -141,35 +139,42 @@
 
                                                                     <dt class="col-sm-4 text-muted">Email</dt>
                                                                     <dd class="col-sm-8">
-                                                                        <a href="mailto:{{ $contact->email }}">{{ $contact->email }}</a>
+                                                                        <a
+                                                                            href="mailto:{{ $contact->email }}">{{ $contact->email }}</a>
                                                                     </dd>
 
                                                                     <dt class="col-sm-4 text-muted">Phone</dt>
                                                                     <dd class="col-sm-8">{{ $contact->phone ?? '—' }}</dd>
 
                                                                     <dt class="col-sm-4 text-muted">Subject</dt>
-                                                                    <dd class="col-sm-8">{{ $contact->subject ?? '—' }}</dd>
+                                                                    <dd class="col-sm-8">{{ $contact->subject ?? '—' }}
+                                                                    </dd>
 
                                                                     <dt class="col-sm-4 text-muted">Message</dt>
                                                                     <dd class="col-sm-8">{{ $contact->message }}</dd>
 
                                                                     <dt class="col-sm-4 text-muted">Terms Accepted At</dt>
-                                                                    <dd class="col-sm-8">{{ $contact->terms_accepted_time ?? '—' }}</dd>
+                                                                    <dd class="col-sm-8">
+                                                                        {{ $contact->terms_accepted_time ?? '—' }}</dd>
 
                                                                     <dt class="col-sm-4 text-muted">IP Address</dt>
-                                                                    <dd class="col-sm-8">{{ $contact->ip_address ?? '—' }}</dd>
+                                                                    <dd class="col-sm-8">{{ $contact->ip_address ?? '—' }}
+                                                                    </dd>
 
                                                                     <dt class="col-sm-4 text-muted">User Agent</dt>
-                                                                    <dd class="col-sm-8" style="word-break:break-word; font-size:12px;">
+                                                                    <dd class="col-sm-8"
+                                                                        style="word-break:break-word; font-size:12px;">
                                                                         {{ $contact->user_agent ?? '—' }}
                                                                     </dd>
 
                                                                     <dt class="col-sm-4 text-muted">Admin Reply</dt>
                                                                     <dd class="col-sm-8">
-                                                                        @if($contact->reply_message)
-                                                                            <span class="text-success">{{ $contact->reply_message }}</span>
+                                                                        @if ($contact->reply_message)
+                                                                            <span
+                                                                                class="text-success">{{ $contact->reply_message }}</span>
                                                                         @else
-                                                                            <span class="text-muted fst-italic">No reply yet</span>
+                                                                            <span class="text-muted fst-italic">No reply
+                                                                                yet</span>
                                                                         @endif
                                                                     </dd>
 
@@ -183,10 +188,8 @@
 
                                                             <div class="modal-footer border-top-0">
                                                                 @if (!$contact->is_replied)
-                                                                    <button type="button"
-                                                                        class="btn btn-light-info"
-                                                                        data-bs-dismiss="modal"
-                                                                        data-bs-toggle="modal"
+                                                                    <button type="button" class="btn btn-light-info"
+                                                                        data-bs-dismiss="modal" data-bs-toggle="modal"
                                                                         data-bs-target="#replyModal{{ $contact->id }}">
                                                                         <i class="ti ti-arrow-back-up me-1"></i> Reply Now
                                                                     </button>
@@ -229,17 +232,21 @@
                                                                         {{-- Contact Info Summary --}}
                                                                         <div class="alert alert-light-secondary mb-3 py-2">
                                                                             <small>
-                                                                                <strong>To:</strong> {{ $contact->email }}<br>
-                                                                                <strong>Subject:</strong> {{ $contact->subject ?? 'Contact Inquiry' }}
+                                                                                <strong>To:</strong>
+                                                                                {{ $contact->email }}<br>
+                                                                                <strong>Subject:</strong>
+                                                                                {{ $contact->subject ?? 'Contact Inquiry' }}
                                                                             </small>
                                                                         </div>
 
                                                                         {{-- Original Message --}}
                                                                         <div class="mb-3">
-                                                                            <label class="form-label text-muted" style="font-size:12px;">
+                                                                            <label class="form-label text-muted"
+                                                                                style="font-size:12px;">
                                                                                 ORIGINAL MESSAGE
                                                                             </label>
-                                                                            <div class="p-3 bg-light rounded" style="font-size:13px; color:#666; border-left:3px solid #6c757d;">
+                                                                            <div class="p-3 bg-light rounded"
+                                                                                style="font-size:13px; color:#666; border-left:3px solid #6c757d;">
                                                                                 {{ $contact->message }}
                                                                             </div>
                                                                         </div>
@@ -247,14 +254,10 @@
                                                                         {{-- Reply Textarea --}}
                                                                         <div class="mb-3">
                                                                             <label class="form-label">
-                                                                                Your Reply <span class="text-danger">*</span>
+                                                                                Your Reply <span
+                                                                                    class="text-danger">*</span>
                                                                             </label>
-                                                                            <textarea
-                                                                                name="reply_message"
-                                                                                class="form-control"
-                                                                                rows="5"
-                                                                                placeholder="Type your reply here..."
-                                                                                required>{{ old('reply_message') }}</textarea>
+                                                                            <textarea name="reply_message" class="form-control" rows="5" placeholder="Type your reply here..." required>{{ old('reply_message') }}</textarea>
                                                                         </div>
 
                                                                     </div>
@@ -263,8 +266,7 @@
                                                                         <button type="button"
                                                                             class="btn btn-light-secondary"
                                                                             data-bs-dismiss="modal">Cancel</button>
-                                                                        <button type="submit"
-                                                                            class="btn btn-light-info">
+                                                                        <button type="submit" class="btn btn-light-info">
                                                                             <i class="ti ti-send me-1"></i> Send Reply
                                                                         </button>
                                                                     </div>
@@ -275,7 +277,6 @@
                                                     </div>
                                                 @endif
                                                 {{-- END REPLY MODAL --}}
-
                                             @endforeach
                                         </tbody>
                                     </table>
@@ -292,18 +293,16 @@
 @endsection
 
 @push('scripts')
-<script>
-    // ── DataTable Init ──────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function () {
-        if (document.getElementById('pc-dt-simple')) {
-            window.dt = new simpleDatatables.DataTable('#pc-dt-simple', {
-                sortable: true,
-                searchable: true,
-                fixedHeight: true,
-            });
-        }
-    });
-
- 
-</script>
+    <script>
+        // ── DataTable Init ──────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function() {
+            if (document.getElementById('pc-dt-simple')) {
+                window.dt = new simpleDatatables.DataTable('#pc-dt-simple', {
+                    sortable: true,
+                    searchable: true,
+                    fixedHeight: true,
+                });
+            }
+        });
+    </script>
 @endpush

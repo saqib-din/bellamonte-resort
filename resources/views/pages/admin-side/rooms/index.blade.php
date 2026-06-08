@@ -26,42 +26,6 @@
 
             @include('components.alerts')
 
-            <!-- Stats Row -->
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card text-center">
-                        <div class="card-body py-3">
-                            <h4 class="mb-1 text-primary">{{ $rooms->count() }}</h4>
-                            <p class="mb-0 text-muted f-13">Total Rooms</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-center">
-                        <div class="card-body py-3">
-                            <h4 class="mb-1 text-success">{{ $rooms->where('status', 'Available')->count() }}</h4>
-                            <p class="mb-0 text-muted f-13">Available</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-center">
-                        <div class="card-body py-3">
-                            <h4 class="mb-1 text-danger">{{ $rooms->where('status', 'Occupied')->count() }}</h4>
-                            <p class="mb-0 text-muted f-13">Occupied</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-center">
-                        <div class="card-body py-3">
-                            <h4 class="mb-1 text-warning">{{ $rooms->where('status', 'Maintenance')->count() }}</h4>
-                            <p class="mb-0 text-muted f-13">Maintenance</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Main Table -->
             <div class="row">
                 <div class="col-sm-12">
@@ -83,13 +47,8 @@
                                             <th>#</th>
                                             <th>Room</th>
                                             <th>Type</th>
-                                            {{-- <th>Floor</th> --}}
-                                            {{-- <th>Capacity</th> --}}
-                                            {{-- <th>Size</th> --}}
-                                            {{-- <th>Bed Type</th> --}}
                                             <th>Check In</th>
                                             <th>Check Out</th>
-                                            {{-- <th>Services</th> --}}
                                             <th>Price</th>
 
                                             <th>Status</th>
@@ -127,19 +86,6 @@
                                                     <span class="badge bg-light-primary">{{ $room->type }}</span>
                                                 </td>
 
-                                                {{-- <td>{{ $room->floor }}</td> --}}
-
-
-
-                                                {{-- <td>
-                                                    <i class="ti ti-users f-14 text-muted"></i>
-                                                    {{ $room->capacity }} persons
-                                                </td> --}}
-
-                                                {{-- <td>{{ $room->size ?? '—' }}</td> --}}
-
-                                                {{-- <td>{{ $room->bed_type ?? '—' }}</td> --}}
-
                                                 <td>
                                                     <i class="ti ti-clock f-13 text-muted"></i>
                                                     {{ $room->check_in_time ? \Carbon\Carbon::parse($room->check_in_time)->format('h:i A') : '—' }}
@@ -150,17 +96,10 @@
                                                     {{ $room->check_out_time ? \Carbon\Carbon::parse($room->check_out_time)->format('h:i A') : '—' }}
                                                 </td>
 
-                                                <!-- Services as badges -->
-                                                {{-- <td style="max-width:200px;">
-                                                    @foreach ($room->getServicesArray() as $service)
-                                                        <span
-                                                            class="badge bg-light-secondary mb-1">{{ trim($service) }}</span>
-                                                    @endforeach
-                                                </td> --}}
-
                                                 <td>
                                                     <strong
-                                                        class="text-success">{{ number_format($room->price_per_night) }} Pkr</strong>
+                                                        class="text-success">₨ {{ number_format($room->price_per_night) }}
+                                                        </strong>
                                                 </td>
 
                                                 <!-- Status -->
@@ -172,11 +111,11 @@
 
                                                 <!-- Actions -->
                                                 <td class="text-end">
-                                                    <a href="{{ route('admin.rooms.show', $room->id) }}"
+                                                    <a href="{{ route('admin.rooms.show', $room) }}"
                                                         class="avtar avtar-xs btn-link-secondary" title="View">
                                                         <i class="ti ti-eye f-20"></i>
                                                     </a>
-                                                    <a href="{{ route('admin.rooms.edit', $room->id) }}"
+                                                    <a href="{{ route('admin.rooms.edit', $room) }}"
                                                         class="avtar avtar-xs btn-link-secondary" title="Edit">
                                                         <i class="ti ti-edit f-20"></i>
                                                     </a>
@@ -185,8 +124,8 @@
                                                         <i class="ti ti-trash f-20"></i>
                                                     </a>
                                                     <form id="delete-form-{{ $room->id }}"
-                                                        action="{{ route('admin.rooms.destroy', $room->id) }}"
-                                                        method="POST" style="display:none;">
+                                                        action="{{ route('admin.rooms.destroy', $room) }}" method="POST"
+                                                        style="display:none;">
                                                         @csrf
                                                         @method('DELETE')
                                                     </form>

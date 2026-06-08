@@ -51,6 +51,16 @@
                                     </div>
 
                                     <div class="col-md-6">
+                                        <label class="form-label">Father Name</label>
+                                        <input type="text" name="father_name"
+                                            class="form-control @error('father_name') is-invalid @enderror"
+                                            value="{{ old('father_name') }}" placeholder="Father name">
+                                        @error('father_name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
                                         <label class="form-label">CNIC / Passport <span class="text-danger">*</span></label>
                                         <input type="text" name="cnic"
                                             class="form-control @error('cnic') is-invalid @enderror"

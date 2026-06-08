@@ -9,24 +9,20 @@ use App\Models\Bill;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\Contact;
+use App\Models\FoodOrder;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    // public function show()
-    // {
-    //     return view('dashboard');
-    // }
-
     public function index()
     {
-        $today     = Carbon::today();
-        $thisMonth = Carbon::now()->startOfMonth();
-        $lastMonth = Carbon::now()->subMonth()->startOfMonth();
+        $today        = Carbon::today();
+        $thisMonth    = Carbon::now()->startOfMonth();
+        $lastMonth    = Carbon::now()->subMonth()->startOfMonth();
         $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
 
-        // ══ ROOMS 
+        // ══ ROOMS
         $totalRooms       = Room::count();
         $availableRooms   = Room::where('status', 'Available')->count();
         $occupiedRooms    = Room::where('status', 'Occupied')->count();
@@ -35,50 +31,62 @@ class DashboardController extends Controller
             ? round(($occupiedRooms / $totalRooms) * 100)
             : 0;
 
-        // ══ BOOKINGS 
-        $totalBookings      = Booking::count();
-        $todayCheckins      = Booking::whereDate('check_in', $today)->count();
-        $todayCheckouts     = Booking::whereDate('check_out', $today)->count();
-        $activeBookings     = Booking::where('status', 'Checked In')->count();
-        $confirmedBookings  = Booking::where('status', 'Confirmed')->count();
-        $thisMonthBookings  = Booking::where('created_at', '>=', $thisMonth)->count();
-        $lastMonthBookings  = Booking::whereBetween('created_at', [$lastMonth, $lastMonthEnd])->count();
-        $bookingGrowth      = $lastMonthBookings > 0
+        // ══ BOOKINGS
+        $totalBookings     = Booking::count();
+        $todayCheckins     = Booking::whereDate('check_in', $today)->count();
+        $todayCheckouts    = Booking::whereDate('check_out', $today)->count();
+        $activeBookings    = Booking::where('status', 'Checked In')->count();
+        $confirmedBookings = Booking::where('status', 'Confirmed')->count();
+        $thisMonthBookings = Booking::where('created_at', '>=', $thisMonth)->count();
+        $lastMonthBookings = Booking::whereBetween('created_at', [$lastMonth, $lastMonthEnd])->count();
+        $bookingGrowth     = $lastMonthBookings > 0
             ? round((($thisMonthBookings - $lastMonthBookings) / $lastMonthBookings) * 100)
             : 100;
 
-        // ══ REVENUE
-        $revenueToday      = Bill::where('status', 'Paid')->whereDate('issue_date', $today)->sum('total_amount');
-        $revenueThisMonth  = Bill::where('status', 'Paid')->where('issue_date', '>=', $thisMonth)->sum('total_amount');
-        $revenueLastMonth  = Bill::where('status', 'Paid')->whereBetween('issue_date', [$lastMonth, $lastMonthEnd])->sum('total_amount');
-        $revenueTotal      = Bill::where('status', 'Paid')->sum('total_amount');
-        $pendingAmount     = Bill::whereIn('status', ['Unpaid', 'Partial'])->sum('balance_due');
-        $revenueGrowth     = $revenueLastMonth > 0
+        // ══ REVENUE (BILLS)
+        $revenueToday     = Bill::where('status', 'Paid')->whereDate('issue_date', $today)->sum('total_amount');
+        $revenueThisMonth = Bill::where('status', 'Paid')->where('issue_date', '>=', $thisMonth)->sum('total_amount');
+        $revenueLastMonth = Bill::where('status', 'Paid')->whereBetween('issue_date', [$lastMonth, $lastMonthEnd])->sum('total_amount');
+        $revenueTotal     = Bill::where('status', 'Paid')->sum('total_amount');
+        $pendingAmount    = Bill::whereIn('status', ['Unpaid', 'Partial'])->sum('balance_due');
+        $revenueGrowth    = $revenueLastMonth > 0
             ? round((($revenueThisMonth - $revenueLastMonth) / $revenueLastMonth) * 100)
             : 100;
 
-        // ══ CUSTOMERS 
-        $totalCustomers   = Customer::count();
-        $newCustomers     = Customer::where('created_at', '>=', $thisMonth)->count();
-        $activeCustomers  = Customer::where('status', 'Active')->count();
+        // ══ FOOD ORDERS
+        $totalFoodOrders      = FoodOrder::count();
+        $pendingFoodOrders    = FoodOrder::where('status', 'Pending')->count();
+        $preparingFoodOrders  = FoodOrder::where('status', 'Preparing')->count();
+        $servedFoodOrders     = FoodOrder::where('status', 'Served')->count();
+        $paidFoodOrders       = FoodOrder::where('status', 'Paid')->count();
+        $foodRevenueTotal     = FoodOrder::where('status', 'Paid')->sum('total_amount');
+        $foodRevenueToday     = FoodOrder::where('status', 'Paid')->whereDate('created_at', $today)->sum('total_amount');
+        $foodRevenueThisMonth = FoodOrder::where('status', 'Paid')->where('created_at', '>=', $thisMonth)->sum('total_amount');
+        $foodPendingAmount    = FoodOrder::whereIn('status', ['Pending', 'Preparing', 'Served'])->sum('balance_due');
 
-        // ══ BILLS / INVOICES 
-        $totalBills    = Bill::count();
-        $paidBills     = Bill::where('status', 'Paid')->count();
-        $unpaidBills   = Bill::where('status', 'Unpaid')->count();
-        $partialBills  = Bill::where('status', 'Partial')->count();
+        // ══ CUSTOMERS
+        $totalCustomers  = Customer::count();
+        $newCustomers    = Customer::where('created_at', '>=', $thisMonth)->count();
+        $activeCustomers = Customer::where('status', 'Active')->count();
 
-        // ══ USERS 
-        $totalUsers    = User::count();
-        $activeUsers   = User::where('status', 'active')->count();
+        // ══ BILLS / INVOICES
+        $totalBills   = Bill::count();
+        $paidBills    = Bill::where('status', 'Paid')->count();
+        $unpaidBills  = Bill::where('status', 'Unpaid')->count();
+        $partialBills = Bill::where('status', 'Partial')->count();
 
+        // ══ USERS
+        $totalUsers  = User::count();
+        $activeUsers = User::where('status', 'active')->count();
 
-
-        // ══ RECENT DATA 
+        // ══ RECENT DATA
         $recentBookings = Booking::with(['room', 'customer'])
             ->latest()->take(6)->get();
 
         $recentBills = Bill::with('customer')
+            ->latest()->take(5)->get();
+
+        $recentFoodOrders = FoodOrder::with(['items', 'customer'])
             ->latest()->take(5)->get();
 
         $todayCheckinsList = Booking::with(['room', 'customer'])
@@ -98,15 +106,16 @@ class DashboardController extends Controller
 
         $rooms = Room::all();
 
-        $totalContacts = Contact::count();
-        $repliedContacts = Contact::where('is_replied', true)->count();
+        // ══ CONTACTS
+        $totalContacts     = Contact::count();
+        $repliedContacts   = Contact::where('is_replied', true)->count();
         $unrepliedContacts = Contact::where('is_replied', false)->count();
 
-        $totalEvents = Event::count();
-        $activeEvents = Event::where('is_active', true)->count();
+        // ══ EVENTS
+        $totalEvents    = Event::count();
+        $activeEvents   = Event::where('is_active', true)->count();
         $upcomingEvents = Event::where('event_date', '>=', now())->count();
-        $pastEvents = Event::where('event_date', '<', now())->count();
-
+        $pastEvents     = Event::where('event_date', '<', now())->count();
 
         return view('dashboard', compact(
             'rooms',
@@ -135,6 +144,17 @@ class DashboardController extends Controller
             'revenueTotal',
             'pendingAmount',
             'revenueGrowth',
+
+            'totalFoodOrders',
+            'pendingFoodOrders',
+            'preparingFoodOrders',
+            'servedFoodOrders',
+            'paidFoodOrders',
+            'foodRevenueTotal',
+            'foodRevenueToday',
+            'foodRevenueThisMonth',
+            'foodPendingAmount',
+            'recentFoodOrders',
 
             'totalCustomers',
             'newCustomers',

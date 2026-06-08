@@ -9,7 +9,6 @@ class EventSeeder extends Seeder
 {
     public function run(): void
     {
-        // Pehle se events hain to seed mat karo
         if (Event::count() > 0) {
             $this->command->info('Events already exist. Skipping seeder.');
             return;
@@ -29,7 +28,7 @@ class EventSeeder extends Seeder
                 'sort_order' => 2,
             ],
             [
-                'title'      => 'Bonfire Nights at Bellamonte Resort',
+                'title'      => 'Bonfire Nights at White Castle Resort',
                 'tag'        => 'Event',
                 'event_date' => '2026-05-20',
                 'sort_order' => 3,
@@ -65,7 +64,7 @@ class EventSeeder extends Seeder
                 'sort_order' => 8,
             ],
             [
-                'title'      => 'Outdoor Camping Experience Near Bellamonte Resort',
+                'title'      => 'Outdoor Camping Experience Near White Castle Resort',
                 'tag'        => 'Camping',
                 'event_date' => '2026-05-31',
                 'sort_order' => 9,

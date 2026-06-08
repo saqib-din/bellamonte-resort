@@ -11,19 +11,13 @@ class CustomerController extends Controller
 {
     public function index(Request $request)
     {
-        // ---- Aggregate stats: fast indexed COUNT queries (collection load NAHI) ----
-        $stats = [
-            'total'       => Customer::count(),
-            'active'      => Customer::where('status', 'Active')->count(),
-            'blacklisted' => Customer::where('status', 'Blacklisted')->count(),
-            'bookings'    => Booking::count(),
-        ];
-
         // ---- AJAX request → yajra DataTables server-side response ----
         if ($request->ajax()) {
             $query = Customer::query()->select([
                 'id',
+                'uuid',
                 'name',
+                'father_name',
                 'email',
                 'image',
                 'cnic',
@@ -48,7 +42,7 @@ class CustomerController extends Controller
                 ->make(true);
         }
 
-        return view('pages.admin-side.customers.index', compact('stats'));
+        return view('pages.admin-side.customers.index');
     }
 
     public function create()
@@ -60,6 +54,7 @@ class CustomerController extends Controller
     {
         $request->validate([
             'name'        => 'required|string|max:100',
+            'father_name' => 'nullable|string|max:100',
             'cnic'        => 'required|unique:customers,cnic',
             'phone'       => 'required|string|max:20',
             'email'       => 'nullable|email|max:100',
@@ -103,6 +98,7 @@ class CustomerController extends Controller
     {
         $request->validate([
             'name'        => 'required|string|max:100',
+            'father_name' => 'nullable|string|max:100',
             'cnic'        => 'required|unique:customers,cnic,' . $customer->id,
             'phone'       => 'required|string|max:20',
             'email'       => 'nullable|email|max:100',

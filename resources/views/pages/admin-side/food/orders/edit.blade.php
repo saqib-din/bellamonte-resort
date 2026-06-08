@@ -1,5 +1,21 @@
 @extends('layouts.admin')
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/css/tom-select.bootstrap5.min.css">
+    <style>
+        .ts-wrapper .ts-control {
+            border-radius: 6px;
+            min-height: 38px;
+            padding: 4px 8px;
+        }
+
+        .ts-wrapper.focus .ts-control {
+            border-color: #4680ff;
+            box-shadow: 0 0 0 0.2rem rgba(70, 128, 255, .25);
+        }
+    </style>
+@endpush
+
 @section('content')
     <div class="pc-container">
         <div class="pc-content">
@@ -43,11 +59,11 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Booking Select</label>
-                                        <select name="booking_id" id="bookingSelect" class="form-select"
-                                            onchange="fillFromBooking()">
+                                        <select name="booking_id" id="bookingSelect" class="form-select">
                                             <option value="">-- Select Booking --</option>
                                             @foreach ($bookings as $booking)
                                                 <option value="{{ $booking->id }}" data-guest="{{ $booking->guest_name }}"
+                                                    data-father="{{ $booking->father_name }}"
                                                     data-phone="{{ $booking->guest_phone }}"
                                                     data-room="{{ $booking->room->room_number ?? '' }}"
                                                     data-customer="{{ $booking->customer_id }}"
@@ -57,7 +73,8 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <small class="text-muted">Select a booking to auto-fill guest details.</small>
+                                        <small class="text-muted">Search & select a booking to auto-fill guest
+                                            details.</small>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Customer (Optional)</label>
@@ -93,6 +110,12 @@
                                         @enderror
                                     </div>
                                     <div class="col-md-4">
+                                        <label class="form-label">Father Name</label>
+                                        <input type="text" name="father_name" id="fatherName" class="form-control"
+                                            value="{{ old('father_name', $foodOrder->father_name) }}"
+                                            placeholder="Father name">
+                                    </div>
+                                    <div class="col-md-4">
                                         <label class="form-label">Phone</label>
                                         <input type="text" name="guest_phone" id="guestPhone" class="form-control"
                                             value="{{ old('guest_phone', $foodOrder->guest_phone) }}"
@@ -103,7 +126,7 @@
                                         <input type="text" name="room_number" id="roomNumber" class="form-control"
                                             value="{{ old('room_number', $foodOrder->room_number) }}" placeholder="101">
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <label class="form-label">Order Type <span class="text-danger">*</span></label>
                                         <select name="order_type" class="form-select">
                                             @foreach (['Room Service', 'Dine In', 'Takeaway'] as $t)
@@ -114,7 +137,7 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <label class="form-label">Status</label>
                                         <select name="status" class="form-select">
                                             @foreach (['Pending', 'Preparing', 'Served', 'Paid', 'Cancelled'] as $s)
@@ -368,15 +391,17 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.min.js"></script>
     <script>
         /* ─── Existing items from DB (PHP → JS) ─────────── */
-        // Ye purane items cart mein pre-load karega
-       const existingItems = @json($existingItems);
+        const existingItems = @json($existingItems);
 
         let cart = {};
+        let bookingReady = false; 
 
-        /* ─── Page load pe existing items cart mein dalo ── */
+        /* ─── Page load ──────────────────────────────────── */
         document.addEventListener('DOMContentLoaded', () => {
+
             existingItems.forEach(item => {
                 cart[item.id] = {
                     name: item.name,
@@ -386,6 +411,23 @@
             });
             renderCart();
             calcTotal();
+
+            // Booking Select with search
+            new TomSelect('#bookingSelect', {
+                placeholder: 'Search booking...',
+                allowEmptyOption: true,
+                onChange: function() {
+                    if (bookingReady) fillFromBooking();
+                }
+            });
+
+            // Customer Select with search
+            new TomSelect('#customerSelect', {
+                placeholder: 'Search customer...',
+                allowEmptyOption: true
+            });
+
+            bookingReady = true;
         });
 
         /* ─── Cart Functions ─────────────────────────────── */
@@ -517,18 +559,17 @@
         function fillFromBooking() {
             const sel = document.getElementById('bookingSelect');
             const opt = sel.options[sel.selectedIndex];
-            if (!opt.value) return;
+            if (!opt || !opt.value) return;
 
             document.getElementById('guestName').value = opt.dataset.guest || '';
+            document.getElementById('fatherName').value = opt.dataset.father || '';
             document.getElementById('guestPhone').value = opt.dataset.phone || '';
             document.getElementById('roomNumber').value = opt.dataset.room || '';
 
-            const custSel = document.getElementById('customerSelect');
-            for (let i = 0; i < custSel.options.length; i++) {
-                if (custSel.options[i].value == opt.dataset.customer) {
-                    custSel.selectedIndex = i;
-                    break;
-                }
+            // Customer sync (TomSelect ke through)
+            const custTS = document.getElementById('customerSelect').tomselect;
+            if (custTS && opt.dataset.customer) {
+                custTS.setValue(opt.dataset.customer);
             }
         }
     </script>

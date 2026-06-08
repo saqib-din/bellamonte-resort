@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->decimal('subtotal', 10, 2);
             $table->timestamps();
 
-            // Foreign keys baad mein add karo
             $table->foreign('food_order_id')
                 ->references('id')->on('food_orders')
                 ->onDelete('cascade');

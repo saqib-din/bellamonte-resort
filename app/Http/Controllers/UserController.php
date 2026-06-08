@@ -67,7 +67,6 @@ class UserController extends Controller
             'status'   => 'required|in:active,inactive',
         ]);
 
-        // Sirf doosre ko admin role assign nahi kar sakte
         if (!$user->isAdmin() && $request->role === 'admin') {
             return redirect()->back()
                 ->with('error', '❌ No one can be assigned the Admin role!');
