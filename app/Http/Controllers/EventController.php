@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class EventController extends Controller
 {
-    // ── Image fields list ──────────────────────────────
     private array $imageFields = ['image', 'detail_image_1', 'detail_image_2', 'detail_image_3'];
 
-    // ── Validation rules (shared) ──────────────────────
     private function rules(bool $imageRequired = false): array
     {
         return [
@@ -32,7 +31,6 @@ class EventController extends Controller
         ];
     }
 
-    // ── Save image to public/uploads/events ───────────
     private function saveImage($file): string
     {
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
@@ -40,7 +38,6 @@ class EventController extends Controller
         return $filename;
     }
 
-    // ── Delete image from public/uploads/events ───────
     private function deleteImage(?string $filename): void
     {
         if ($filename) {
@@ -49,62 +46,59 @@ class EventController extends Controller
         }
     }
 
-    // ─────────────────────────────────────────────────
-    // PUBLIC: Events Grid
-    // ─────────────────────────────────────────────────
+    // ── PUBLIC (landing — still Blade) ──
     public function show()
     {
-        $events = Event::active()
-            ->orderBy('sort_order')
-            ->orderByDesc('event_date')
-            ->get();
-
+        $events = Event::active()->orderBy('sort_order')->orderByDesc('event_date')->get();
         return view('pages.events.event', compact('events'));
     }
 
     public function details(Event $event)
     {
         abort_if(! $event->is_active, 404);
-
-        $related = Event::active()
-            ->where('id', '!=', $event->id)
-            ->latest()
-            ->take(3)
-            ->get();
-
+        $related = Event::active()->where('id', '!=', $event->id)->latest()->take(3)->get();
         return view('pages.events.details', compact('event', 'related'));
     }
 
-    // ─────────────────────────────────────────────────
-    // ADMIN: Index
-    // ─────────────────────────────────────────────────
+    // ── ADMIN (Inertia) ──
     public function index()
     {
-        $events = Event::orderBy('sort_order')->latest()->get();
-        return view('pages.admin-side.events.index', compact('events'));
+        $events = Event::orderBy('sort_order')->latest()->get()->map(fn ($e) => [
+            'slug'       => $e->slug,
+            'title'      => $e->title,
+            'tag'        => $e->tag,
+            'event_date' => optional($e->event_date)->format('d M Y'),
+            'sort_order' => $e->sort_order,
+            'is_active'  => (bool) $e->is_active,
+            'image_url'  => $e->image_url,
+        ]);
+
+        return Inertia::render('Events/Index', [
+            'events' => $events,
+            'count'  => $events->count(),
+        ]);
     }
 
-    // ADMIN: Create
     public function create()
     {
         if (Event::count() >= 9) {
-            return redirect()->route('events.index')
-                ->with('error', 'Maximum 9 events allowed. Please delete one first.');
+            return redirect()->route('events.index')->with('error', 'Maximum 9 events allowed. Please delete one first.');
         }
-        return view('pages.admin-side.events.create');
+
+        return Inertia::render('Events/Create', [
+            'count' => Event::count(),
+        ]);
     }
 
-    // ADMIN: Store
     public function store(Request $request)
     {
         if (Event::count() >= 9) {
-            return redirect()->route('events.index')
-                ->with('error', 'Maximum 9 events allowed. Please delete one first.');
+            return redirect()->route('events.index')->with('error', 'Maximum 9 events allowed. Please delete one first.');
         }
 
         $request->validate($this->rules(imageRequired: true));
 
-        $data               = $request->except($this->imageFields);
+        $data               = $request->except(array_merge($this->imageFields, ['_method']));
         $data['is_active']  = $request->boolean('is_active', true);
         $data['sort_order'] = $request->input('sort_order', 0);
 
@@ -116,47 +110,50 @@ class EventController extends Controller
 
         Event::create($data);
 
-        return redirect()->route('events.index')
-            ->with('success', 'Event created successfully!');
+        return redirect()->route('events.index')->with('success', 'Event created successfully!');
     }
 
-    // ADMIN: Edit
     public function edit(Event $event)
     {
-        return view('pages.admin-side.events.edit', compact('event'));
+        return Inertia::render('Events/Edit', [
+            'count' => Event::count(),
+            'event' => [
+                'slug'              => $event->slug,
+                'title'             => $event->title,
+                'tag'               => $event->tag,
+                'event_date'        => optional($event->event_date)->format('Y-m-d'),
+                'short_description' => $event->short_description,
+                'description'       => $event->description,
+                'section_1_title'   => $event->section_1_title,
+                'section_1_text'    => $event->section_1_text,
+                'section_2_title'   => $event->section_2_title,
+                'section_2_text'    => $event->section_2_text,
+                'sort_order'        => $event->sort_order,
+                'is_active'         => (bool) $event->is_active,
+                'image_url'         => $event->image ? $event->image_url : null,
+                'detail_image_1_url'=> $event->detail_image_1 ? $event->detail_image_1_url : null,
+                'detail_image_2_url'=> $event->detail_image_2 ? $event->detail_image_2_url : null,
+                'detail_image_3_url'=> $event->detail_image_3 ? $event->detail_image_3_url : null,
+            ],
+        ]);
     }
 
-    // ADMIN: Update
     public function update(Request $request, Event $event)
     {
         $request->validate($this->rules(imageRequired: false));
 
-        $data              = $request->except($this->imageFields);
+        $data              = $request->except(array_merge($this->imageFields, ['_method']));
         $data['is_active'] = $request->boolean('is_active', true);
 
         foreach ($this->imageFields as $field) {
             if ($request->hasFile($field)) {
-                $this->deleteImage($event->$field);                      
-                $data[$field] = $this->saveImage($request->file($field)); 
+                $this->deleteImage($event->$field);
+                $data[$field] = $this->saveImage($request->file($field));
             }
         }
 
         $event->update($data);
 
-        return redirect()->route('events.index')
-            ->with('success', 'Event updated successfully!');
+        return redirect()->route('events.index')->with('success', 'Event updated successfully!');
     }
-
-    // ADMIN: Delete
-    // public function destroy(Event $event)
-    // {
-    //     foreach ($this->imageFields as $field) {
-    //         $this->deleteImage($event->$field);
-    //     }
-
-    //     $event->delete();
-
-    //     return redirect()->route('events.index')
-    //         ->with('success', 'Event deleted successfully!');
-    // }
 }

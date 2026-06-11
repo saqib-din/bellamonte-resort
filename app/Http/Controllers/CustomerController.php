@@ -4,50 +4,65 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
-use App\Models\Booking;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Inertia\Inertia;
 
 class CustomerController extends Controller
 {
+    private const SORTABLE = ['id', 'name', 'cnic', 'phone', 'city', 'gender', 'status'];
+
     public function index(Request $request)
     {
-        // ---- AJAX request → yajra DataTables server-side response ----
-        if ($request->ajax()) {
-            $query = Customer::query()->select([
-                'id',
-                'uuid',
-                'name',
-                'father_name',
-                'email',
-                'image',
-                'cnic',
-                'phone',
-                'city',
-                'nationality',
-                'gender',
-                'status',
-            ]);
+        $query = Customer::query();
 
-            return datatables()->eloquent($query)
-                ->addColumn('customer', fn($c) =>
-                view('pages.admin-side.customers.partials.customer-cell', ['c' => $c])->render())
-                ->addColumn('location', fn($c) =>
-                view('pages.admin-side.customers.partials.location-cell', ['c' => $c])->render())
-                ->editColumn('gender', fn($c) => $c->gender ?? '—')
-                ->addColumn('status_badge', fn($c) =>
-                '<span class="badge ' . $c->getStatusBadgeClass() . '">' . e($c->status) . '</span>')
-                ->addColumn('action', fn($c) =>
-                view('pages.admin-side.customers.partials.actions', ['c' => $c])->render())
-                ->rawColumns(['customer', 'location', 'status_badge', 'action'])
-                ->make(true);
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('name', 'like', "%{$s}%")
+                    ->orWhere('cnic', 'like', "%{$s}%")
+                    ->orWhere('phone', 'like', "%{$s}%")
+                    ->orWhere('city', 'like', "%{$s}%")
+                    ->orWhere('email', 'like', "%{$s}%");
+            });
         }
 
-        return view('pages.admin-side.customers.index');
+        $sort = in_array($request->sort, self::SORTABLE, true) ? $request->sort : 'id';
+        $dir  = $request->dir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sort, $dir);
+
+        $perPage = (int) $request->input('per_page', 15);
+
+        $customers = $query->paginate($perPage)->withQueryString()->through(fn ($c) => [
+            'id'          => $c->id,
+            'uuid'        => $c->uuid,
+            'name'        => $c->name,
+            'father_name' => $c->father_name,
+            'email'       => $c->email,
+            'cnic'        => $c->cnic,
+            'phone'       => $c->phone,
+            'city'        => $c->city,
+            'nationality' => $c->nationality,
+            'gender'      => $c->gender,
+            'status'      => $c->status,
+            'statusBadge' => $c->getStatusBadgeClass(),
+            'image'       => $c->image ? asset('uploads/customers/' . $c->image) : null,
+        ]);
+
+        return Inertia::render('Customers/Index', [
+            'customers' => $customers,
+            'filters'   => [
+                'search'   => $request->search,
+                'sort'     => $sort,
+                'dir'      => $dir,
+                'per_page' => $perPage,
+            ],
+        ]);
     }
 
     public function create()
     {
-        return view('pages.admin-side.customers.create');
+        return Inertia::render('Customers/Create');
     }
 
     public function store(Request $request)
@@ -79,19 +94,68 @@ class CustomerController extends Controller
 
         Customer::create($data);
 
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer added successfully!');
+        return redirect()->route('customers.index')->with('success', 'Customer added successfully!');
     }
 
     public function show(Customer $customer)
     {
         $customer->load('bookings.room');
-        return view('pages.admin-side.customers.show', compact('customer'));
+
+        return Inertia::render('Customers/Show', [
+            'customer' => [
+                'uuid'        => $customer->uuid,
+                'name'        => $customer->name,
+                'father_name' => $customer->father_name,
+                'email'       => $customer->email,
+                'cnic'        => $customer->cnic,
+                'phone'       => $customer->phone,
+                'gender'      => $customer->gender,
+                'nationality' => $customer->nationality,
+                'city'        => $customer->city,
+                'address'     => $customer->address,
+                'notes'       => $customer->notes,
+                'status'      => $customer->status,
+                'statusBadge' => $customer->getStatusBadgeClass(),
+                'image'       => $customer->image ? asset('uploads/customers/' . $customer->image) : null,
+                'totalStays'  => $customer->getTotalStays(),
+                'totalSpent'  => $customer->getTotalSpent(),
+                'age'         => $customer->getAge(),
+                'bookings'    => $customer->bookings->map(fn ($b) => [
+                    'uuid'           => $b->uuid ?? $b->id,
+                    'booking_number' => $b->booking_number,
+                    'room_number'    => $b->room->room_number ?? '—',
+                    'room_type'      => $b->room->type ?? '',
+                    'check_in'       => optional($b->check_in)->format('d M Y'),
+                    'check_out'      => optional($b->check_out)->format('d M Y'),
+                    'nights'         => $b->nights,
+                    'total_amount'   => $b->total_amount,
+                    'status'         => $b->status,
+                    'statusBadge'    => method_exists($b, 'getStatusBadgeClass') ? $b->getStatusBadgeClass() : 'bg-light-secondary',
+                ]),
+            ],
+        ]);
     }
 
     public function edit(Customer $customer)
     {
-        return view('pages.admin-side.customers.edit', compact('customer'));
+        return Inertia::render('Customers/Edit', [
+            'customer' => [
+                'uuid'        => $customer->uuid,
+                'name'        => $customer->name,
+                'father_name' => $customer->father_name,
+                'cnic'        => $customer->cnic,
+                'phone'       => $customer->phone,
+                'email'       => $customer->email,
+                'gender'      => $customer->gender,
+                'dob'         => optional($customer->dob)->format('Y-m-d'),
+                'nationality' => $customer->nationality,
+                'city'        => $customer->city,
+                'address'     => $customer->address,
+                'notes'       => $customer->notes,
+                'status'      => $customer->status,
+                'image'       => $customer->image ? asset('uploads/customers/' . $customer->image) : null,
+            ],
+        ]);
     }
 
     public function update(Request $request, Customer $customer)
@@ -112,7 +176,7 @@ class CustomerController extends Controller
             'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $data = $request->except('image');
+        $data = $request->except(['image', '_method']);
 
         if ($request->hasFile('image')) {
             if ($customer->image) {
@@ -127,8 +191,7 @@ class CustomerController extends Controller
 
         $customer->update($data);
 
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer updated successfully!');
+        return redirect()->route('customers.index')->with('success', 'Customer updated successfully!');
     }
 
     public function destroy(Customer $customer)
@@ -139,7 +202,6 @@ class CustomerController extends Controller
         }
         $customer->delete();
 
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer deleted successfully!');
+        return redirect()->route('customers.index')->with('success', 'Customer deleted successfully!');
     }
 }

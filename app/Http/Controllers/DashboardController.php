@@ -11,7 +11,7 @@ use App\Models\User;
 use App\Models\Contact;
 use App\Models\FoodOrder;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -23,20 +23,11 @@ class DashboardController extends Controller
         $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
 
         // ══ ROOMS
-        $totalRooms       = Room::count();
-        $availableRooms   = Room::where('status', 'Available')->count();
-        $occupiedRooms    = Room::where('status', 'Occupied')->count();
-        $maintenanceRooms = Room::where('status', 'Maintenance')->count();
-        $occupancyRate    = $totalRooms > 0
-            ? round(($occupiedRooms / $totalRooms) * 100)
-            : 0;
+        $totalRooms     = Room::count();
+        $availableRooms = Room::where('status', 'Available')->count();
 
         // ══ BOOKINGS
         $totalBookings     = Booking::count();
-        $todayCheckins     = Booking::whereDate('check_in', $today)->count();
-        $todayCheckouts    = Booking::whereDate('check_out', $today)->count();
-        $activeBookings    = Booking::where('status', 'Checked In')->count();
-        $confirmedBookings = Booking::where('status', 'Confirmed')->count();
         $thisMonthBookings = Booking::where('created_at', '>=', $thisMonth)->count();
         $lastMonthBookings = Booking::whereBetween('created_at', [$lastMonth, $lastMonthEnd])->count();
         $bookingGrowth     = $lastMonthBookings > 0
@@ -47,8 +38,9 @@ class DashboardController extends Controller
         $revenueToday     = Bill::where('status', 'Paid')->whereDate('issue_date', $today)->sum('total_amount');
         $revenueThisMonth = Bill::where('status', 'Paid')->where('issue_date', '>=', $thisMonth)->sum('total_amount');
         $revenueLastMonth = Bill::where('status', 'Paid')->whereBetween('issue_date', [$lastMonth, $lastMonthEnd])->sum('total_amount');
-        $revenueTotal     = Bill::where('status', 'Paid')->sum('total_amount');
         $pendingAmount    = Bill::whereIn('status', ['Unpaid', 'Partial'])->sum('balance_due');
+        $unpaidBills      = Bill::where('status', 'Unpaid')->count();
+        $partialBills     = Bill::where('status', 'Partial')->count();
         $revenueGrowth    = $revenueLastMonth > 0
             ? round((($revenueThisMonth - $revenueLastMonth) / $revenueLastMonth) * 100)
             : 100;
@@ -56,127 +48,56 @@ class DashboardController extends Controller
         // ══ FOOD ORDERS
         $totalFoodOrders      = FoodOrder::count();
         $pendingFoodOrders    = FoodOrder::where('status', 'Pending')->count();
-        $preparingFoodOrders  = FoodOrder::where('status', 'Preparing')->count();
         $servedFoodOrders     = FoodOrder::where('status', 'Served')->count();
-        $paidFoodOrders       = FoodOrder::where('status', 'Paid')->count();
-        $foodRevenueTotal     = FoodOrder::where('status', 'Paid')->sum('total_amount');
         $foodRevenueToday     = FoodOrder::where('status', 'Paid')->whereDate('created_at', $today)->sum('total_amount');
         $foodRevenueThisMonth = FoodOrder::where('status', 'Paid')->where('created_at', '>=', $thisMonth)->sum('total_amount');
         $foodPendingAmount    = FoodOrder::whereIn('status', ['Pending', 'Preparing', 'Served'])->sum('balance_due');
 
         // ══ CUSTOMERS
-        $totalCustomers  = Customer::count();
-        $newCustomers    = Customer::where('created_at', '>=', $thisMonth)->count();
-        $activeCustomers = Customer::where('status', 'Active')->count();
+        $totalCustomers = Customer::count();
+        $newCustomers   = Customer::where('created_at', '>=', $thisMonth)->count();
 
-        // ══ BILLS / INVOICES
-        $totalBills   = Bill::count();
-        $paidBills    = Bill::where('status', 'Paid')->count();
-        $unpaidBills  = Bill::where('status', 'Unpaid')->count();
-        $partialBills = Bill::where('status', 'Partial')->count();
+        // ══ EVENTS
+        $totalEvents  = Event::count();
+        $activeEvents = Event::where('is_active', true)->count();
+
+        // ══ CONTACTS
+        $totalContacts   = Contact::count();
+        $repliedContacts = Contact::where('is_replied', true)->count();
 
         // ══ USERS
         $totalUsers  = User::count();
         $activeUsers = User::where('status', 'active')->count();
 
-        // ══ RECENT DATA
-        $recentBookings = Booking::with(['room', 'customer'])
-            ->latest()->take(6)->get();
-
-        $recentBills = Bill::with('customer')
-            ->latest()->take(5)->get();
-
-        $recentFoodOrders = FoodOrder::with(['items', 'customer'])
-            ->latest()->take(5)->get();
-
-        $todayCheckinsList = Booking::with(['room', 'customer'])
-            ->whereDate('check_in', $today)
-            ->get();
-
-        $todayCheckoutsList = Booking::with(['room', 'customer'])
-            ->where('status', 'Checked In')
-            ->whereDate('check_out', $today)
-            ->get();
-
-        $upcomingCheckouts = Booking::with(['room', 'customer'])
-            ->where('status', 'Checked In')
-            ->whereBetween('check_out', [today()->addDay(), today()->addDays(3)])
-            ->orderBy('check_out')
-            ->get();
-
-        $rooms = Room::all();
-
-        // ══ CONTACTS
-        $totalContacts     = Contact::count();
-        $repliedContacts   = Contact::where('is_replied', true)->count();
-        $unrepliedContacts = Contact::where('is_replied', false)->count();
-
-        // ══ EVENTS
-        $totalEvents    = Event::count();
-        $activeEvents   = Event::where('is_active', true)->count();
-        $upcomingEvents = Event::where('event_date', '>=', now())->count();
-        $pastEvents     = Event::where('event_date', '<', now())->count();
-
-        return view('dashboard', compact(
-            'rooms',
-            'totalRooms',
-            'availableRooms',
-            'occupiedRooms',
-            'maintenanceRooms',
-            'occupancyRate',
-
-            'totalEvents',
-            'activeEvents',
-            'upcomingEvents',
-            'pastEvents',
-
-            'totalBookings',
-            'todayCheckins',
-            'todayCheckouts',
-            'activeBookings',
-            'confirmedBookings',
-            'thisMonthBookings',
-            'bookingGrowth',
-
-            'revenueToday',
-            'revenueThisMonth',
-            'revenueLastMonth',
-            'revenueTotal',
-            'pendingAmount',
-            'revenueGrowth',
-
-            'totalFoodOrders',
-            'pendingFoodOrders',
-            'preparingFoodOrders',
-            'servedFoodOrders',
-            'paidFoodOrders',
-            'foodRevenueTotal',
-            'foodRevenueToday',
-            'foodRevenueThisMonth',
-            'foodPendingAmount',
-            'recentFoodOrders',
-
-            'totalCustomers',
-            'newCustomers',
-            'activeCustomers',
-
-            'totalContacts',
-            'repliedContacts',
-            'unrepliedContacts',
-
-            'totalBills',
-            'paidBills',
-            'unpaidBills',
-            'partialBills',
-
-            'totalUsers',
-            'activeUsers',
-
-            'recentBookings',
-            'recentBills',
-            'todayCheckinsList',
-            'todayCheckoutsList',
-            'upcomingCheckouts'
-        ));
+        return Inertia::render('Dashboard', [
+            'today' => $today->format('l, F j, Y'),
+            'stats' => [
+                'totalRooms'           => $totalRooms,
+                'availableRooms'       => $availableRooms,
+                'totalBookings'        => $totalBookings,
+                'thisMonthBookings'    => $thisMonthBookings,
+                'bookingGrowth'        => $bookingGrowth,
+                'totalCustomers'       => $totalCustomers,
+                'newCustomers'         => $newCustomers,
+                'revenueToday'         => $revenueToday,
+                'revenueThisMonth'     => $revenueThisMonth,
+                'revenueGrowth'        => $revenueGrowth,
+                'pendingAmount'        => $pendingAmount,
+                'unpaidBills'          => $unpaidBills,
+                'partialBills'         => $partialBills,
+                'totalFoodOrders'      => $totalFoodOrders,
+                'pendingFoodOrders'    => $pendingFoodOrders,
+                'servedFoodOrders'     => $servedFoodOrders,
+                'foodRevenueToday'     => $foodRevenueToday,
+                'foodRevenueThisMonth' => $foodRevenueThisMonth,
+                'foodPendingAmount'    => $foodPendingAmount,
+                'totalEvents'          => $totalEvents,
+                'activeEvents'         => $activeEvents,
+                'totalContacts'        => $totalContacts,
+                'repliedContacts'      => $repliedContacts,
+                'totalUsers'           => $totalUsers,
+                'activeUsers'          => $activeUsers,
+            ],
+        ]);
     }
 }

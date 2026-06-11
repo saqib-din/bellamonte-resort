@@ -65,18 +65,12 @@
         <div id="mobile-menu-wrap"></div>
 
         <h4 class="m-4"> Get In Touch </h4>
-        {{-- <div class="top-social">
-            <a href="#"><i class="fa fa-facebook"></i></a>
-            <a href="#"><i class="fa fa-twitter"></i></a>
-            <a href="#"><i class="fa fa-tripadvisor"></i></a>
-            <a href="#"><i class="fa fa-instagram"></i></a>
-        </div> --}}
         <ul class="top-widget">
             <li><a href="tel:03296777222" style="color: inherit; text-decoration: none;">
                     <i class="fa fa-phone"></i> 0329 6777222
                 </a></li>
-            <li><a href="mailto:bellamonteresort01@gmail.com" style="color: inherit; text-decoration: none;">
-                    <i class="fa fa-envelope"></i> bellamonteresort01@gmail.com
+            <li><a href="mailto:thewhitecastle4444@gmail.com" style="color: inherit; text-decoration: none;">
+                    <i class="fa fa-envelope"></i> thewhitecastle4444@gmail.com
                 </a></li>
         </ul>
     </div>
@@ -97,7 +91,8 @@
 
 
     <!-- WhatsApp Floating Button START -->
-    <a href="https://wa.me/923296777222" class="whatsapp-float" target="_blank" title="Chat with us on WhatsApp">
+    <a href="https://wa.me/923296777222?text=Hello%21%20I%27m%20interested%20in%20White%20Castle%20Resort.%20Could%20you%20please%20share%20room%20availability%20and%20rates%3F"
+        class="whatsapp-float" target="_blank" title="Chat with us on WhatsApp">
         <i class="fa fa-whatsapp"></i>
     </a>
     <!-- WhatsApp Floating Button END -->

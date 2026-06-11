@@ -4,14 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class SettingController extends Controller
 {
     public function index()
     {
         $settings = Setting::all_settings();
-        return view('pages.admin-side.settings.index', compact('settings'));
+        $logo     = $settings['hotel_logo'] ?? null;
+
+        return Inertia::render('Settings/Index', [
+            'settings' => $settings,
+            'logoUrl'  => $logo ? asset('uploads/settings/' . $logo) : null,
+        ]);
     }
 
     public function update(Request $request)

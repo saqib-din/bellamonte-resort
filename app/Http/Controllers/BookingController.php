@@ -6,85 +6,63 @@ use App\Models\Room;
 use App\Models\Booking;
 use App\Models\Customer;
 use Illuminate\Support\Carbon;
-use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class BookingController extends Controller
 {
+    private const SORTABLE = ['id', 'booking_number', 'guest_name', 'check_in', 'check_out', 'total_amount', 'status'];
+
     public function index(Request $request)
     {
-        if ($request->ajax()) {
-            $query = Booking::with('room')->select('bookings.*');
+        $query = Booking::with('room');
 
-            return DataTables::eloquent($query)
-                ->addColumn('booking_number', fn($b) => '<strong>' . e($b->booking_number) . '</strong>')
-                ->addColumn(
-                    'guest',
-                    fn($b) =>
-                    '<div><h6 class="mb-0">' . e($b->guest_name) . '</h6>' .
-                        '<small class="text-muted">' . e($b->guest_phone) . '</small></div>'
-                )
-                ->addColumn(
-                    'room',
-                    fn($b) =>
-                    '<span class="badge bg-light-primary">Room ' . e($b->room->room_number ?? '—') . '</span><br>' .
-                        '<small class="text-muted">' . e($b->room->type ?? '') . '</small>'
-                )
-                ->editColumn(
-                    'check_in',
-                    fn($b) =>
-                    '<i class="ti ti-calendar-event f-13 text-muted me-1"></i>' . $b->check_in->format('d M Y')
-                )
-                ->editColumn(
-                    'check_out',
-                    fn($b) =>
-                    '<i class="ti ti-calendar-event f-13 text-muted me-1"></i>' . $b->check_out->format('d M Y')
-                )
-                ->addColumn(
-                    'total',
-                    fn($b) =>
-                    '<strong class="text-success">₨ ' . number_format($b->total_amount) . '</strong>'
-                )
-                ->addColumn(
-                    'status_badge',
-                    fn($b) =>
-                    '<span class="badge ' . $b->getStatusBadgeClass() . '">' . e($b->status) . '</span>'
-                )
-                ->addColumn('action', function ($b) {
-                    $html = '';
-
-                    if ($b->status === 'Confirmed') {
-                        $html .= '<form action="' . route('admin.bookings.checkin', $b) . '" method="POST" class="d-inline">'
-                            . csrf_field()
-                            . '<button class="avtar avtar-xs btn-link-success" title="Check In" type="submit"><i class="ti ti-login f-18"></i></button></form>';
-                    }
-
-                    if ($b->status === 'Checked In') {
-                        $html .= '<form action="' . route('admin.bookings.checkout', $b) . '" method="POST" class="d-inline">'
-                            . csrf_field()
-                            . '<button class="avtar avtar-xs btn-link-warning" title="Check Out" type="submit"><i class="ti ti-logout f-18"></i></button></form>';
-                    }
-
-                    $html .= '<a href="' . route('admin.bookings.show', $b) . '" class="avtar avtar-xs btn-link-secondary" title="View"><i class="ti ti-eye f-18"></i></a>';
-                    $html .= '<a href="' . route('admin.bookings.edit', $b) . '" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></a>';
-                    $html .= '<a href="#" class="avtar avtar-xs btn-link-secondary bs-pass-para" data-id="' . $b->id . '" title="Delete"><i class="ti ti-trash f-18"></i></a>';
-                    $html .= '<form id="delete-form-' . $b->id . '" action="' . route('admin.bookings.destroy', $b) . '" method="POST" style="display:none;">'
-                        . csrf_field() . method_field('DELETE') . '</form>';
-
-                    return $html;
-                })
-                ->rawColumns(['booking_number', 'guest', 'room', 'check_in', 'check_out', 'total', 'status_badge', 'action'])
-                ->make(true);
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('booking_number', 'like', "%{$s}%")
+                    ->orWhere('guest_name', 'like', "%{$s}%")
+                    ->orWhere('guest_phone', 'like', "%{$s}%");
+            });
         }
 
-        return view('pages.admin-side.booking.index');
+        $sort = in_array($request->sort, self::SORTABLE, true) ? $request->sort : 'id';
+        $dir  = $request->dir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sort, $dir);
+
+        $perPage = (int) $request->input('per_page', 15);
+
+        $bookings = $query->paginate($perPage)->withQueryString()->through(fn ($b) => [
+            'uuid'           => $b->uuid,
+            'booking_number' => $b->booking_number,
+            'guest_name'     => $b->guest_name,
+            'guest_phone'    => $b->guest_phone,
+            'room_number'    => $b->room->room_number ?? '—',
+            'room_type'      => $b->room->type ?? '',
+            'check_in'       => optional($b->check_in)->format('d M Y'),
+            'check_out'      => optional($b->check_out)->format('d M Y'),
+            'total_amount'   => $b->total_amount,
+            'status'         => $b->status,
+            'statusBadge'    => $b->getStatusBadgeClass(),
+        ]);
+
+        return Inertia::render('Bookings/Index', [
+            'bookings' => $bookings,
+            'filters'  => [
+                'search'   => $request->search,
+                'sort'     => $sort,
+                'dir'      => $dir,
+                'per_page' => $perPage,
+            ],
+        ]);
     }
 
     public function create()
     {
-        $rooms     = Room::where('status', 'Available')->orderBy('room_number')->get();
-        $customers = Customer::orderBy('name')->get();
-        return view('pages.admin-side.booking.create', compact('rooms', 'customers'));
+        return Inertia::render('Bookings/Create', [
+            'rooms'     => $this->roomOptions(Room::where('status', 'Available')->orderBy('room_number')->get()),
+            'customers' => $this->customerOptions(),
+        ]);
     }
 
     public function store(Request $request)
@@ -103,7 +81,6 @@ class BookingController extends Controller
             'check_out'        => 'required|date|after:check_in',
             'payment_method'   => 'required',
             'payment_status'   => 'required',
-            // 'advance_paid'   => 'nullable|numeric|min:0',
             'status'           => 'required',
             'special_requests' => 'nullable|string',
             'notes'            => 'nullable|string',
@@ -133,13 +110,11 @@ class BookingController extends Controller
             'total_amount'     => $total,
             'payment_status'   => $request->payment_status,
             'payment_method'   => $request->payment_method,
-            // 'advance_paid'  => $request->advance_paid ?? 0,
             'status'           => $request->status,
             'special_requests' => $request->special_requests,
             'notes'            => $request->notes,
         ]);
 
-        // Mark room as occupied
         if (in_array($request->status, ['Confirmed', 'Checked In'])) {
             $room->update(['status' => 'Occupied']);
         }
@@ -151,14 +126,72 @@ class BookingController extends Controller
     public function show(Booking $booking)
     {
         $booking->load(['room', 'customer']);
-        return view('pages.admin-side.booking.show', compact('booking'));
+
+        return Inertia::render('Bookings/Show', [
+            'booking' => [
+                'uuid'             => $booking->uuid,
+                'booking_number'   => $booking->booking_number,
+                'guest_name'       => $booking->guest_name,
+                'father_name'      => $booking->father_name,
+                'guest_phone'      => $booking->guest_phone,
+                'guest_cnic'       => $booking->guest_cnic,
+                'guest_email'      => $booking->guest_email,
+                'adults'           => $booking->adults,
+                'children'         => $booking->children,
+                'check_in'         => optional($booking->check_in)->format('d M Y'),
+                'check_out'        => optional($booking->check_out)->format('d M Y'),
+                'nights'           => $booking->nights,
+                'room_price'       => $booking->room_price,
+                'total_amount'     => $booking->total_amount,
+                'advance_paid'     => $booking->advance_paid,
+                'remaining'        => $booking->getRemainingBalance(),
+                'payment_method'   => $booking->payment_method,
+                'payment_status'   => $booking->payment_status,
+                'paymentBadge'     => $booking->getPaymentBadgeClass(),
+                'status'           => $booking->status,
+                'statusBadge'      => $booking->getStatusBadgeClass(),
+                'special_requests' => $booking->special_requests,
+                'notes'            => $booking->notes,
+                'room_number'      => $booking->room->room_number ?? '—',
+                'room_type'        => $booking->room->type ?? '',
+                'room_floor'       => $booking->room->floor ?? '',
+                'check_in_time'    => $booking->room && $booking->room->check_in_time ? Carbon::parse($booking->room->check_in_time)->format('h:i A') : null,
+                'check_out_time'   => $booking->room && $booking->room->check_out_time ? Carbon::parse($booking->room->check_out_time)->format('h:i A') : null,
+            ],
+        ]);
     }
 
     public function edit(Booking $booking)
     {
-        $rooms     = Room::orderBy('room_number')->get();
-        $customers = Customer::orderBy('name')->get();
-        return view('pages.admin-side.booking.edit', compact('booking', 'rooms', 'customers'));
+        return Inertia::render('Bookings/Edit', [
+            'rooms'     => $this->roomOptions(Room::orderBy('room_number')->get()),
+            'customers' => $this->customerOptions(),
+            'booking'   => [
+                'uuid'             => $booking->uuid,
+                'booking_number'   => $booking->booking_number,
+                'room_id'          => $booking->room_id,
+                'customer_id'      => $booking->customer_id,
+                'guest_name'       => $booking->guest_name,
+                'father_name'      => $booking->father_name,
+                'guest_phone'      => $booking->guest_phone,
+                'guest_cnic'       => $booking->guest_cnic,
+                'guest_email'      => $booking->guest_email,
+                'adults'           => $booking->adults,
+                'children'         => $booking->children,
+                'check_in'         => optional($booking->check_in)->format('Y-m-d'),
+                'check_out'        => optional($booking->check_out)->format('Y-m-d'),
+                'nights'           => $booking->nights,
+                'room_price'       => $booking->room_price,
+                'total_amount'     => $booking->total_amount,
+                'remaining'        => $booking->getRemainingBalance(),
+                'payment_status'   => $booking->payment_status,
+                'payment_method'   => $booking->payment_method,
+                'status'           => $booking->status,
+                'special_requests' => $booking->special_requests,
+                'notes'            => $booking->notes,
+                'room_label'       => 'Room ' . ($booking->room->room_number ?? '') . ' — ' . ($booking->room->type ?? ''),
+            ],
+        ]);
     }
 
     public function update(Request $request, Booking $booking)
@@ -173,7 +206,6 @@ class BookingController extends Controller
             'check_out'      => 'required|date|after:check_in',
             'payment_status' => 'required',
             'payment_method' => 'required',
-            // 'advance_paid' => 'nullable|numeric|min:0',
             'status'         => 'required',
         ]);
 
@@ -204,48 +236,68 @@ class BookingController extends Controller
             'total_amount'     => $total,
             'payment_status'   => $request->payment_status,
             'payment_method'   => $request->payment_method,
-            // 'advance_paid'  => $request->advance_paid ?? 0,
             'status'           => $request->status,
             'special_requests' => $request->special_requests,
             'notes'            => $request->notes,
         ]);
 
-        // Room status update
         if (in_array($request->status, ['Confirmed', 'Checked In'])) {
             $room->update(['status' => 'Occupied']);
         } elseif (in_array($request->status, ['Checked Out', 'Cancelled', 'No Show'])) {
             $room->update(['status' => 'Available']);
         }
 
-        return redirect()->route('admin.bookings.index')
-            ->with('success', 'Booking has been updated successfully!');
+        return redirect()->route('admin.bookings.index')->with('success', 'Booking has been updated successfully!');
     }
 
     public function destroy(Booking $booking)
     {
-        // Free room
         if ($booking->status === 'Checked In') {
             $booking->room->update(['status' => 'Available']);
         }
 
         $booking->delete();
-        return redirect()->route('admin.bookings.index')
-            ->with('success', 'Booking has been deleted successfully!');
+
+        return redirect()->route('admin.bookings.index')->with('success', 'Booking has been deleted successfully!');
     }
 
-    // Quick checkout
     public function checkout(Booking $booking)
     {
         $booking->update(['status' => 'Checked Out']);
         $booking->room->update(['status' => 'Available']);
-        return redirect()->back()->with('success', 'Guest has been checked out successfully!');
+
+        return back()->with('success', 'Guest has been checked out successfully!');
     }
 
-    // Quick checkin
     public function checkin(Booking $booking)
     {
         $booking->update(['status' => 'Checked In']);
         $booking->room->update(['status' => 'Occupied']);
-        return redirect()->back()->with('success', 'Guest has been checked in successfully!');
+
+        return back()->with('success', 'Guest has been checked in successfully!');
+    }
+
+    // ── Helpers: serialize dropdown options for the Vue form ──
+    private function roomOptions($rooms): array
+    {
+        return $rooms->map(fn ($r) => [
+            'id'          => $r->id,
+            'room_number' => $r->room_number,
+            'type'        => $r->type,
+            'price'       => $r->price_per_night,
+            'capacity'    => $r->capacity,
+            'status'      => $r->status,
+        ])->all();
+    }
+
+    private function customerOptions(): array
+    {
+        return Customer::orderBy('name')->get()->map(fn ($c) => [
+            'id'    => $c->id,
+            'name'  => $c->name,
+            'phone' => $c->phone,
+            'cnic'  => $c->cnic,
+            'email' => $c->email,
+        ])->all();
     }
 }

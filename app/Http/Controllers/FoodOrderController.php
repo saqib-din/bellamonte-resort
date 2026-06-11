@@ -3,123 +3,85 @@
 namespace App\Http\Controllers;
 
 use App\Models\FoodOrder;
-use App\Models\FoodOrderItem;
+use App\Models\FoodItem;
 use App\Models\FoodCategory;
 use App\Models\Booking;
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use Yajra\DataTables\Facades\DataTables;
-
+use Inertia\Inertia;
 
 class FoodOrderController extends Controller
 {
+    private const SORTABLE = ['order_number', 'guest_name', 'total_amount', 'status', 'created_at'];
 
     public function index(Request $request)
     {
-        if ($request->ajax()) {
+        $query = FoodOrder::with(['items', 'customer']);
 
-            $query = FoodOrder::with(['items', 'customer'])
-                ->select('food_orders.*')
-                ->latest();
-
-            return DataTables::eloquent($query)
-
-                ->addColumn('order_no', fn($o) =>
-                view('pages.admin-side.food.orders.partials.order-cell', ['order' => $o])->render())
-
-                ->addColumn('guest', fn($o) =>
-                view('pages.admin-side.food.orders.partials.guest-cell', ['order' => $o])->render())
-
-                ->addColumn('room', fn($o) =>
-                $o->room_number
-                    ? '<span class="badge bg-light-primary">Room ' . e($o->room_number) . '</span>'
-                    : '<span class="text-muted">—</span>')
-
-                ->addColumn('type', fn($o) =>
-                '<span class="badge ' . $o->order_type_badge_class . '">' . e($o->order_type) . '</span>')
-
-                ->addColumn('items_count', fn($o) =>
-                '<small class="text-muted">' . $o->items->count() . ' item(s)</small>')
-
-                ->addColumn('total', fn($o) =>
-                '<strong class="text-dark">₨ ' . number_format($o->total_amount) . '</strong>')
-
-                ->addColumn('balance', fn($o) =>
-                $o->balance_due > 0
-                    ? '<span class="text-danger fw-500">₨ ' . number_format($o->balance_due) . '</span>'
-                    : '<span class="text-muted">—</span>')
-
-                ->addColumn('status', fn($o) =>
-                '<span class="badge ' . $o->status_badge_class . '">' . e($o->status) . '</span>')
-
-                ->addColumn('action', fn($o) =>
-                view('pages.admin-side.food.orders.partials.action', ['order' => $o])->render())
-
-                ->filterColumn('order_no', function ($q, $keyword) {
-                    $q->where('order_number', 'like', "%{$keyword}%");
-                })
-                ->filterColumn('guest', function ($q, $keyword) {
-                    $q->where('guest_name', 'like', "%{$keyword}%")
-                        ->orWhere('guest_phone', 'like', "%{$keyword}%");
-                })
-
-                ->rawColumns(['order_no', 'guest', 'room', 'type', 'items_count', 'total', 'balance', 'status', 'action'])
-                ->make(true);
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('order_number', 'like', "%{$s}%")
+                    ->orWhere('guest_name', 'like', "%{$s}%")
+                    ->orWhere('guest_phone', 'like', "%{$s}%");
+            });
         }
 
-        return view('pages.admin-side.food.orders.index');
+        $sort = in_array($request->sort, self::SORTABLE, true) ? $request->sort : 'created_at';
+        $dir  = $request->dir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sort, $dir);
+
+        $perPage = (int) $request->input('per_page', 15);
+
+        $orders = $query->paginate($perPage)->withQueryString()->through(fn ($o) => [
+            'uuid'            => $o->uuid,
+            'order_number'    => $o->order_number,
+            'date'            => optional($o->created_at)->format('d M Y, h:i A'),
+            'guest_name'      => $o->guest_name,
+            'guest_phone'     => $o->guest_phone,
+            'room_number'     => $o->room_number,
+            'order_type'      => $o->order_type,
+            'orderTypeBadge'  => $o->order_type_badge_class,
+            'items_count'     => $o->items->count(),
+            'total_amount'    => $o->total_amount,
+            'balance_due'     => $o->balance_due,
+            'status'          => $o->status,
+            'statusBadge'     => $o->status_badge_class,
+        ]);
+
+        return Inertia::render('Food/Orders/Index', [
+            'orders'  => $orders,
+            'filters' => [
+                'search'   => $request->search,
+                'sort'     => $sort,
+                'dir'      => $dir,
+                'per_page' => $perPage,
+            ],
+        ]);
     }
 
     public function create()
     {
-        $categories = FoodCategory::with('availableItems')
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
-        $bookings   = Booking::with('room')
-            ->whereIn('status', ['confirmed', 'checked_in'])
-            ->latest()->get();
-        $customers  = Customer::orderBy('name')->get();
-
-        return view('pages.admin-side.food.orders.create', compact('categories', 'bookings', 'customers'));
+        return Inertia::render('Food/Orders/Create', [
+            'categories' => $this->categoryOptions(),
+            'bookings'   => $this->bookingOptions(),
+            'customers'  => $this->customerOptions(),
+        ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'guest_name'     => 'required|string|max:255',
-            'father_name'    => 'nullable|string|max:255',
-            'order_type'     => 'required|string',
-            'payment_method' => 'required|string',
-            'items'          => 'required|array|min:1',
+            'guest_name'           => 'required|string|max:255',
+            'father_name'          => 'nullable|string|max:255',
+            'order_type'           => 'required|string',
+            'payment_method'       => 'required|string',
+            'items'                => 'required|array|min:1',
             'items.*.food_item_id' => 'required|exists:food_items,id',
             'items.*.quantity'     => 'required|integer|min:1',
         ]);
 
-        // Calculate totals
-        $subtotal = 0;
-        $orderItems = [];
-
-        foreach ($request->items as $item) {
-            $foodItem  = \App\Models\FoodItem::findOrFail($item['food_item_id']);
-            $lineTotal = $foodItem->price * $item['quantity'];
-            $subtotal += $lineTotal;
-            $orderItems[] = [
-                'food_item_id' => $foodItem->id,
-                'item_name'    => $foodItem->name,
-                'unit_price'   => $foodItem->price,
-                'quantity'     => $item['quantity'],
-                'subtotal'     => $lineTotal,
-            ];
-        }
-
-        $discount   = (float) $request->discount ?? 0;
-        $taxPct     = (float) $request->tax_percent ?? 0;
-        $afterDis   = $subtotal - $discount;
-        $taxAmount  = round($afterDis * ($taxPct / 100), 2);
-        $total      = round($afterDis + $taxAmount, 2);
-        $paid       = (float) $request->amount_paid ?? 0;
-        $balance    = max(0, $total - $paid);
+        [$subtotal, $orderItems, $totals] = $this->computeTotals($request);
 
         $order = FoodOrder::create([
             'order_number'   => FoodOrder::generateOrderNumber(),
@@ -133,12 +95,12 @@ class FoodOrderController extends Controller
             'payment_method' => $request->payment_method,
             'status'         => 'Pending',
             'subtotal'       => $subtotal,
-            'discount'       => $discount,
-            'tax_percent'    => $taxPct,
-            'tax_amount'     => $taxAmount,
-            'total_amount'   => $total,
-            'amount_paid'    => $paid,
-            'balance_due'    => $balance,
+            'discount'       => $totals['discount'],
+            'tax_percent'    => $totals['taxPct'],
+            'tax_amount'     => $totals['taxAmount'],
+            'total_amount'   => $totals['total'],
+            'amount_paid'    => $totals['paid'],
+            'balance_due'    => $totals['balance'],
             'notes'          => $request->notes,
         ]);
 
@@ -146,76 +108,64 @@ class FoodOrderController extends Controller
             $order->items()->create($item);
         }
 
-        return redirect()->route('food.orders.show', $order)
-            ->with('success', 'Food order placed successfully!');
+        return redirect()->route('food.orders.show', $order)->with('success', 'Food order placed successfully!');
     }
 
     public function show(FoodOrder $foodOrder)
     {
-        $foodOrder->load(['items.foodItem', 'booking', 'customer']);
-        return view('pages.admin-side.food.orders.show', compact('foodOrder'));
+        $foodOrder->load(['items', 'booking', 'customer']);
+
+        return Inertia::render('Food/Orders/Show', [
+            'order' => $this->serializeOrder($foodOrder),
+        ]);
     }
 
     public function edit(FoodOrder $foodOrder)
     {
-        $categories = FoodCategory::with('availableItems')
-            ->where('is_active', true)
-            ->orderBy('sort_order')->get();
-        $bookings   = Booking::with('room')
-            ->whereIn('status', ['confirmed', 'checked_in'])->latest()->get();
-        $customers  = Customer::orderBy('name')->get();
+        $foodOrder->load('items');
 
-        $existingItems = $foodOrder->items->map(function ($i) {
-            return [
-                'id'    => $i->food_item_id,
-                'name'  => $i->item_name,
-                'price' => (float) $i->unit_price,
-                'qty'   => $i->quantity,
-            ];
-        })->values();
-
-        return view('pages.admin-side.food.orders.edit', compact(
-            'foodOrder',
-            'categories',
-            'bookings',
-            'customers',
-            'existingItems'
-        ));
+        return Inertia::render('Food/Orders/Edit', [
+            'categories' => $this->categoryOptions(),
+            'bookings'   => $this->bookingOptions(),
+            'customers'  => $this->customerOptions(),
+            'order'      => [
+                'uuid'           => $foodOrder->uuid,
+                'order_number'   => $foodOrder->order_number,
+                'booking_id'     => $foodOrder->booking_id,
+                'customer_id'    => $foodOrder->customer_id,
+                'guest_name'     => $foodOrder->guest_name,
+                'father_name'    => $foodOrder->father_name,
+                'guest_phone'    => $foodOrder->guest_phone,
+                'room_number'    => $foodOrder->room_number,
+                'order_type'     => $foodOrder->order_type,
+                'payment_method' => $foodOrder->payment_method,
+                'discount'       => $foodOrder->discount,
+                'tax_percent'    => $foodOrder->tax_percent,
+                'amount_paid'    => $foodOrder->amount_paid,
+                'notes'          => $foodOrder->notes,
+                'cart'           => $foodOrder->items->map(fn ($i) => [
+                    'id'    => $i->food_item_id,
+                    'name'  => $i->item_name,
+                    'price' => (float) $i->unit_price,
+                    'qty'   => $i->quantity,
+                ])->values(),
+            ],
+        ]);
     }
 
     public function update(Request $request, FoodOrder $foodOrder)
     {
         $request->validate([
-            'guest_name'     => 'required|string|max:255',
-            'father_name'    => 'nullable|string|max:255',
-            'order_type'     => 'required|string',
-            'payment_method' => 'required|string',
-            'items'          => 'required|array|min:1',
+            'guest_name'           => 'required|string|max:255',
+            'father_name'          => 'nullable|string|max:255',
+            'order_type'           => 'required|string',
+            'payment_method'       => 'required|string',
+            'items'                => 'required|array|min:1',
+            'items.*.food_item_id' => 'required|exists:food_items,id',
+            'items.*.quantity'     => 'required|integer|min:1',
         ]);
 
-        $subtotal   = 0;
-        $orderItems = [];
-
-        foreach ($request->items as $item) {
-            $foodItem  = \App\Models\FoodItem::findOrFail($item['food_item_id']);
-            $lineTotal = $foodItem->price * $item['quantity'];
-            $subtotal += $lineTotal;
-            $orderItems[] = [
-                'food_item_id' => $foodItem->id,
-                'item_name'    => $foodItem->name,
-                'unit_price'   => $foodItem->price,
-                'quantity'     => $item['quantity'],
-                'subtotal'     => $lineTotal,
-            ];
-        }
-
-        $discount  = (float) $request->discount ?? 0;
-        $taxPct    = (float) $request->tax_percent ?? 0;
-        $afterDis  = $subtotal - $discount;
-        $taxAmount = round($afterDis * ($taxPct / 100), 2);
-        $total     = round($afterDis + $taxAmount, 2);
-        $paid      = (float) $request->amount_paid ?? 0;
-        $balance   = max(0, $total - $paid);
+        [$subtotal, $orderItems, $totals] = $this->computeTotals($request);
 
         $foodOrder->update([
             'booking_id'     => $request->booking_id ?: null,
@@ -227,29 +177,28 @@ class FoodOrderController extends Controller
             'order_type'     => $request->order_type,
             'payment_method' => $request->payment_method,
             'subtotal'       => $subtotal,
-            'discount'       => $discount,
-            'tax_percent'    => $taxPct,
-            'tax_amount'     => $taxAmount,
-            'total_amount'   => $total,
-            'amount_paid'    => $paid,
-            'balance_due'    => $balance,
+            'discount'       => $totals['discount'],
+            'tax_percent'    => $totals['taxPct'],
+            'tax_amount'     => $totals['taxAmount'],
+            'total_amount'   => $totals['total'],
+            'amount_paid'    => $totals['paid'],
+            'balance_due'    => $totals['balance'],
             'notes'          => $request->notes,
         ]);
 
-        // Re-create items
         $foodOrder->items()->delete();
         foreach ($orderItems as $item) {
             $foodOrder->items()->create($item);
         }
 
-        return redirect()->route('food.orders.show', $foodOrder)
-            ->with('success', 'Order updated successfully!');
+        return redirect()->route('food.orders.show', $foodOrder)->with('success', 'Order updated successfully!');
     }
 
     public function destroy(FoodOrder $foodOrder)
     {
         $foodOrder->items()->delete();
         $foodOrder->delete();
+
         return redirect()->route('food.orders.index')->with('success', 'Order deleted.');
     }
 
@@ -257,12 +206,120 @@ class FoodOrderController extends Controller
     {
         $request->validate(['status' => 'required|in:Pending,Preparing,Served,Paid,Cancelled']);
         $foodOrder->update(['status' => $request->status]);
+
         return back()->with('success', 'Status updated to ' . $request->status);
     }
 
     public function print(FoodOrder $foodOrder)
     {
         $foodOrder->load(['items.foodItem', 'booking']);
+
         return view('pages.admin-side.food.orders.print', compact('foodOrder'));
+    }
+
+    // ── Helpers ──────────────────────────────────────
+    private function computeTotals(Request $request): array
+    {
+        $subtotal   = 0;
+        $orderItems = [];
+
+        foreach ($request->items as $item) {
+            $foodItem  = FoodItem::findOrFail($item['food_item_id']);
+            $lineTotal = $foodItem->price * $item['quantity'];
+            $subtotal += $lineTotal;
+            $orderItems[] = [
+                'food_item_id' => $foodItem->id,
+                'item_name'    => $foodItem->name,
+                'unit_price'   => $foodItem->price,
+                'quantity'     => $item['quantity'],
+                'subtotal'     => $lineTotal,
+            ];
+        }
+
+        $discount  = (float) ($request->discount ?? 0);
+        $taxPct    = (float) ($request->tax_percent ?? 0);
+        $afterDis  = $subtotal - $discount;
+        $taxAmount = round($afterDis * ($taxPct / 100), 2);
+        $total     = round($afterDis + $taxAmount, 2);
+        $paid      = (float) ($request->amount_paid ?? 0);
+        $balance   = max(0, $total - $paid);
+
+        return [$subtotal, $orderItems, compact('discount', 'taxPct', 'taxAmount', 'total', 'paid', 'balance')];
+    }
+
+    private function serializeOrder(FoodOrder $o): array
+    {
+        return [
+            'uuid'           => $o->uuid,
+            'order_number'   => $o->order_number,
+            'guest_name'     => $o->guest_name,
+            'father_name'    => $o->father_name,
+            'guest_phone'    => $o->guest_phone,
+            'room_number'    => $o->room_number,
+            'order_type'     => $o->order_type,
+            'orderTypeBadge' => $o->order_type_badge_class,
+            'payment_method' => $o->payment_method,
+            'status'         => $o->status,
+            'statusBadge'    => $o->status_badge_class,
+            'subtotal'       => $o->subtotal,
+            'discount'       => $o->discount,
+            'tax_percent'    => $o->tax_percent,
+            'tax_amount'     => $o->tax_amount,
+            'total_amount'   => $o->total_amount,
+            'amount_paid'    => $o->amount_paid,
+            'balance_due'    => $o->balance_due,
+            'notes'          => $o->notes,
+            'date'           => optional($o->created_at)->format('d M Y, h:i A'),
+            'items'          => $o->items->map(fn ($i) => [
+                'item_name'  => $i->item_name,
+                'quantity'   => $i->quantity,
+                'unit_price' => $i->unit_price,
+                'subtotal'   => $i->subtotal,
+            ])->values(),
+        ];
+    }
+
+    private function categoryOptions(): array
+    {
+        return FoodCategory::with('availableItems')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn ($c) => [
+                'id'    => $c->id,
+                'icon'  => $c->icon,
+                'name'  => $c->name,
+                'items' => $c->availableItems->map(fn ($i) => [
+                    'id'          => $i->id,
+                    'name'        => $i->name,
+                    'description' => $i->description,
+                    'price'       => (float) $i->price,
+                ])->values(),
+            ])->all();
+    }
+
+    private function bookingOptions(): array
+    {
+        return Booking::with('room')
+            ->whereIn('status', ['Confirmed', 'Checked In'])
+            ->latest()->get()
+            ->map(fn ($b) => [
+                'id'          => $b->id,
+                'label'       => $b->booking_number . ' — ' . $b->guest_name . ' | Room ' . ($b->room->room_number ?? '?'),
+                'guest_name'  => $b->guest_name,
+                'father_name' => $b->father_name,
+                'guest_phone' => $b->guest_phone,
+                'room_number' => $b->room->room_number ?? '',
+                'customer_id' => $b->customer_id,
+            ])->all();
+    }
+
+    private function customerOptions(): array
+    {
+        return Customer::orderBy('name')->get()->map(fn ($c) => [
+            'id'    => $c->id,
+            'name'  => $c->name,
+            'phone' => $c->phone,
+        ])->all();
     }
 }

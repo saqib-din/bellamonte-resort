@@ -6,6 +6,7 @@ use App\Mail\ContactReplyMail;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Inertia\Inertia;
 
 class ContactController extends Controller
 {
@@ -37,11 +38,28 @@ class ContactController extends Controller
         return back()->with('success', 'Your message has been sent! We will get back to you soon.');
     }
 
-    // ─── Admin: List all contacts 
+    // ─── Admin: List all contacts (Inertia)
     public function index()
     {
-        $contacts = Contact::latest()->get();
-        return view('pages.admin-side.contacts.index', compact('contacts'));
+        $contacts = Contact::latest()->get()->map(fn ($c) => [
+            'id'                  => $c->id,
+            'name'                => $c->name,
+            'email'               => $c->email,
+            'phone'               => $c->phone,
+            'subject'             => $c->subject,
+            'message'             => $c->message,
+            'is_replied'          => (bool) $c->is_replied,
+            'reply_message'       => $c->reply_message,
+            'replied_at'          => optional($c->replied_at)->format('d M Y, h:i A'),
+            'terms_accepted_time' => optional($c->terms_accepted_time)->format('d M Y, h:i A'),
+            'ip_address'          => $c->ip_address,
+            'user_agent'          => $c->user_agent,
+            'created_at'          => optional($c->created_at)->format('d M Y, h:i A'),
+        ]);
+
+        return Inertia::render('Contacts/Index', [
+            'contacts' => $contacts,
+        ]);
     }
 
     // ─── Admin: Reply to a contact via email 

@@ -7,18 +7,48 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = User::latest()->get();
-        return view('pages.admin-side.users.index', compact('users'));
+        $all = User::latest()->get();
+
+        $users = $all->map(fn ($u) => [
+            'id'           => $u->id,
+            'uuid'         => $u->uuid,
+            'name'         => $u->name,
+            'email'        => $u->email,
+            'phone'        => $u->phone,
+            'role'         => $u->role,
+            'role_label'   => $u->getRoleLabel(),
+            'role_badge'   => $u->getRoleBadgeClass(),
+            'status'       => $u->status,
+            'status_badge' => $u->getStatusBadgeClass(),
+            'created_at'   => optional($u->created_at)->format('d M Y'),
+            'is_me'        => $u->id === Auth::id(),
+            'is_admin'     => $u->isAdmin(),
+        ]);
+
+        $counts = [
+            'total'        => $all->count(),
+            'admin'        => $all->where('role', 'admin')->count(),
+            'manager'      => $all->where('role', 'manager')->count(),
+            'receptionist' => $all->where('role', 'receptionist')->count(),
+            'accountant'   => $all->where('role', 'accountant')->count(),
+            'staff'        => $all->where('role', 'staff')->count(),
+        ];
+
+        return Inertia::render('Users/Index', [
+            'users'  => $users,
+            'counts' => $counts,
+        ]);
     }
 
     public function create()
     {
-        return view('pages.admin-side.users.create');
+        return Inertia::render('Users/Create');
     }
 
     public function store(Request $request)
@@ -53,7 +83,17 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        return view('pages.admin-side.users.edit', compact('user'));
+        return Inertia::render('Users/Edit', [
+            'user' => [
+                'id'     => $user->id,
+                'uuid'   => $user->uuid,
+                'name'   => $user->name,
+                'email'  => $user->email,
+                'phone'  => $user->phone,
+                'role'   => $user->role,
+                'status' => $user->status,
+            ],
+        ]);
     }
 
     public function update(Request $request, User $user)
