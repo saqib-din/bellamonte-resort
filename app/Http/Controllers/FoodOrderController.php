@@ -8,6 +8,7 @@ use App\Models\FoodCategory;
 use App\Models\Booking;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class FoodOrderController extends Controller
@@ -72,16 +73,39 @@ class FoodOrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'booking_id'           => 'nullable|exists:bookings,id',
+            'customer_id'          => 'nullable|exists:customers,id',
             'guest_name'           => 'required|string|max:255',
             'father_name'          => 'nullable|string|max:255',
-            'order_type'           => 'required|string',
-            'payment_method'       => 'required|string',
+            'guest_phone'          => 'nullable|string|max:20',
+            'room_number'          => 'nullable|string|max:20',
+            'order_type'           => 'required|in:Room Service,Dine In,Takeaway',
+            'payment_method'       => 'required|string|max:50',
+            'discount'             => 'nullable|numeric|min:0',
+            'amount_paid'          => 'nullable|numeric|min:0',
+            'notes'                => 'nullable|string|max:1000',
             'items'                => 'required|array|min:1',
             'items.*.food_item_id' => 'required|exists:food_items,id',
-            'items.*.quantity'     => 'required|integer|min:1',
+            'items.*.quantity'     => 'required|integer|min:1|max:1000',
+        ], [
+            'items.required'            => 'Please add at least one item to the order.',
+            'items.min'                 => 'Please add at least one item to the order.',
+            'items.*.quantity.required' => 'Quantity is required for each item.',
+            'items.*.quantity.min'      => 'Quantity must be at least 1.',
         ]);
 
         [$subtotal, $orderItems, $totals] = $this->computeTotals($request);
+
+        if ($totals['discount'] > $subtotal) {
+            throw ValidationException::withMessages([
+                'discount' => 'Discount cannot be more than the subtotal (₨' . number_format($subtotal) . ').',
+            ]);
+        }
+        if ($totals['paid'] > $totals['total']) {
+            throw ValidationException::withMessages([
+                'amount_paid' => 'Amount paid cannot be more than the total (₨' . number_format($totals['total']) . ').',
+            ]);
+        }
 
         $order = FoodOrder::create([
             'order_number'   => FoodOrder::generateOrderNumber(),
@@ -156,16 +180,39 @@ class FoodOrderController extends Controller
     public function update(Request $request, FoodOrder $foodOrder)
     {
         $request->validate([
+            'booking_id'           => 'nullable|exists:bookings,id',
+            'customer_id'          => 'nullable|exists:customers,id',
             'guest_name'           => 'required|string|max:255',
             'father_name'          => 'nullable|string|max:255',
-            'order_type'           => 'required|string',
-            'payment_method'       => 'required|string',
+            'guest_phone'          => 'nullable|string|max:20',
+            'room_number'          => 'nullable|string|max:20',
+            'order_type'           => 'required|in:Room Service,Dine In,Takeaway',
+            'payment_method'       => 'required|string|max:50',
+            'discount'             => 'nullable|numeric|min:0',
+            'amount_paid'          => 'nullable|numeric|min:0',
+            'notes'                => 'nullable|string|max:1000',
             'items'                => 'required|array|min:1',
             'items.*.food_item_id' => 'required|exists:food_items,id',
-            'items.*.quantity'     => 'required|integer|min:1',
+            'items.*.quantity'     => 'required|integer|min:1|max:1000',
+        ], [
+            'items.required'            => 'Please add at least one item to the order.',
+            'items.min'                 => 'Please add at least one item to the order.',
+            'items.*.quantity.required' => 'Quantity is required for each item.',
+            'items.*.quantity.min'      => 'Quantity must be at least 1.',
         ]);
 
         [$subtotal, $orderItems, $totals] = $this->computeTotals($request);
+
+        if ($totals['discount'] > $subtotal) {
+            throw ValidationException::withMessages([
+                'discount' => 'Discount cannot be more than the subtotal (₨' . number_format($subtotal) . ').',
+            ]);
+        }
+        if ($totals['paid'] > $totals['total']) {
+            throw ValidationException::withMessages([
+                'amount_paid' => 'Amount paid cannot be more than the total (₨' . number_format($totals['total']) . ').',
+            ]);
+        }
 
         $foodOrder->update([
             'booking_id'     => $request->booking_id ?: null,
@@ -237,10 +284,10 @@ class FoodOrderController extends Controller
         }
 
         $discount  = (float) ($request->discount ?? 0);
-        $taxPct    = (float) ($request->tax_percent ?? 0);
+        $taxPct    = 0;
         $afterDis  = $subtotal - $discount;
-        $taxAmount = round($afterDis * ($taxPct / 100), 2);
-        $total     = round($afterDis + $taxAmount, 2);
+        $taxAmount = 0;
+        $total     = round($afterDis, 2);
         $paid      = (float) ($request->amount_paid ?? 0);
         $balance   = max(0, $total - $paid);
 
@@ -300,14 +347,14 @@ class FoodOrderController extends Controller
 
     private function bookingOptions(): array
     {
-        return Booking::with('room')
+        return Booking::with(['room', 'customer'])
             ->whereIn('status', ['Confirmed', 'Checked In'])
             ->latest()->get()
             ->map(fn ($b) => [
                 'id'          => $b->id,
                 'label'       => $b->booking_number . ' — ' . $b->guest_name . ' | Room ' . ($b->room->room_number ?? '?'),
                 'guest_name'  => $b->guest_name,
-                'father_name' => $b->father_name,
+                'father_name' => $b->father_name ?: optional($b->customer)->father_name,
                 'guest_phone' => $b->guest_phone,
                 'room_number' => $b->room->room_number ?? '',
                 'customer_id' => $b->customer_id,

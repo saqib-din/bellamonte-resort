@@ -10,12 +10,14 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Booking Select</label>
-                                <SearchSelect v-model="form.booking_id" :options="bookingOpts" placeholder="-- Booking Select --" search-placeholder="Search booking..." @change="fillFromBooking" />
+                                <SearchSelect v-model="form.booking_id" :options="bookingOpts" :invalid="!!form.errors.booking_id" placeholder="-- Booking Select --" search-placeholder="Search booking..." @change="fillFromBooking" />
+                                <div v-if="form.errors.booking_id" class="text-danger f-12 mt-1">{{ form.errors.booking_id }}</div>
                                 <small class="text-muted">Select a booking to auto-fill all details.</small>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Customer (Optional)</label>
-                                <SearchSelect v-model="form.customer_id" :options="customerOpts" placeholder="-- Customer --" search-placeholder="Search customer..." />
+                                <SearchSelect v-model="form.customer_id" :options="customerOpts" :invalid="!!form.errors.customer_id" placeholder="-- Customer --" search-placeholder="Search customer..." />
+                                <div v-if="form.errors.customer_id" class="text-danger f-12 mt-1">{{ form.errors.customer_id }}</div>
                             </div>
                         </div>
                     </div>
@@ -33,31 +35,38 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Father Name</label>
-                                <input type="text" v-model="form.father_name" class="form-control" placeholder="Father name (optional)">
+                                <input type="text" v-model="form.father_name" class="form-control" :class="{ 'is-invalid': form.errors.father_name }" placeholder="Father name (optional)">
+                                <div v-if="form.errors.father_name" class="invalid-feedback">{{ form.errors.father_name }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Phone</label>
-                                <input type="text" v-model="form.guest_phone" class="form-control" placeholder="0300-1234567">
+                                <input type="text" v-model="form.guest_phone" class="form-control" :class="{ 'is-invalid': form.errors.guest_phone }" placeholder="0300-1234567">
+                                <div v-if="form.errors.guest_phone" class="invalid-feedback">{{ form.errors.guest_phone }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Room Number</label>
-                                <input type="text" v-model="form.room_number" class="form-control" placeholder="101">
+                                <input type="text" v-model="form.room_number" class="form-control" :class="{ 'is-invalid': form.errors.room_number }" placeholder="101">
+                                <div v-if="form.errors.room_number" class="invalid-feedback">{{ form.errors.room_number }}</div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Room Type</label>
-                                <input type="text" v-model="form.room_type" class="form-control" placeholder="Deluxe">
+                                <input type="text" v-model="form.room_type" class="form-control" :class="{ 'is-invalid': form.errors.room_type }" placeholder="Deluxe">
+                                <div v-if="form.errors.room_type" class="invalid-feedback">{{ form.errors.room_type }}</div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Nights</label>
-                                <input type="number" v-model.number="form.nights" class="form-control" min="1">
+                                <input type="number" v-model.number="form.nights" class="form-control" :class="{ 'is-invalid': form.errors.nights }" min="1">
+                                <div v-if="form.errors.nights" class="invalid-feedback">{{ form.errors.nights }}</div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Check In</label>
-                                <input type="date" v-model="form.check_in" class="form-control">
+                                <input type="datetime-local" v-model="form.check_in" class="form-control" :class="{ 'is-invalid': form.errors.check_in }">
+                                <div v-if="form.errors.check_in" class="invalid-feedback">{{ form.errors.check_in }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Check Out</label>
-                                <input type="date" v-model="form.check_out" class="form-control">
+                                <input type="datetime-local" v-model="form.check_out" class="form-control" :class="{ 'is-invalid': form.errors.check_out }">
+                                <div v-if="form.errors.check_out" class="invalid-feedback">{{ form.errors.check_out }}</div>
                             </div>
                         </div>
                     </div>
@@ -76,30 +85,36 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Vehicle Number</label>
-                                <input type="text" v-model="form.vehicle_number" class="form-control text-uppercase" placeholder="LEA-1234">
+                                <input type="text" v-model="form.vehicle_number" class="form-control text-uppercase" :class="{ 'is-invalid': form.errors.vehicle_number }" placeholder="LEA-1234">
+                                <div v-if="form.errors.vehicle_number" class="invalid-feedback">{{ form.errors.vehicle_number }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Vehicle Type</label>
-                                <select v-model="form.vehicle_type" class="form-select">
+                                <select v-model="form.vehicle_type" class="form-select" :class="{ 'is-invalid': form.errors.vehicle_type }">
                                     <option value="">-- Select --</option>
                                     <option v-for="vt in vehicleTypes" :key="vt" :value="vt">{{ vt }}</option>
                                 </select>
+                                <div v-if="form.errors.vehicle_type" class="invalid-feedback">{{ form.errors.vehicle_type }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Vehicle Model</label>
-                                <input type="text" v-model="form.vehicle_model" class="form-control" placeholder="Corolla 2022">
+                                <input type="text" v-model="form.vehicle_model" class="form-control" :class="{ 'is-invalid': form.errors.vehicle_model }" placeholder="Corolla 2022">
+                                <div v-if="form.errors.vehicle_model" class="invalid-feedback">{{ form.errors.vehicle_model }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Vehicle Color</label>
-                                <input type="text" v-model="form.vehicle_color" class="form-control" placeholder="White">
+                                <input type="text" v-model="form.vehicle_color" class="form-control" :class="{ 'is-invalid': form.errors.vehicle_color }" placeholder="White">
+                                <div v-if="form.errors.vehicle_color" class="invalid-feedback">{{ form.errors.vehicle_color }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Driver Name</label>
-                                <input type="text" v-model="form.driver_name" class="form-control" placeholder="Optional">
+                                <input type="text" v-model="form.driver_name" class="form-control" :class="{ 'is-invalid': form.errors.driver_name }" placeholder="Optional">
+                                <div v-if="form.errors.driver_name" class="invalid-feedback">{{ form.errors.driver_name }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Parking Charges (₨)</label>
-                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.parking_charges" class="form-control" min="0"></div>
+                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.parking_charges" class="form-control" :class="{ 'is-invalid': form.errors.parking_charges || parkingChargesError }" min="0"></div>
+                                <div v-if="form.errors.parking_charges || parkingChargesError" class="text-danger f-13 mt-1">{{ form.errors.parking_charges || parkingChargesError }}</div>
                                 <small class="text-muted">Added to the total.</small>
                             </div>
                         </div>
@@ -113,33 +128,31 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Room Charges (₨) <span class="text-danger">*</span></label>
-                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.room_charges" class="form-control" :class="{ 'is-invalid': form.errors.room_charges }" min="0"></div>
-                                <div v-if="form.errors.room_charges" class="text-danger f-12 mt-1">{{ form.errors.room_charges }}</div>
+                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.room_charges" class="form-control" :class="{ 'is-invalid': form.errors.room_charges || roomChargesError }" min="0"></div>
+                                <div v-if="form.errors.room_charges || roomChargesError" class="text-danger f-12 mt-1">{{ form.errors.room_charges || roomChargesError }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Extra Charges (₨) <small class="text-muted">Food, Laundry, etc.</small></label>
-                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.extra_charges" class="form-control" min="0"></div>
+                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.extra_charges" class="form-control" :class="{ 'is-invalid': form.errors.extra_charges || extraChargesError }" min="0"></div>
+                                <div v-if="form.errors.extra_charges || extraChargesError" class="text-danger f-13 mt-1">{{ form.errors.extra_charges || extraChargesError }}</div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Discount (₨)</label>
-                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.discount" class="form-control" min="0"></div>
+                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.discount" class="form-control" :class="{ 'is-invalid': form.errors.discount || overDiscount }" min="0"></div>
+                                <div v-if="form.errors.discount || overDiscount" class="text-danger f-13 mt-1">{{ form.errors.discount || ('Discount cannot exceed subtotal (₨' + n(totals.subtotal) + ')') }}</div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Tax (%)</label>
-                                <div class="input-group"><input type="number" v-model.number="form.tax_percent" class="form-control" min="0" max="100"><span class="input-group-text">%</span></div>
-                            </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Amount Paid (₨)</label>
-                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.amount_paid" class="form-control" min="0"></div>
+                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.amount_paid" class="form-control" :class="{ 'is-invalid': form.errors.amount_paid || overPaid }" min="0"></div>
+                                <div v-if="form.errors.amount_paid || overPaid" class="text-danger f-13 mt-1">{{ form.errors.amount_paid || ('Amount paid cannot exceed total (₨' + n(totals.total) + ')') }}</div>
                             </div>
                         </div>
                         <div class="mt-4 p-3 rounded surface-box">
                             <div class="row text-center">
                                 <div class="col-3"><div class="text-muted f-12">Room + Extra + Parking</div><div class="fw-500">₨{{ n(totals.subtotal) }}</div></div>
-                                <div class="col-2"><div class="text-muted f-12">Discount</div><div class="fw-500 text-success">-₨{{ n(totals.discount) }}</div></div>
-                                <div class="col-2"><div class="text-muted f-12">Tax</div><div class="fw-500 text-warning">₨{{ n(totals.tax) }}</div></div>
+                                <div class="col-3"><div class="text-muted f-12">Discount</div><div class="fw-500 text-success">-₨{{ n(totals.discount) }}</div></div>
                                 <div class="col-3"><div class="text-muted f-12">Total</div><div class="fw-bold text-primary fs-5">₨{{ n(totals.total) }}</div></div>
-                                <div class="col-2"><div class="text-muted f-12">Balance</div><div class="fw-bold text-danger">₨{{ n(totals.balance) }}</div></div>
+                                <div class="col-3"><div class="text-muted f-12">Balance</div><div class="fw-bold text-danger">₨{{ n(totals.balance) }}</div></div>
                             </div>
                         </div>
                     </div>
@@ -148,7 +161,8 @@
                 <!-- Notes -->
                 <div class="card mb-4">
                     <div class="card-header"><h5 class="mb-0"><i class="ti ti-notes me-2"></i>Notes</h5></div>
-                    <div class="card-body"><textarea v-model="form.notes" class="form-control" rows="3" placeholder="Enter notes ..."></textarea></div>
+                    <div class="card-body"><textarea v-model="form.notes" class="form-control" :class="{ 'is-invalid': form.errors.notes }" rows="3" placeholder="Enter notes ..."></textarea>
+                        <div v-if="form.errors.notes" class="invalid-feedback">{{ form.errors.notes }}</div></div>
                 </div>
             </div>
 
@@ -163,7 +177,7 @@
                             <hr class="my-2">
                             <li class="mb-2"><i class="ti ti-car text-info me-1"></i><strong>Vehicle Details</strong><p class="text-muted mb-0 ms-3">Toggle on if the guest has a vehicle. Parking charges are added automatically to the total.</p></li>
                             <hr class="my-2">
-                            <li class="mb-2"><i class="ti ti-calculator text-warning me-1"></i><strong>Live Calculator</strong><p class="text-muted mb-0 ms-3">Total amount is calculated in real-time as you enter charges, discount and tax.</p></li>
+                            <li class="mb-2"><i class="ti ti-calculator text-warning me-1"></i><strong>Live Calculator</strong><p class="text-muted mb-0 ms-3">Total amount is calculated in real-time as you enter charges and discount.</p></li>
                             <hr class="my-2">
                             <li class="mb-2"><i class="ti ti-credit-card text-secondary me-1"></i><strong>Payment Status</strong><p class="text-muted mb-0 ms-3">Status is set automatically to Paid, Unpaid, or Partial based on the amount received.</p></li>
                             <hr class="my-2">
@@ -178,9 +192,10 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Payment Method <span class="text-danger">*</span></label>
-                            <select v-model="form.payment_method" class="form-select">
+                            <select v-model="form.payment_method" class="form-select" :class="{ 'is-invalid': form.errors.payment_method }">
                                 <option v-for="m in paymentMethods" :key="m" :value="m">{{ m }}</option>
                             </select>
+                            <div v-if="form.errors.payment_method" class="invalid-feedback">{{ form.errors.payment_method }}</div>
                         </div>
                         <div class="mb-0">
                             <label class="form-label">Issue Date <span class="text-danger">*</span></label>
@@ -198,7 +213,6 @@
                         <div class="d-flex justify-content-between mb-2"><span class="text-muted f-13">Extra Charges</span><span>₨{{ n(form.extra_charges) }}</span></div>
                         <div class="d-flex justify-content-between mb-2" v-if="form.has_vehicle && Number(form.parking_charges) > 0"><span class="text-muted f-13">Parking Charges</span><span>₨{{ n(form.parking_charges) }}</span></div>
                         <div class="d-flex justify-content-between mb-2"><span class="text-muted f-13">Discount</span><span class="text-success">-₨{{ n(totals.discount) }}</span></div>
-                        <div class="d-flex justify-content-between mb-2"><span class="text-muted f-13">Tax</span><span>₨{{ n(totals.tax) }}</span></div>
                         <hr>
                         <div class="d-flex justify-content-between mb-2"><span class="fw-500">Total</span><span class="fw-bold text-primary">₨{{ n(totals.total) }}</span></div>
                         <div class="d-flex justify-content-between mb-2"><span class="text-muted f-13">Amount Paid</span><span class="text-success">₨{{ n(totals.paid) }}</span></div>
@@ -209,7 +223,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary" :disabled="form.processing"><i class="ti ti-file-invoice me-2"></i>{{ mode === 'edit' ? 'Update Invoice' : 'Generate Invoice' }}</button>
+                            <button type="submit" class="btn btn-primary" :disabled="form.processing || overDiscount || overPaid || !!roomChargesError || !!extraChargesError || !!parkingChargesError"><i class="ti ti-file-invoice me-2"></i>{{ mode === 'edit' ? 'Update Invoice' : 'Generate Invoice' }}</button>
                             <Link href="/billing" class="btn btn-outline-secondary"><i class="ti ti-arrow-left me-2"></i>Cancel</Link>
                         </div>
                     </div>
@@ -257,7 +271,6 @@ const form = useForm({
     room_charges:    Number(b.room_charges ?? 0),
     extra_charges:   Number(b.extra_charges ?? 0),
     discount:        Number(b.discount ?? 0),
-    tax_percent:     Number(b.tax_percent ?? 0),
     amount_paid:     Number(b.amount_paid ?? 0),
     payment_method:  b.payment_method ?? 'Cash',
     issue_date:      b.issue_date ?? today,
@@ -272,14 +285,38 @@ const totals = computed(() => {
     const extra   = Number(form.extra_charges) || 0;
     const parking = form.has_vehicle ? (Number(form.parking_charges) || 0) : 0;
     const dis     = Number(form.discount) || 0;
-    const taxPct  = Number(form.tax_percent) || 0;
     const paid    = Number(form.amount_paid) || 0;
     const subtotal = room + extra + parking;
     const afterDis = subtotal - dis;
-    const tax      = Math.round(afterDis * (taxPct / 100) * 100) / 100;
-    const total    = Math.round((afterDis + tax) * 100) / 100;
+    const total    = Math.round(afterDis * 100) / 100;
     const balance  = Math.max(0, Math.round((total - paid) * 100) / 100);
-    return { subtotal, discount: dis, tax, total, paid, balance };
+    return { subtotal, discount: dis, total, paid, balance };
+});
+
+const overDiscount = computed(() => (Number(form.discount) || 0) > totals.value.subtotal);
+const overPaid     = computed(() => (Number(form.amount_paid) || 0) > totals.value.total);
+
+const MAX_MONEY = 9999999;
+const roomChargesError = computed(() => {
+    const raw = form.room_charges;
+    if (raw === '' || raw === null || raw === undefined || isNaN(Number(raw))) return 'Room charges are required.';
+    const v = Number(raw);
+    if (v < 0) return 'Room charges cannot be negative.';
+    if (v > MAX_MONEY) return 'Room charges cannot exceed ₨9,999,999.';
+    return '';
+});
+const extraChargesError = computed(() => {
+    const v = Number(form.extra_charges) || 0;
+    if (v < 0) return 'Extra charges cannot be negative.';
+    if (v > MAX_MONEY) return 'Extra charges cannot exceed ₨9,999,999.';
+    return '';
+});
+const parkingChargesError = computed(() => {
+    if (!form.has_vehicle) return '';
+    const v = Number(form.parking_charges) || 0;
+    if (v < 0) return 'Parking charges cannot be negative.';
+    if (v > MAX_MONEY) return 'Parking charges cannot exceed ₨9,999,999.';
+    return '';
 });
 
 const n = (v) => Number(v || 0).toLocaleString('en-US');

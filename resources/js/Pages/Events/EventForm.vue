@@ -26,11 +26,13 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Short Description</label>
-                            <textarea v-model="form.short_description" class="form-control" rows="2" placeholder="Brief summary (shown in listing)"></textarea>
+                            <textarea v-model="form.short_description" class="form-control" :class="{ 'is-invalid': form.errors.short_description }" rows="2" placeholder="Brief summary (shown in listing)"></textarea>
+                            <div v-if="form.errors.short_description" class="invalid-feedback">{{ form.errors.short_description }}</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Full Description</label>
-                            <textarea v-model="form.description" class="form-control" rows="4" placeholder="Detailed description for event detail page"></textarea>
+                            <textarea v-model="form.description" class="form-control" :class="{ 'is-invalid': form.errors.description }" rows="4" placeholder="Detailed description for event detail page"></textarea>
+                            <div v-if="form.errors.description" class="invalid-feedback">{{ form.errors.description }}</div>
                         </div>
                     </div>
                 </div>
@@ -41,19 +43,23 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Section 1 Title</label>
-                            <input type="text" v-model="form.section_1_title" class="form-control" placeholder="e.g. Luxury & Comfort">
+                            <input type="text" v-model="form.section_1_title" class="form-control" :class="{ 'is-invalid': form.errors.section_1_title }" placeholder="e.g. Luxury & Comfort">
+                            <div v-if="form.errors.section_1_title" class="invalid-feedback">{{ form.errors.section_1_title }}</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Section 1 Text</label>
-                            <textarea v-model="form.section_1_text" class="form-control" rows="3"></textarea>
+                            <textarea v-model="form.section_1_text" class="form-control" :class="{ 'is-invalid': form.errors.section_1_text }" rows="3"></textarea>
+                            <div v-if="form.errors.section_1_text" class="invalid-feedback">{{ form.errors.section_1_text }}</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Section 2 Title</label>
-                            <input type="text" v-model="form.section_2_title" class="form-control" placeholder="e.g. Perfect Destination">
+                            <input type="text" v-model="form.section_2_title" class="form-control" :class="{ 'is-invalid': form.errors.section_2_title }" placeholder="e.g. Perfect Destination">
+                            <div v-if="form.errors.section_2_title" class="invalid-feedback">{{ form.errors.section_2_title }}</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Section 2 Text</label>
-                            <textarea v-model="form.section_2_text" class="form-control" rows="3"></textarea>
+                            <textarea v-model="form.section_2_text" class="form-control" :class="{ 'is-invalid': form.errors.section_2_text }" rows="3"></textarea>
+                            <div v-if="form.errors.section_2_text" class="invalid-feedback">{{ form.errors.section_2_text }}</div>
                         </div>
                     </div>
                 </div>
@@ -66,7 +72,8 @@
                             <div class="col-md-4 mb-3" v-for="n in 3" :key="n">
                                 <label class="form-label">Image {{ n }}</label>
                                 <img v-if="detailPreviews[n] || event?.[`detail_image_${n}_url`]" :src="detailPreviews[n] || event[`detail_image_${n}_url`]" class="img-fluid mb-2 rounded" style="max-height:100px; object-fit:cover;">
-                                <input type="file" class="form-control" accept="image/*" @change="onDetailFile(n, $event)">
+                                <input type="file" class="form-control" :class="{ 'is-invalid': form.errors[`detail_image_${n}`] }" accept="image/*" @change="onDetailFile(n, $event)">
+                                <div v-if="form.errors[`detail_image_${n}`]" class="invalid-feedback">{{ form.errors[`detail_image_${n}`] }}</div>
                             </div>
                         </div>
                     </div>
@@ -92,7 +99,8 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Sort Order</label>
-                            <input type="number" v-model.number="form.sort_order" class="form-control" min="0">
+                            <input type="number" v-model.number="form.sort_order" class="form-control" :class="{ 'is-invalid': form.errors.sort_order }" min="0">
+                            <div v-if="form.errors.sort_order" class="invalid-feedback">{{ form.errors.sort_order }}</div>
                             <small class="text-muted">Lower number = shown first</small>
                         </div>
                         <div class="form-check form-switch">

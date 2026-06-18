@@ -48,8 +48,8 @@ class Bill extends Model
 
     protected $casts = [
         'issue_date'      => 'date',
-        'check_in'        => 'date',
-        'check_out'       => 'date',
+        'check_in'        => 'datetime',
+        'check_out'       => 'datetime',
         'has_vehicle'     => 'boolean',
         'parking_charges' => 'decimal:2',
     ];
@@ -61,6 +61,15 @@ class Bill extends Model
             if (empty($bill->uuid)) {
                 $bill->uuid = (string) Str::uuid();
             }
+        });
+
+        // Keep the linked booking's payment status in sync with this invoice
+        static::saved(function (Bill $bill) {
+            $bill->syncBookingPaymentStatus();
+        });
+
+        static::deleted(function (Bill $bill) {
+            $bill->syncBookingPaymentStatus(true);
         });
     }
 
@@ -127,15 +136,14 @@ class Bill extends Model
         $extra      = $this->extra_charges ?? 0;
         $parking    = $this->parking_charges ?? 0;   // ← vehicle parking
         $discount   = $this->discount ?? 0;
-        $taxPercent = $this->tax_percent ?? 0;
         $paid       = $this->amount_paid ?? 0;
 
-        $subtotal      = $room + $extra + $parking;   // parking subtotal mein add
+        $subtotal      = $room + $extra + $parking;   // parking subtotal  add
         $afterDiscount = $subtotal - $discount;
-        $taxAmount     = ($afterDiscount * $taxPercent) / 100;
-        $total         = $afterDiscount + $taxAmount;
+        $total         = $afterDiscount;
 
-        $this->tax_amount   = $taxAmount;
+        $this->tax_percent  = 0;
+        $this->tax_amount   = 0;
         $this->total_amount = $total;
         $this->balance_due  = $total - $paid;
 
@@ -146,5 +154,31 @@ class Bill extends Model
         };
 
         return $this;
+    }
+
+    /**
+     * Sync the linked booking's payment_status with this invoice.
+     * Paid → Paid, Partial → Partial, Unpaid → Pending. Invoice deleted → Pending.
+     */
+    public function syncBookingPaymentStatus(bool $invoiceDeleted = false): void
+    {
+        if (! $this->booking_id) {
+            return;
+        }
+
+        $booking = $this->booking;
+        if (! $booking) {
+            return;
+        }
+
+        $status = $invoiceDeleted ? 'Pending' : match ($this->status) {
+            'Paid'    => 'Paid',
+            'Partial' => 'Partial',
+            default   => 'Pending',
+        };
+
+        if ($booking->payment_status !== $status) {
+            $booking->update(['payment_status' => $status]);
+        }
     }
 }

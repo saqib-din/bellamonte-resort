@@ -30,7 +30,8 @@
         </div>
         <div class="mb-3">
             <label class="form-label">Description</label>
-            <textarea v-model="editForm.description" class="form-control" rows="2"></textarea>
+            <textarea v-model="editForm.description" class="form-control" :class="{ 'is-invalid': editForm.errors.description }" rows="2"></textarea>
+            <div v-if="editForm.errors.description" class="invalid-feedback">{{ editForm.errors.description }}</div>
         </div>
         <div class="mb-3">
             <label class="form-label">Price (₨)</label>
@@ -66,7 +67,8 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Description</label>
-                            <textarea v-model="addForm.description" class="form-control" rows="2" placeholder="Optional..."></textarea>
+                            <textarea v-model="addForm.description" class="form-control" :class="{ 'is-invalid': addForm.errors.description }" rows="2" placeholder="Optional..."></textarea>
+                            <div v-if="addForm.errors.description" class="invalid-feedback">{{ addForm.errors.description }}</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Price (₨) <span class="text-danger">*</span></label>
@@ -108,14 +110,21 @@
 
             <div class="card">
                 <div class="card-header"><h5 class="mb-0">All Menu Items</h5></div>
-                <div class="card-body table-card p-0">
+                <div class="card-body table-card">
+                    <TableToolbar v-model:perPage="filters.per_page" v-model:search="filters.search" :per-page-options="[10, 15, 25, 50, 100]" />
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
                             <thead class="table-light">
-                                <tr><th>Name</th><th>Category</th><th>Price</th><th>Available</th><th class="text-end">Action</th></tr>
+                                <tr>
+                                    <th role="button" @click="sortBy('name')">Name <SortIcon col="name" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th>Category</th>
+                                    <th role="button" @click="sortBy('price')">Price <SortIcon col="price" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('is_available')">Available <SortIcon col="is_available" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th class="text-end">Action</th>
+                                </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="item in items" :key="item.id">
+                                <tr v-for="item in items.data" :key="item.id">
                                     <td>
                                         <h6 class="mb-0">{{ item.name }}</h6>
                                         <small v-if="item.description" class="text-muted">{{ truncate(item.description, 40) }}</small>
@@ -131,12 +140,15 @@
                                         <a href="javascript:void(0)" class="avtar avtar-xs btn-link-secondary" title="Delete" @click="askDelete(item)"><i class="ti ti-trash f-18"></i></a>
                                     </td>
                                 </tr>
-                                <tr v-if="!items.length">
-                                    <td colspan="5" class="text-center py-4 text-muted">No items yet.</td>
+                                <tr v-if="!items.data.length">
+                                    <td colspan="5" class="text-center py-4 text-muted">No items found.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+                    <TableFooter :from="items.from" :to="items.to" :total="items.total"
+                        :can-prev="!!items.prev_page_url" :can-next="!!items.next_page_url"
+                        @prev="go(items.prev_page_url)" @next="go(items.next_page_url)" />
                 </div>
             </div>
         </div>
@@ -144,18 +156,43 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import { Link, useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import AppModal from '@/Components/AppModal.vue';
 import { swalDelete } from '@/lib/swalDelete';
+import TableToolbar from '@/Components/TableToolbar.vue';
+import TableFooter from '@/Components/TableFooter.vue';
+import SortIcon from '@/Components/SortIcon.vue';
 
 defineOptions({ layout: AppLayout });
 
-defineProps({
-    items:      { type: Array, default: () => [] },
+const props = defineProps({
+    items:      { type: Object, required: true },
     categories: { type: Array, default: () => [] },
+    filters:    { type: Object, default: () => ({}) },
 });
+
+const filters = reactive({
+    search:   props.filters.search   ?? '',
+    sort:     props.filters.sort     ?? 'created_at',
+    dir:      props.filters.dir      ?? 'desc',
+    per_page: props.filters.per_page ?? 15,
+});
+function reload() {
+    router.get('/food/items', {
+        search: filters.search || undefined, sort: filters.sort, dir: filters.dir, per_page: filters.per_page,
+    }, { preserveState: true, preserveScroll: true, replace: true });
+}
+let st = null;
+watch(() => filters.search, () => { clearTimeout(st); st = setTimeout(reload, 350); });
+watch(() => filters.per_page, reload);
+function sortBy(col) {
+    if (filters.sort === col) filters.dir = filters.dir === 'asc' ? 'desc' : 'asc';
+    else { filters.sort = col; filters.dir = 'asc'; }
+    reload();
+}
+function go(url) { if (url) router.get(url, {}, { preserveState: true, preserveScroll: true }); }
 
 const n = (v) => Number(v || 0).toLocaleString('en-US');
 const truncate = (s, len) => (s && s.length > len ? s.slice(0, len) + '…' : s);

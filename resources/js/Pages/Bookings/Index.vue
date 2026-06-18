@@ -66,8 +66,11 @@
                                             <i class="ti ti-logout f-18"></i>
                                         </button>
                                         <Link :href="`/bookings/${b.uuid}`" class="avtar avtar-xs btn-link-secondary" title="View"><i class="ti ti-eye f-18"></i></Link>
-                                        <Link :href="`/bookings/${b.uuid}/edit`" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></Link>
-                                        <button class="avtar avtar-xs btn-link-secondary" title="Delete" @click="askDelete(b)"><i class="ti ti-trash f-18"></i></button>
+                                        <template v-if="!b.locked">
+                                            <Link :href="`/bookings/${b.uuid}/edit`" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></Link>
+                                            <button class="avtar avtar-xs btn-link-secondary" title="Delete" @click="askDelete(b)"><i class="ti ti-trash f-18"></i></button>
+                                        </template>
+                                        <span v-else class="avtar avtar-xs text-success" :title="`Invoice ${b.invoice_number || ''} fully paid — locked`"><i class="ti ti-lock f-18"></i></span>
                                     </td>
                                 </tr>
                                 <tr v-if="!bookings.data.length">

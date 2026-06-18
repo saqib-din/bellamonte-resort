@@ -21,7 +21,8 @@
     <AppModal :show="!!editTarget" title="Edit Category" :max-width="440" @close="editTarget = null">
         <div class="mb-3">
             <label class="form-label">Icon</label>
-            <input type="text" v-model="editForm.icon" class="form-control" maxlength="5">
+            <input type="text" v-model="editForm.icon" class="form-control" :class="{ 'is-invalid': editForm.errors.icon }" maxlength="5">
+            <div v-if="editForm.errors.icon" class="invalid-feedback">{{ editForm.errors.icon }}</div>
         </div>
         <div class="mb-3">
             <label class="form-label">Name</label>
@@ -44,7 +45,8 @@
                     <form @submit.prevent="addCategory">
                         <div class="mb-3">
                             <label class="form-label">Icon (Emoji)</label>
-                            <input type="text" v-model="addForm.icon" class="form-control" placeholder="🍛" maxlength="5">
+                            <input type="text" v-model="addForm.icon" class="form-control" :class="{ 'is-invalid': addForm.errors.icon }" placeholder="🍛" maxlength="5">
+                            <div v-if="addForm.errors.icon" class="invalid-feedback">{{ addForm.errors.icon }}</div>
                             <small class="text-muted">Pick from the panel below or paste an emoji.</small>
                         </div>
                         <div class="mb-3">
@@ -95,30 +97,42 @@
 
             <div class="card">
                 <div class="card-header"><h5 class="mb-0">All Categories</h5></div>
-                <div class="card-body p-0">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr><th>Icon</th><th>Name</th><th>Items</th><th>Status</th><th class="text-end">Action</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="cat in categories" :key="cat.id">
-                                <td class="fs-4">{{ cat.icon }}</td>
-                                <td><h6 class="mb-0">{{ cat.name }}</h6></td>
-                                <td><span class="badge bg-light-primary">{{ cat.items_count }} items</span></td>
-                                <td>
-                                    <span v-if="cat.is_active" class="badge bg-light-success text-success">Active</span>
-                                    <span v-else class="badge bg-light-danger text-danger">Inactive</span>
-                                </td>
-                                <td class="text-end">
-                                    <a href="javascript:void(0)" class="avtar avtar-xs btn-link-secondary" title="Edit" @click="openEdit(cat)"><i class="ti ti-edit f-18"></i></a>
-                                    <a href="javascript:void(0)" class="avtar avtar-xs btn-link-secondary" title="Delete" @click="askDelete(cat)"><i class="ti ti-trash f-18"></i></a>
-                                </td>
-                            </tr>
-                            <tr v-if="!categories.length">
-                                <td colspan="5" class="text-center py-4 text-muted">No category yet — add one from the left.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="card-body table-card">
+                    <TableToolbar v-model:perPage="filters.per_page" v-model:search="filters.search" :per-page-options="[10, 15, 25, 50, 100]" />
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Icon</th>
+                                    <th role="button" @click="sortBy('name')">Name <SortIcon col="name" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('items_count')">Items <SortIcon col="items_count" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('is_active')">Status <SortIcon col="is_active" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="cat in categories.data" :key="cat.id">
+                                    <td class="fs-4">{{ cat.icon }}</td>
+                                    <td><h6 class="mb-0">{{ cat.name }}</h6></td>
+                                    <td><span class="badge bg-light-primary">{{ cat.items_count }} items</span></td>
+                                    <td>
+                                        <span v-if="cat.is_active" class="badge bg-light-success text-success">Active</span>
+                                        <span v-else class="badge bg-light-danger text-danger">Inactive</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="javascript:void(0)" class="avtar avtar-xs btn-link-secondary" title="Edit" @click="openEdit(cat)"><i class="ti ti-edit f-18"></i></a>
+                                        <a href="javascript:void(0)" class="avtar avtar-xs btn-link-secondary" title="Delete" @click="askDelete(cat)"><i class="ti ti-trash f-18"></i></a>
+                                    </td>
+                                </tr>
+                                <tr v-if="!categories.data.length">
+                                    <td colspan="5" class="text-center py-4 text-muted">No category found.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <TableFooter :from="categories.from" :to="categories.to" :total="categories.total"
+                        :can-prev="!!categories.prev_page_url" :can-next="!!categories.next_page_url"
+                        @prev="go(categories.prev_page_url)" @next="go(categories.next_page_url)" />
                 </div>
             </div>
         </div>
@@ -126,17 +140,42 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import { Link, useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import AppModal from '@/Components/AppModal.vue';
 import { swalDelete } from '@/lib/swalDelete';
+import TableToolbar from '@/Components/TableToolbar.vue';
+import TableFooter from '@/Components/TableFooter.vue';
+import SortIcon from '@/Components/SortIcon.vue';
 
 defineOptions({ layout: AppLayout });
 
-defineProps({
-    categories: { type: Array, default: () => [] },
+const props = defineProps({
+    categories: { type: Object, required: true },
+    filters:    { type: Object, default: () => ({}) },
 });
+
+const filters = reactive({
+    search:   props.filters.search   ?? '',
+    sort:     props.filters.sort     ?? 'sort_order',
+    dir:      props.filters.dir      ?? 'desc',
+    per_page: props.filters.per_page ?? 15,
+});
+function reload() {
+    router.get('/food/categories', {
+        search: filters.search || undefined, sort: filters.sort, dir: filters.dir, per_page: filters.per_page,
+    }, { preserveState: true, preserveScroll: true, replace: true });
+}
+let st = null;
+watch(() => filters.search, () => { clearTimeout(st); st = setTimeout(reload, 350); });
+watch(() => filters.per_page, reload);
+function sortBy(col) {
+    if (filters.sort === col) filters.dir = filters.dir === 'asc' ? 'desc' : 'asc';
+    else { filters.sort = col; filters.dir = 'asc'; }
+    reload();
+}
+function go(url) { if (url) router.get(url, {}, { preserveState: true, preserveScroll: true }); }
 
 const emojis = ['🍛', '🍳', '☕', '🍟', '🥗', '🍰', '🥤', '🍜', '🍕', '🥩', '🍱', '🍣'];
 

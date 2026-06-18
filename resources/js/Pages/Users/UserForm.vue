@@ -34,14 +34,16 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Phone</label>
-                                <input type="text" v-model="form.phone" class="form-control" placeholder="Enter a phone number">
+                                <input type="text" v-model="form.phone" class="form-control" :class="{ 'is-invalid': form.errors.phone }" placeholder="Enter a phone number">
+                                <div v-if="form.errors.phone" class="invalid-feedback">{{ form.errors.phone }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Status</label>
-                                <select v-model="form.status" class="form-select">
+                                <select v-model="form.status" class="form-select" :class="{ 'is-invalid': form.errors.status }">
                                     <option value="active">✅ Active</option>
                                     <option value="inactive">❌ Inactive</option>
                                 </select>
+                                <div v-if="form.errors.status" class="invalid-feedback">{{ form.errors.status }}</div>
                             </div>
                         </div>
                     </div>

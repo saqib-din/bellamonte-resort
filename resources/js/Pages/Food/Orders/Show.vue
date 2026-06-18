@@ -45,7 +45,7 @@
                             <table class="table table-sm mb-0">
                                 <tr><td class="text-muted">Subtotal</td><td class="text-end">₨{{ n(order.subtotal) }}</td></tr>
                                 <tr><td class="text-muted">Discount</td><td class="text-end text-success">-₨{{ n(order.discount) }}</td></tr>
-                                <tr><td class="text-muted">Tax ({{ order.tax_percent }}%)</td><td class="text-end">₨{{ n(order.tax_amount) }}</td></tr>
+                                <tr v-if="order.tax_amount > 0"><td class="text-muted">Tax ({{ order.tax_percent }}%)</td><td class="text-end">₨{{ n(order.tax_amount) }}</td></tr>
                                 <tr class="fw-bold"><td>Total</td><td class="text-end text-primary">₨{{ n(order.total_amount) }}</td></tr>
                                 <tr><td class="text-muted">Paid</td><td class="text-end text-success">₨{{ n(order.amount_paid) }}</td></tr>
                                 <tr class="fw-bold text-danger"><td>Balance</td><td class="text-end">₨{{ n(order.balance_due) }}</td></tr>

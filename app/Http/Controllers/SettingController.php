@@ -23,11 +23,13 @@ class SettingController extends Controller
     {
         $request->validate([
             'hotel_name'    => 'required|string|max:100',
-            'hotel_email'   => 'nullable|email',
-            'hotel_phone'   => 'nullable|string|max:20',
-            'default_tax'   => 'nullable|numeric|min:0|max:100',
-            'checkin_time'  => 'nullable',
-            'checkout_time' => 'nullable',
+            'hotel_email'   => 'nullable|email|max:150',
+            'hotel_phone'   => 'nullable|string|max:30',
+            'hotel_country' => 'nullable|string|max:100',
+            'hotel_address' => 'nullable|string|max:255',
+            'facebook'      => 'nullable|string|max:255',
+            'instagram'     => 'nullable|string|max:255',
+            'twitter'       => 'nullable|string|max:255',
             'hotel_logo'    => 'nullable|image|mimes:jpg,jpeg,png,webp,svg|max:2048',
         ]);
 

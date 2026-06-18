@@ -43,7 +43,8 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Father Name</label>
-                                <input type="text" v-model="form.father_name" class="form-control" placeholder="Father name (optional)">
+                                <input type="text" v-model="form.father_name" class="form-control" :class="{ 'is-invalid': form.errors.father_name }" placeholder="Father name (optional)">
+                                <div v-if="form.errors.father_name" class="invalid-feedback">{{ form.errors.father_name }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Phone <span class="text-danger">*</span></label>
@@ -52,11 +53,13 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">CNIC / Passport</label>
-                                <input type="text" v-model="form.guest_cnic" class="form-control" placeholder="35202-1234567-1">
+                                <input type="text" v-model="form.guest_cnic" class="form-control" :class="{ 'is-invalid': form.errors.guest_cnic }" placeholder="35202-1234567-1">
+                                <div v-if="form.errors.guest_cnic" class="invalid-feedback">{{ form.errors.guest_cnic }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Email</label>
-                                <input type="email" v-model="form.guest_email" class="form-control" placeholder="guest@email.com">
+                                <input type="email" v-model="form.guest_email" class="form-control" :class="{ 'is-invalid': form.errors.guest_email }" placeholder="guest@email.com">
+                                <div v-if="form.errors.guest_email" class="invalid-feedback">{{ form.errors.guest_email }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Adults <span class="text-danger">*</span></label>
@@ -64,6 +67,7 @@
                                     <span class="input-group-text"><i class="ti ti-users"></i></span>
                                     <input type="number" v-model="form.adults" class="form-control" min="1">
                                 </div>
+                                <div v-if="form.errors.adults" class="text-danger f-13 mt-1">{{ form.errors.adults }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Children</label>
@@ -71,37 +75,56 @@
                                     <span class="input-group-text"><i class="ti ti-users"></i></span>
                                     <input type="number" v-model="form.children" class="form-control" min="0">
                                 </div>
+                                <div v-if="form.errors.children" class="text-danger f-13 mt-1">{{ form.errors.children }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Dates -->
+                <!-- Stay Type, Dates & Rate -->
                 <div class="card mb-4">
-                    <div class="card-header"><h5 class="mb-0"><i class="ti ti-calendar me-2"></i>Check In / Check Out</h5></div>
+                    <div class="card-header"><h5 class="mb-0"><i class="ti ti-calendar me-2"></i>Stay Type, Dates &amp; Rate</h5></div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Check In Date <span class="text-danger">*</span></label>
+                                <label class="form-label">Stay Type <span class="text-danger">*</span></label>
+                                <select v-model="form.rate_type" class="form-select" :class="{ 'is-invalid': form.errors.rate_type }">
+                                    <option value="Night">🌙 Per Night</option>
+                                    <option value="Day">☀️ Per Day</option>
+                                    <option value="Hourly">⏱️ Per Hour</option>
+                                </select>
+                                <div v-if="form.errors.rate_type" class="invalid-feedback">{{ form.errors.rate_type }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Rate <small class="text-muted">({{ rateLabel }})</small> <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₨</span>
+                                    <input type="number" v-model.number="form.rate" class="form-control" :class="{ 'is-invalid': form.errors.rate }" min="0" placeholder="0">
+                                </div>
+                                <div v-if="form.errors.rate" class="text-danger f-12 mt-1">{{ form.errors.rate }}</div>
+                                <small v-else class="text-muted">Auto-filled from room — edit for day/hourly.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Check In <small class="text-muted">(date &amp; time)</small> <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="ti ti-calendar-event"></i></span>
-                                    <input type="date" v-model="form.check_in" class="form-control" :class="{ 'is-invalid': form.errors.check_in }">
+                                    <input type="datetime-local" v-model="form.check_in" class="form-control" :class="{ 'is-invalid': form.errors.check_in }">
                                 </div>
                                 <div v-if="form.errors.check_in" class="invalid-feedback d-block">{{ form.errors.check_in }}</div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Check Out Date <span class="text-danger">*</span></label>
+                                <label class="form-label">Check Out <small class="text-muted">(date &amp; time)</small> <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="ti ti-calendar-event"></i></span>
-                                    <input type="date" v-model="form.check_out" class="form-control" :class="{ 'is-invalid': form.errors.check_out }">
+                                    <input type="datetime-local" v-model="form.check_out" class="form-control" :class="{ 'is-invalid': form.errors.check_out }">
                                 </div>
                                 <div v-if="form.errors.check_out" class="invalid-feedback d-block">{{ form.errors.check_out }}</div>
                             </div>
-                            <div class="col-12" v-if="nights > 0 && selectedRoom">
+                            <div class="col-12" v-if="units > 0">
                                 <div class="alert alert-success mb-0 py-2">
                                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                        <span><i class="ti ti-moon me-1"></i> Nights: <strong>{{ nights }}</strong></span>
-                                        <span><i class="ti ti-currency-rupee me-1"></i> Per Night: <strong>₨{{ n(selectedRoom.price) }}</strong></span>
+                                        <span><i class="ti ti-clock me-1"></i> {{ unitLabel }}: <strong>{{ units }}</strong></span>
+                                        <span><i class="ti ti-currency-rupee me-1"></i> {{ rateLabel }}: <strong>₨{{ n(form.rate) }}</strong></span>
                                         <span class="fs-5"><i class="ti ti-calculator me-1"></i> Total: <strong class="text-success">₨{{ n(total) }}</strong></span>
                                     </div>
                                 </div>
@@ -117,11 +140,13 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Special Requests (Guest)</label>
-                                <textarea v-model="form.special_requests" class="form-control" rows="3" placeholder="Any special requests..."></textarea>
+                                <textarea v-model="form.special_requests" class="form-control" :class="{ 'is-invalid': form.errors.special_requests }" rows="3" placeholder="Any special requests..."></textarea>
+                                <div v-if="form.errors.special_requests" class="invalid-feedback">{{ form.errors.special_requests }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Admin Notes</label>
-                                <textarea v-model="form.notes" class="form-control" rows="3" placeholder="Internal notes..."></textarea>
+                                <textarea v-model="form.notes" class="form-control" :class="{ 'is-invalid': form.errors.notes }" rows="3" placeholder="Internal notes..."></textarea>
+                                <div v-if="form.errors.notes" class="invalid-feedback">{{ form.errors.notes }}</div>
                             </div>
                         </div>
                     </div>
@@ -145,9 +170,10 @@
                     <div class="card-header"><h5 class="mb-0"><i class="ti ti-settings me-2"></i>Booking Status</h5></div>
                     <div class="card-body">
                         <label class="form-label">Booking Status <span class="text-danger">*</span></label>
-                        <select v-model="form.status" class="form-select">
+                        <select v-model="form.status" class="form-select" :class="{ 'is-invalid': form.errors.status }">
                             <option v-for="s in statusOptions" :key="s.value" :value="s.value">{{ s.icon }} {{ s.value }}</option>
                         </select>
+                        <div v-if="form.errors.status" class="invalid-feedback">{{ form.errors.status }}</div>
                     </div>
                 </div>
 
@@ -156,15 +182,17 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Payment Status</label>
-                            <select v-model="form.payment_status" class="form-select">
+                            <select v-model="form.payment_status" class="form-select" :class="{ 'is-invalid': form.errors.payment_status }">
                                 <option v-for="ps in paymentStatuses" :key="ps" :value="ps">{{ ps }}</option>
                             </select>
+                            <div v-if="form.errors.payment_status" class="invalid-feedback">{{ form.errors.payment_status }}</div>
                         </div>
                         <div class="mb-0">
                             <label class="form-label">Payment Method</label>
-                            <select v-model="form.payment_method" class="form-select">
+                            <select v-model="form.payment_method" class="form-select" :class="{ 'is-invalid': form.errors.payment_method }">
                                 <option v-for="m in paymentMethods" :key="m" :value="m">{{ m }}</option>
                             </select>
+                            <div v-if="form.errors.payment_method" class="invalid-feedback">{{ form.errors.payment_method }}</div>
                         </div>
                         <div v-if="mode === 'edit' && booking" class="alert alert-info py-2 mb-0 mt-3">
                             <small><i class="ti ti-wallet me-1"></i> Remaining: <strong>₨{{ n(booking.remaining) }}</strong></small>
@@ -206,7 +234,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import SearchSelect from '@/Components/SearchSelect.vue';
 
@@ -217,8 +245,10 @@ const props = defineProps({
     customers: { type: Array, default: () => [] },
 });
 
-const today    = new Date().toISOString().slice(0, 10);
-const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+const pad     = (x) => String(x).padStart(2, '0');
+const dtLocal = (d, h, mm) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(h)}:${pad(mm)}`;
+const today    = dtLocal(new Date(), 14, 0);
+const tomorrow = dtLocal(new Date(Date.now() + 86400000), 12, 0);
 
 const b = props.booking || {};
 const form = useForm({
@@ -233,6 +263,8 @@ const form = useForm({
     children:         b.children ?? 0,
     check_in:         b.check_in ?? today,
     check_out:        b.check_out ?? tomorrow,
+    rate_type:        b.rate_type ?? 'Night',
+    rate:             b.room_price != null ? Number(b.room_price) : '',
     payment_status:   b.payment_status ?? 'Pending',
     payment_method:   b.payment_method ?? 'Cash',
     status:           b.status ?? 'Confirmed',
@@ -262,23 +294,37 @@ const customerOpts = computed(() => props.customers.map((c) => ({
     label: `${c.name} — ${c.phone}`,
 })));
 
-const nights = computed(() => {
+const rateLabel = computed(() => (form.rate_type === 'Hourly' ? 'Per Hour' : form.rate_type === 'Day' ? 'Per Day' : 'Per Night'));
+const unitLabel = computed(() => (form.rate_type === 'Hourly' ? 'Hours' : form.rate_type === 'Day' ? 'Days' : 'Nights'));
+
+const units = computed(() => {
     if (!form.check_in || !form.check_out) return 0;
-    const d = Math.ceil((new Date(form.check_out) - new Date(form.check_in)) / 86400000);
-    return d > 0 ? d : 0;
+    const a = new Date(form.check_in);
+    const b2 = new Date(form.check_out);
+    const ms = b2 - a;
+    if (ms <= 0) return 0;
+    if (form.rate_type === 'Hourly') return Math.max(1, Math.ceil(ms / 3600000));
+    const da = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+    const db = new Date(b2.getFullYear(), b2.getMonth(), b2.getDate());
+    return Math.max(1, Math.round((db - da) / 86400000));
 });
 
-const total = computed(() => (selectedRoom.value ? nights.value * selectedRoom.value.price : 0));
+const total = computed(() => (Number(form.rate) || 0) * units.value);
+
+watch(() => form.room_id, () => {
+    if (selectedRoom.value) form.rate = selectedRoom.value.price;
+});
 
 const n = (v) => Number(v || 0).toLocaleString('en-US');
 
 function fillCustomer() {
     const c = props.customers.find((x) => x.id === form.customer_id);
     if (!c) return;
-    form.guest_name  = c.name || '';
-    form.guest_phone = c.phone || '';
-    form.guest_cnic  = c.cnic || '';
-    form.guest_email = c.email || '';
+    form.guest_name   = c.name || '';
+    form.father_name  = c.father_name || '';
+    form.guest_phone  = c.phone || '';
+    form.guest_cnic   = c.cnic || '';
+    form.guest_email  = c.email || '';
 }
 
 function submit() {

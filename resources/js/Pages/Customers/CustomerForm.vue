@@ -34,37 +34,44 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Gender</label>
-                                <select v-model="form.gender" class="form-select">
+                                <select v-model="form.gender" class="form-select" :class="{ 'is-invalid': form.errors.gender }">
                                     <option value="">-- Select --</option>
                                     <option v-for="g in ['Male','Female','Other']" :key="g" :value="g">{{ g }}</option>
                                 </select>
+                                <div v-if="form.errors.gender" class="invalid-feedback">{{ form.errors.gender }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Date of Birth</label>
-                                <input type="date" v-model="form.dob" class="form-control">
+                                <input type="date" v-model="form.dob" class="form-control" :class="{ 'is-invalid': form.errors.dob }">
+                                <div v-if="form.errors.dob" class="invalid-feedback">{{ form.errors.dob }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Nationality</label>
-                                <input type="text" v-model="form.nationality" class="form-control">
+                                <input type="text" v-model="form.nationality" class="form-control" :class="{ 'is-invalid': form.errors.nationality }">
+                                <div v-if="form.errors.nationality" class="invalid-feedback">{{ form.errors.nationality }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">City</label>
-                                <input type="text" v-model="form.city" class="form-control" placeholder="Lahore">
+                                <input type="text" v-model="form.city" class="form-control" :class="{ 'is-invalid': form.errors.city }" placeholder="Lahore">
+                                <div v-if="form.errors.city" class="invalid-feedback">{{ form.errors.city }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Status</label>
-                                <select v-model="form.status" class="form-select">
+                                <select v-model="form.status" class="form-select" :class="{ 'is-invalid': form.errors.status }">
                                     <option value="Active">✅ Active</option>
                                     <option value="Blacklisted">🚫 Blacklisted</option>
                                 </select>
+                                <div v-if="form.errors.status" class="invalid-feedback">{{ form.errors.status }}</div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Address</label>
-                                <textarea v-model="form.address" class="form-control" rows="2" placeholder="House #, Street, Area, City..."></textarea>
+                                <textarea v-model="form.address" class="form-control" :class="{ 'is-invalid': form.errors.address }" rows="2" placeholder="House #, Street, Area, City..."></textarea>
+                                <div v-if="form.errors.address" class="invalid-feedback">{{ form.errors.address }}</div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Notes <small class="text-muted">(Admin only)</small></label>
-                                <textarea v-model="form.notes" class="form-control" rows="2" placeholder="Enter a note ..."></textarea>
+                                <textarea v-model="form.notes" class="form-control" :class="{ 'is-invalid': form.errors.notes }" rows="2" placeholder="Enter a note ..."></textarea>
+                                <div v-if="form.errors.notes" class="invalid-feedback">{{ form.errors.notes }}</div>
                             </div>
                         </div>
                     </div>

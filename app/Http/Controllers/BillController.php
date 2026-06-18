@@ -6,6 +6,7 @@ use App\Models\Bill;
 use App\Models\Booking;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class BillController extends Controller
@@ -38,8 +39,8 @@ class BillController extends Controller
             'guest_phone'    => $b->guest_phone,
             'room_number'    => $b->room_number,
             'room_type'      => $b->room_type,
-            'check_in'       => optional($b->check_in)->format('d M Y'),
-            'check_out'      => optional($b->check_out)->format('d M Y'),
+            'check_in'       => optional($b->check_in)->format('d M Y, h:i A'),
+            'check_out'      => optional($b->check_out)->format('d M Y, h:i A'),
             'payment_method' => $b->payment_method,
             'total_amount'   => $b->total_amount,
             'status'         => $b->status,
@@ -89,6 +90,11 @@ class BillController extends Controller
 
     public function edit(Bill $bill)
     {
+        if ($bill->status === 'Paid') {
+            return redirect()->route('billing.show', $bill)
+                ->with('error', 'This invoice is fully paid and can only be viewed or deleted.');
+        }
+
         return Inertia::render('Billing/Edit', [
             'bookings'  => $this->bookingOptions(Booking::with(['room', 'customer'])->latest()->get()),
             'customers' => $this->customerOptions(),
@@ -102,8 +108,8 @@ class BillController extends Controller
                 'guest_phone'     => $bill->guest_phone,
                 'room_number'     => $bill->room_number,
                 'room_type'       => $bill->room_type,
-                'check_in'        => optional($bill->check_in)->format('Y-m-d'),
-                'check_out'       => optional($bill->check_out)->format('Y-m-d'),
+                'check_in'        => optional($bill->check_in)->format('Y-m-d\TH:i'),
+                'check_out'       => optional($bill->check_out)->format('Y-m-d\TH:i'),
                 'nights'          => $bill->nights,
                 'has_vehicle'     => (bool) $bill->has_vehicle,
                 'vehicle_number'  => $bill->vehicle_number,
@@ -126,6 +132,11 @@ class BillController extends Controller
 
     public function update(Request $request, Bill $bill)
     {
+        if ($bill->status === 'Paid') {
+            return redirect()->route('billing.index')
+                ->with('error', 'This invoice is fully paid and can only be viewed or deleted.');
+        }
+
         $this->validateBill($request);
 
         $this->fillBill($bill, $request);
@@ -153,23 +164,60 @@ class BillController extends Controller
     private function validateBill(Request $request): void
     {
         $request->validate([
-            'guest_name'      => 'required|string|max:100',
-            'father_name'     => 'nullable|string|max:100',
-            'room_charges'    => 'required|numeric|min:0',
-            'extra_charges'   => 'nullable|numeric|min:0',
+            'booking_id'      => 'nullable|exists:bookings,id',
+            'customer_id'     => 'nullable|exists:customers,id',
+            'guest_name'      => 'required|string|max:50',
+            'father_name'     => 'nullable|string|max:60',
+            'guest_phone'     => 'nullable|string|max:20',
+            'room_number'     => 'nullable|string|max:20',
+            'room_type'       => 'nullable|string|max:100',
+            'check_in'        => 'nullable|date',
+            'check_out'       => 'nullable|date',
+            'nights'          => 'nullable|integer|min:0|max:3650',
+            'room_charges'    => 'required|numeric|min:0|max:9999999',
+            'extra_charges'   => 'nullable|numeric|min:0|max:9999999',
             'discount'        => 'nullable|numeric|min:0',
-            'tax_percent'     => 'nullable|numeric|min:0|max:100',
             'amount_paid'     => 'nullable|numeric|min:0',
-            'payment_method'  => 'required',
+            'payment_method'  => 'required|string|max:50',
             'issue_date'      => 'required|date',
+            'notes'           => 'nullable|string|max:2000',
             'has_vehicle'     => 'nullable|boolean',
             'vehicle_number'  => 'nullable|string|max:30',
             'vehicle_type'    => 'nullable|in:Car,SUV,Van,Bike,Jeep,Other',
             'vehicle_model'   => 'nullable|string|max:50',
             'vehicle_color'   => 'nullable|string|max:30',
             'driver_name'     => 'nullable|string|max:100',
-            'parking_charges' => 'nullable|numeric|min:0',
+            'parking_charges' => 'nullable|numeric|min:0|max:9999999',
+        ], [
+            'room_charges.required' => 'Room charges are required.',
+            'room_charges.numeric'  => 'Room charges must be a valid number.',
+            'room_charges.min'      => 'Room charges cannot be negative.',
+            'room_charges.max'      => 'Room charges cannot exceed ₨9,999,999.',
+            'extra_charges.numeric' => 'Extra charges must be a valid number.',
+            'extra_charges.min'     => 'Extra charges cannot be negative.',
+            'extra_charges.max'     => 'Extra charges cannot exceed ₨9,999,999.',
+            'parking_charges.numeric' => 'Parking charges must be a valid number.',
+            'parking_charges.min'     => 'Parking charges cannot be negative.',
+            'parking_charges.max'     => 'Parking charges cannot exceed ₨9,999,999.',
         ]);
+
+        $subtotal = (float) ($request->room_charges ?? 0)
+            + (float) ($request->extra_charges ?? 0)
+            + ($request->boolean('has_vehicle') ? (float) ($request->parking_charges ?? 0) : 0);
+        $discount = (float) ($request->discount ?? 0);
+        $total    = max(0, $subtotal - $discount);
+        $paid     = (float) ($request->amount_paid ?? 0);
+
+        if ($discount > $subtotal) {
+            throw ValidationException::withMessages([
+                'discount' => 'Discount cannot be more than the charges subtotal (₨' . number_format($subtotal) . ').',
+            ]);
+        }
+        if ($paid > $total) {
+            throw ValidationException::withMessages([
+                'amount_paid' => 'Amount paid cannot be more than the total (₨' . number_format($total) . ').',
+            ]);
+        }
     }
 
     private function fillBill(Bill $bill, Request $request): void
@@ -215,8 +263,8 @@ class BillController extends Controller
             'guest_phone'     => $b->guest_phone,
             'room_number'     => $b->room_number,
             'room_type'       => $b->room_type,
-            'check_in'        => optional($b->check_in)->format('d M Y'),
-            'check_out'       => optional($b->check_out)->format('d M Y'),
+            'check_in'        => optional($b->check_in)->format('d M Y, h:i A'),
+            'check_out'       => optional($b->check_out)->format('d M Y, h:i A'),
             'nights'          => $b->nights,
             'has_vehicle'     => (bool) $b->has_vehicle,
             'vehicle_number'  => $b->vehicle_number,
@@ -252,14 +300,14 @@ class BillController extends Controller
         return $bookings->map(fn ($b) => [
             'id'          => $b->id,
             'label'       => $b->booking_number . ' — ' . $b->guest_name . ' | Room ' . ($b->room->room_number ?? '?')
-                . ' | ' . optional($b->check_in)->format('d M') . ' → ' . optional($b->check_out)->format('d M Y'),
+                . ' | ' . optional($b->check_in)->format('d M') . ' → ' . optional($b->check_out)->format('d M Y, h:i A'),
             'guest_name'  => $b->guest_name,
             'father_name' => $b->father_name,
             'guest_phone' => $b->guest_phone,
             'room_number' => $b->room->room_number ?? '',
             'room_type'   => $b->room->type ?? '',
-            'check_in'    => optional($b->check_in)->format('Y-m-d'),
-            'check_out'   => optional($b->check_out)->format('Y-m-d'),
+            'check_in'    => optional($b->check_in)->format('Y-m-d\TH:i'),
+            'check_out'   => optional($b->check_out)->format('Y-m-d\TH:i'),
             'nights'      => $b->nights,
             'amount'      => $b->total_amount,
             'customer_id' => $b->customer_id,

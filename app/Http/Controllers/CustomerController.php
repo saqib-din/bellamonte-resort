@@ -69,8 +69,8 @@ class CustomerController extends Controller
     {
         $request->validate([
             'name'        => 'required|string|max:100',
-            'father_name' => 'nullable|string|max:100',
-            'cnic'        => 'required|unique:customers,cnic',
+            'father_name' => 'nullable|string|max:255',
+            'cnic'        => 'required|string|max:20|unique:customers,cnic',
             'phone'       => 'required|string|max:20',
             'email'       => 'nullable|email|max:100',
             'city'        => 'nullable|string|max:100',
@@ -162,8 +162,8 @@ class CustomerController extends Controller
     {
         $request->validate([
             'name'        => 'required|string|max:100',
-            'father_name' => 'nullable|string|max:100',
-            'cnic'        => 'required|unique:customers,cnic,' . $customer->id,
+            'father_name' => 'nullable|string|max:255',
+            'cnic'        => 'required|string|max:20|unique:customers,cnic,' . $customer->id,
             'phone'       => 'required|string|max:20',
             'email'       => 'nullable|email|max:100',
             'city'        => 'nullable|string|max:100',

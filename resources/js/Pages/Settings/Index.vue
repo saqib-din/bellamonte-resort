@@ -35,15 +35,18 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Phone</label>
-                                <input type="text" v-model="form.hotel_phone" class="form-control" placeholder="0300-1234567">
+                                <input type="text" v-model="form.hotel_phone" class="form-control" :class="{ 'is-invalid': form.errors.hotel_phone }" placeholder="0300-1234567">
+                                <div v-if="form.errors.hotel_phone" class="invalid-feedback">{{ form.errors.hotel_phone }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Country</label>
-                                <input type="text" v-model="form.hotel_country" class="form-control" placeholder="Pakistan">
+                                <input type="text" v-model="form.hotel_country" class="form-control" :class="{ 'is-invalid': form.errors.hotel_country }" placeholder="Pakistan">
+                                <div v-if="form.errors.hotel_country" class="invalid-feedback">{{ form.errors.hotel_country }}</div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Full Address</label>
-                                <input type="text" v-model="form.hotel_address" class="form-control" placeholder="Street, Area, City, Pakistan">
+                                <input type="text" v-model="form.hotel_address" class="form-control" :class="{ 'is-invalid': form.errors.hotel_address }" placeholder="Street, Area, City, Pakistan">
+                                <div v-if="form.errors.hotel_address" class="invalid-feedback">{{ form.errors.hotel_address }}</div>
                             </div>
                         </div>
                     </div>
@@ -55,15 +58,18 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label"><i class="ti ti-brand-facebook text-primary me-1"></i>Facebook</label>
-                                <input type="text" v-model="form.facebook" class="form-control" placeholder="https://facebook.com/...">
+                                <input type="text" v-model="form.facebook" class="form-control" :class="{ 'is-invalid': form.errors.facebook }" placeholder="https://facebook.com/...">
+                                <div v-if="form.errors.facebook" class="invalid-feedback">{{ form.errors.facebook }}</div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label"><i class="ti ti-brand-instagram text-danger me-1"></i>Instagram</label>
-                                <input type="text" v-model="form.instagram" class="form-control" placeholder="https://instagram.com/...">
+                                <input type="text" v-model="form.instagram" class="form-control" :class="{ 'is-invalid': form.errors.instagram }" placeholder="https://instagram.com/...">
+                                <div v-if="form.errors.instagram" class="invalid-feedback">{{ form.errors.instagram }}</div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label"><i class="ti ti-brand-twitter text-info me-1"></i>Twitter / X</label>
-                                <input type="text" v-model="form.twitter" class="form-control" placeholder="https://twitter.com/...">
+                                <input type="text" v-model="form.twitter" class="form-control" :class="{ 'is-invalid': form.errors.twitter }" placeholder="https://twitter.com/...">
+                                <div v-if="form.errors.twitter" class="invalid-feedback">{{ form.errors.twitter }}</div>
                             </div>
                         </div>
                     </div>

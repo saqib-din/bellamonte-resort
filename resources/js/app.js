@@ -12,7 +12,7 @@ document.addEventListener('click', (e) => {
     const el = e.target.closest('input, select, textarea');
     if (!el) return;
     el.focus();
-    if (el.type === 'date' && typeof el.showPicker === 'function') {
+    if (typeof el.showPicker === 'function' && ['date', 'datetime-local', 'time', 'month', 'week'].includes(el.type)) {
         try { el.showPicker(); } catch (_) { /* ignore */ }
     }
 });

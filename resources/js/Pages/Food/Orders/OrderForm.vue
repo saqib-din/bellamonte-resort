@@ -10,12 +10,14 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Booking Select (Optional)</label>
-                                <SearchSelect v-model="form.booking_id" :options="bookingOpts" placeholder="-- Select Booking --" search-placeholder="Search booking..." @change="fillFromBooking" />
+                                <SearchSelect v-model="form.booking_id" :options="bookingOpts" :invalid="!!form.errors.booking_id" placeholder="-- Select Booking --" search-placeholder="Search booking..." @change="fillFromBooking" />
+                                <div v-if="form.errors.booking_id" class="text-danger f-12 mt-1">{{ form.errors.booking_id }}</div>
                                 <small class="text-muted">Select a booking to auto-fill guest details.</small>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Customer (Optional)</label>
-                                <SearchSelect v-model="form.customer_id" :options="customerOpts" placeholder="-- Customer --" search-placeholder="Search customer..." />
+                                <SearchSelect v-model="form.customer_id" :options="customerOpts" :invalid="!!form.errors.customer_id" placeholder="-- Customer --" search-placeholder="Search customer..." />
+                                <div v-if="form.errors.customer_id" class="text-danger f-12 mt-1">{{ form.errors.customer_id }}</div>
                             </div>
                         </div>
                     </div>
@@ -33,21 +35,25 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Father Name (Optional)</label>
-                                <input type="text" v-model="form.father_name" class="form-control" placeholder="Father name">
+                                <input type="text" v-model="form.father_name" class="form-control" :class="{ 'is-invalid': form.errors.father_name }" placeholder="Father name">
+                                <div v-if="form.errors.father_name" class="invalid-feedback">{{ form.errors.father_name }}</div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Phone (Optional)</label>
-                                <input type="text" v-model="form.guest_phone" class="form-control" placeholder="0316-8336096">
+                                <input type="text" v-model="form.guest_phone" class="form-control" :class="{ 'is-invalid': form.errors.guest_phone }" placeholder="0316-8336096">
+                                <div v-if="form.errors.guest_phone" class="invalid-feedback">{{ form.errors.guest_phone }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Room Number (Optional)</label>
-                                <input type="text" v-model="form.room_number" class="form-control" placeholder="101">
+                                <input type="text" v-model="form.room_number" class="form-control" :class="{ 'is-invalid': form.errors.room_number }" placeholder="101">
+                                <div v-if="form.errors.room_number" class="invalid-feedback">{{ form.errors.room_number }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Order Type <span class="text-danger">*</span></label>
-                                <select v-model="form.order_type" class="form-select">
+                                <select v-model="form.order_type" class="form-select" :class="{ 'is-invalid': form.errors.order_type }">
                                     <option v-for="t in orderTypes" :key="t" :value="t">{{ t }}</option>
                                 </select>
+                                <div v-if="form.errors.order_type" class="invalid-feedback">{{ form.errors.order_type }}</div>
                             </div>
                         </div>
                     </div>
@@ -113,26 +119,23 @@
                     <div class="card-header"><h5 class="mb-0"><i class="ti ti-calculator me-2"></i>Charges & Payment</h5></div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Discount (₨)</label>
-                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.discount" class="form-control" min="0"></div>
+                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.discount" class="form-control" :class="{ 'is-invalid': form.errors.discount || overDiscount }" min="0"></div>
+                                <div v-if="form.errors.discount || overDiscount" class="text-danger f-13 mt-1">{{ form.errors.discount || ('Discount cannot exceed subtotal (₨' + n(totals.subtotal) + ')') }}</div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Tax (%)</label>
-                                <div class="input-group"><input type="number" v-model.number="form.tax_percent" class="form-control" min="0" max="100"><span class="input-group-text">%</span></div>
-                            </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Amount Paid (₨)</label>
-                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.amount_paid" class="form-control" min="0"></div>
+                                <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.amount_paid" class="form-control" :class="{ 'is-invalid': form.errors.amount_paid || overPaid }" min="0"></div>
+                                <div v-if="form.errors.amount_paid || overPaid" class="text-danger f-13 mt-1">{{ form.errors.amount_paid || ('Amount paid cannot exceed total (₨' + n(totals.total) + ')') }}</div>
                             </div>
                         </div>
                         <div class="mt-4 p-3 rounded surface-box">
                             <div class="row text-center">
                                 <div class="col-3"><div class="text-muted f-12">Subtotal</div><div class="fw-500">₨{{ n(totals.subtotal) }}</div></div>
-                                <div class="col-2"><div class="text-muted f-12">Discount</div><div class="fw-500 text-success">-₨{{ n(totals.discount) }}</div></div>
-                                <div class="col-2"><div class="text-muted f-12">Tax</div><div class="fw-500 text-warning">₨{{ n(totals.tax) }}</div></div>
+                                <div class="col-3"><div class="text-muted f-12">Discount</div><div class="fw-500 text-success">-₨{{ n(totals.discount) }}</div></div>
                                 <div class="col-3"><div class="text-muted f-12">Total</div><div class="fw-bold text-primary fs-5">₨{{ n(totals.total) }}</div></div>
-                                <div class="col-2"><div class="text-muted f-12">Balance</div><div class="fw-bold text-danger">₨{{ n(totals.balance) }}</div></div>
+                                <div class="col-3"><div class="text-muted f-12">Balance</div><div class="fw-bold text-danger">₨{{ n(totals.balance) }}</div></div>
                             </div>
                         </div>
                     </div>
@@ -142,7 +145,8 @@
                 <div class="card mb-4">
                     <div class="card-header"><h5 class="mb-0"><i class="ti ti-notes me-2"></i>Notes (Optional)</h5></div>
                     <div class="card-body">
-                        <textarea v-model="form.notes" class="form-control" rows="3" placeholder="Special instructions, allergies, etc."></textarea>
+                        <textarea v-model="form.notes" class="form-control" :class="{ 'is-invalid': form.errors.notes }" rows="3" placeholder="Special instructions, allergies, etc."></textarea>
+                        <div v-if="form.errors.notes" class="invalid-feedback">{{ form.errors.notes }}</div>
                     </div>
                 </div>
             </div>
@@ -153,9 +157,10 @@
                     <div class="card-header"><h5 class="mb-0"><i class="ti ti-credit-card me-2"></i>Payment</h5></div>
                     <div class="card-body">
                         <label class="form-label">Payment Method <span class="text-danger">*</span></label>
-                        <select v-model="form.payment_method" class="form-select">
+                        <select v-model="form.payment_method" class="form-select" :class="{ 'is-invalid': form.errors.payment_method }">
                             <option v-for="m in paymentMethods" :key="m" :value="m">{{ m }}</option>
                         </select>
+                        <div v-if="form.errors.payment_method" class="invalid-feedback">{{ form.errors.payment_method }}</div>
                     </div>
                 </div>
 
@@ -170,7 +175,6 @@
                         <hr>
                         <div class="d-flex justify-content-between mb-2"><span class="text-muted f-13">Subtotal</span><span>₨{{ n(totals.subtotal) }}</span></div>
                         <div class="d-flex justify-content-between mb-2"><span class="text-muted f-13">Discount</span><span class="text-success">-₨{{ n(totals.discount) }}</span></div>
-                        <div class="d-flex justify-content-between mb-2"><span class="text-muted f-13">Tax</span><span>₨{{ n(totals.tax) }}</span></div>
                         <hr>
                         <div class="d-flex justify-content-between mb-2"><span class="fw-500">Total</span><span class="fw-bold text-primary">₨{{ n(totals.total) }}</span></div>
                         <div class="d-flex justify-content-between mb-2"><span class="text-muted f-13">Amount Paid</span><span class="text-success">₨{{ n(totals.paid) }}</span></div>
@@ -181,7 +185,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary" :disabled="form.processing">
+                            <button type="submit" class="btn btn-primary" :disabled="form.processing || overDiscount || overPaid">
                                 <i class="ti ti-receipt me-2"></i>{{ mode === 'edit' ? 'Update Order' : 'Place Food Order' }}
                             </button>
                             <Link href="/food/orders" class="btn btn-outline-secondary"><i class="ti ti-arrow-left me-2"></i>Cancel</Link>
@@ -220,7 +224,6 @@ const form = useForm({
     order_type:     o.order_type ?? 'Room Service',
     payment_method: o.payment_method ?? 'Cash',
     discount:       Number(o.discount ?? 0),
-    tax_percent:    Number(o.tax_percent ?? 0),
     amount_paid:    Number(o.amount_paid ?? 0),
     notes:          o.notes ?? '',
     items:          [],
@@ -250,14 +253,15 @@ function changeQty(c, delta) {
 const totals = computed(() => {
     const subtotal = cart.value.reduce((s, c) => s + c.price * c.qty, 0);
     const discount = Number(form.discount) || 0;
-    const taxPct   = Number(form.tax_percent) || 0;
     const paid     = Number(form.amount_paid) || 0;
     const afterDis = subtotal - discount;
-    const tax      = Math.round(afterDis * (taxPct / 100) * 100) / 100;
-    const total    = Math.round((afterDis + tax) * 100) / 100;
+    const total    = Math.round(afterDis * 100) / 100;
     const balance  = Math.max(0, total - paid);
-    return { subtotal, discount, tax, total, paid, balance };
+    return { subtotal, discount, total, paid, balance };
 });
+
+const overDiscount = computed(() => (Number(form.discount) || 0) > totals.value.subtotal);
+const overPaid     = computed(() => (Number(form.amount_paid) || 0) > totals.value.total);
 
 const n = (v) => Number(v || 0).toLocaleString('en-US');
 const truncate = (s, len) => (s && s.length > len ? s.slice(0, len) + '…' : s);

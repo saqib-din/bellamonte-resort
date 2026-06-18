@@ -50,6 +50,7 @@
                                     <input type="text" v-model="form.size" class="form-control" placeholder="30">
                                     <span class="input-group-text">sq ft</span>
                                 </div>
+                                <div v-if="form.errors.size" class="text-danger f-12 mt-1">{{ form.errors.size }}</div>
                             </div>
                         </div>
                     </div>
@@ -62,10 +63,11 @@
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label">Bed Type</label>
-                                <select v-model="form.bed_type" class="form-select">
+                                <select v-model="form.bed_type" class="form-select" :class="{ 'is-invalid': form.errors.bed_type }">
                                     <option value="">-- Select Bed --</option>
                                     <option v-for="b in beds" :key="b" :value="b">{{ b }}</option>
                                 </select>
+                                <div v-if="form.errors.bed_type" class="invalid-feedback">{{ form.errors.bed_type }}</div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Check In Time</label>
@@ -73,6 +75,7 @@
                                     <span class="input-group-text"><i class="ti ti-clock"></i></span>
                                     <input type="time" v-model="form.check_in_time" class="form-control">
                                 </div>
+                                <div v-if="form.errors.check_in_time" class="text-danger f-12 mt-1">{{ form.errors.check_in_time }}</div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Check Out Time</label>
@@ -80,6 +83,7 @@
                                     <span class="input-group-text"><i class="ti ti-clock"></i></span>
                                     <input type="time" v-model="form.check_out_time" class="form-control">
                                 </div>
+                                <div v-if="form.errors.check_out_time" class="text-danger f-12 mt-1">{{ form.errors.check_out_time }}</div>
                             </div>
                         </div>
                     </div>
@@ -99,7 +103,8 @@
                                 </div>
                             </div>
                         </div>
-                        <input type="text" v-model="form.services" class="form-control" placeholder="WiFi, AC, TV, Geyser ...">
+                        <input type="text" v-model="form.services" class="form-control" :class="{ 'is-invalid': form.errors.services }" placeholder="WiFi, AC, TV, Geyser ...">
+                        <div v-if="form.errors.services" class="invalid-feedback">{{ form.errors.services }}</div>
                         <small class="text-muted">Check above or enter manually</small>
                     </div>
                 </div>
@@ -108,7 +113,8 @@
                 <div class="card mb-4">
                     <div class="card-header"><h5 class="mb-0"><i class="ti ti-file-text me-2"></i>Description</h5></div>
                     <div class="card-body">
-                        <textarea v-model="form.description" class="form-control" rows="5" placeholder="Enter Room Description..."></textarea>
+                        <textarea v-model="form.description" class="form-control" :class="{ 'is-invalid': form.errors.description }" rows="5" placeholder="Enter Room Description..."></textarea>
+                        <div v-if="form.errors.description" class="invalid-feedback">{{ form.errors.description }}</div>
                     </div>
                 </div>
             </div>

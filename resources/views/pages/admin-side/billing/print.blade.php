@@ -369,8 +369,8 @@
                     </strong>
                 @endif
                 @if ($bill->check_in && $bill->check_out)
-                    <p>Check In: {{ $bill->check_in->format('d M Y') }}</p>
-                    <p>Check Out: {{ $bill->check_out->format('d M Y') }}</p>
+                    <p>Check In: {{ $bill->check_in->format('d M Y, h:i A') }}</p>
+                    <p>Check Out: {{ $bill->check_out->format('d M Y, h:i A') }}</p>
                     <p>Duration: {{ $bill->nights }} night(s)</p>
                 @endif
             </div>

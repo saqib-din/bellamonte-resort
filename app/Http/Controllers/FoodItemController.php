@@ -9,9 +9,25 @@ use Inertia\Inertia;
 
 class FoodItemController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $items = FoodItem::with('category')->latest()->get()->map(fn ($i) => [
+        $sortable = ['name', 'price', 'is_available', 'created_at'];
+
+        $query = FoodItem::with('category');
+
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(fn ($q) => $q->where('name', 'like', "%{$s}%")
+                ->orWhere('description', 'like', "%{$s}%"));
+        }
+
+        $sort = in_array($request->sort, $sortable, true) ? $request->sort : 'created_at';
+        $dir  = $request->dir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sort, $dir);
+
+        $perPage = (int) $request->input('per_page', 15);
+
+        $items = $query->paginate($perPage)->withQueryString()->through(fn ($i) => [
             'id'               => $i->id,
             'name'             => $i->name,
             'description'      => $i->description,
@@ -27,6 +43,12 @@ class FoodItemController extends Controller
         return Inertia::render('Food/Items/Index', [
             'items'      => $items,
             'categories' => $categories,
+            'filters'    => [
+                'search'   => $request->search,
+                'sort'     => $sort,
+                'dir'      => $dir,
+                'per_page' => $perPage,
+            ],
         ]);
     }
 
@@ -34,8 +56,10 @@ class FoodItemController extends Controller
     {
         $request->validate([
             'food_category_id' => 'required|exists:food_categories,id',
-            'name'             => 'required|string|max:255',
-            'price'            => 'required|numeric|min:0',
+            'name'             => 'required|string|max:50',
+            'description'      => 'nullable|string|max:1000',
+            'price'            => 'required|numeric|min:0|max:9999999',
+            'is_available'     => 'nullable|boolean',
         ]);
 
         FoodItem::create([
@@ -53,8 +77,10 @@ class FoodItemController extends Controller
     {
         $request->validate([
             'food_category_id' => 'required|exists:food_categories,id',
-            'name'             => 'required|string|max:255',
-            'price'            => 'required|numeric|min:0',
+            'name'             => 'required|string|max:50',
+            'description'      => 'nullable|string|max:1000',
+            'price'            => 'required|numeric|min:0|max:9999999',
+            'is_available'     => 'nullable|boolean',
         ]);
 
         $foodItem->update([

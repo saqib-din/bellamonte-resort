@@ -21,6 +21,7 @@ class Booking extends Model
         'check_in',
         'check_out',
         'nights',
+        'rate_type',
         'room_price',
         'total_amount',
         'payment_status',
@@ -32,9 +33,19 @@ class Booking extends Model
     ];
 
     protected $casts = [
-        'check_in'  => 'date',
-        'check_out' => 'date',
+        'check_in'  => 'datetime',
+        'check_out' => 'datetime',
     ];
+
+    // Singular unit label for the booking's rate type
+    public function getUnitLabel(): string
+    {
+        return match ($this->rate_type) {
+            'Day'    => 'Day(s)',
+            'Hourly' => 'Hour(s)',
+            default  => 'Night(s)',
+        };
+    }
 
     // ── Auto-generate uuid ───────────────────────────
     protected static function booted(): void
@@ -103,5 +114,11 @@ class Booking extends Model
     public function getRemainingBalance()
     {
         return $this->total_amount - $this->advance_paid;
+    }
+
+    // Booking is locked (view-only) once its invoice is fully paid
+    public function isInvoicePaid(): bool
+    {
+        return optional($this->bill)->status === 'Paid';
     }
 }

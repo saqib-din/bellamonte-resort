@@ -61,7 +61,7 @@
                                     <td class="text-end">
                                         <a :href="`/billing/${b.uuid}/print`" target="_blank" class="avtar avtar-xs btn-link-secondary" title="Print"><i class="ti ti-printer f-18"></i></a>
                                         <Link :href="`/billing/${b.uuid}`" class="avtar avtar-xs btn-link-secondary" title="View"><i class="ti ti-eye f-18"></i></Link>
-                                        <Link :href="`/billing/${b.uuid}/edit`" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></Link>
+                                        <Link v-if="b.status !== 'Paid'" :href="`/billing/${b.uuid}/edit`" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></Link>
                                         <button class="avtar avtar-xs btn-link-secondary" title="Delete" @click="askDelete(b)"><i class="ti ti-trash f-18"></i></button>
                                     </td>
                                 </tr>

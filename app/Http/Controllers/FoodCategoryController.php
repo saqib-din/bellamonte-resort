@@ -8,9 +8,23 @@ use Inertia\Inertia;
 
 class FoodCategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categories = FoodCategory::withCount('items')->orderBy('sort_order')->get()->map(fn ($c) => [
+        $sortable = ['name', 'items_count', 'is_active', 'sort_order'];
+
+        $query = FoodCategory::withCount('items');
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', "%{$request->search}%");
+        }
+
+        $sort = in_array($request->sort, $sortable, true) ? $request->sort : 'sort_order';
+        $dir  = $request->dir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sort, $dir);
+
+        $perPage = (int) $request->input('per_page', 15);
+
+        $categories = $query->paginate($perPage)->withQueryString()->through(fn ($c) => [
             'id'          => $c->id,
             'icon'        => $c->icon,
             'name'        => $c->name,
@@ -20,13 +34,19 @@ class FoodCategoryController extends Controller
 
         return Inertia::render('Food/Categories/Index', [
             'categories' => $categories,
+            'filters'    => [
+                'search'   => $request->search,
+                'sort'     => $sort,
+                'dir'      => $dir,
+                'per_page' => $perPage,
+            ],
         ]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:50',
             'icon' => 'nullable|string|max:10',
         ]);
 
@@ -42,7 +62,10 @@ class FoodCategoryController extends Controller
 
     public function update(Request $request, FoodCategory $foodCategory)
     {
-        $request->validate(['name' => 'required|string|max:255']);
+        $request->validate([
+            'name' => 'required|string|max:50',
+            'icon' => 'nullable|string|max:10',
+        ]);
 
         $foodCategory->update([
             'name'      => $request->name,

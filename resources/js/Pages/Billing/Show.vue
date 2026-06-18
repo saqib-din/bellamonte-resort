@@ -14,7 +14,8 @@
                         <div class="page-header-title"><h2 class="mb-0">{{ bill.invoice_number }}</h2></div>
                         <div class="d-flex gap-2 flex-wrap">
                             <a :href="`/billing/${bill.uuid}/print`" target="_blank" class="btn btn-success"><i class="ti ti-printer me-1"></i> Print</a>
-                            <Link :href="`/billing/${bill.uuid}/edit`" class="btn btn-primary"><i class="ti ti-edit me-1"></i> Edit</Link>
+                            <Link v-if="bill.status !== 'Paid'" :href="`/billing/${bill.uuid}/edit`" class="btn btn-primary"><i class="ti ti-edit me-1"></i> Edit</Link>
+                            <span v-else class="btn btn-light-success disabled"><i class="ti ti-lock me-1"></i> Paid — Edit Locked</span>
                             <Link href="/billing" class="btn btn-outline-secondary"><i class="ti ti-arrow-left me-1"></i> Back</Link>
                         </div>
                     </div>

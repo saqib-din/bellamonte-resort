@@ -15,7 +15,7 @@ class BookingController extends Controller
 
     public function index(Request $request)
     {
-        $query = Booking::with('room');
+        $query = Booking::with(['room', 'bill']);
 
         if ($request->filled('search')) {
             $s = $request->search;
@@ -44,6 +44,8 @@ class BookingController extends Controller
             'total_amount'   => $b->total_amount,
             'status'         => $b->status,
             'statusBadge'    => $b->getStatusBadgeClass(),
+            'locked'         => optional($b->bill)->status === 'Paid',
+            'invoice_number' => optional($b->bill)->invoice_number,
         ]);
 
         return Inertia::render('Bookings/Index', [
@@ -70,20 +72,22 @@ class BookingController extends Controller
         $request->validate([
             'room_id'          => 'required|exists:rooms,id',
             'customer_id'      => 'required|exists:customers,id',
-            'guest_name'       => 'required|string|max:100',
-            'father_name'      => 'nullable|string|max:100',
+            'guest_name'       => 'required|string|max:50',
+            'father_name'      => 'nullable|string|max:60',
             'guest_phone'      => 'required|string|max:20',
             'guest_cnic'       => 'nullable|string|max:20',
             'guest_email'      => 'nullable|email|max:100',
-            'adults'           => 'required|integer|min:1',
-            'children'         => 'nullable|integer|min:0',
+            'adults'           => 'required|integer|min:1|max:50',
+            'children'         => 'nullable|integer|min:0|max:50',
             'check_in'         => 'required|date',
             'check_out'        => 'required|date|after:check_in',
-            'payment_method'   => 'required',
-            'payment_status'   => 'required',
-            'status'           => 'required',
-            'special_requests' => 'nullable|string',
-            'notes'            => 'nullable|string',
+            'rate_type'        => 'required|in:Night,Day,Hourly',
+            'rate'             => 'required|numeric|min:0|max:9999999',
+            'payment_method'   => 'required|in:Cash,Card,Bank Transfer,JazzCash,EasyPaisa',
+            'payment_status'   => 'required|in:Pending,Paid,Partial,Refunded',
+            'status'           => 'required|in:Confirmed,Checked In,Checked Out,Cancelled,No Show',
+            'special_requests' => 'nullable|string|max:2000',
+            'notes'            => 'nullable|string|max:2000',
         ]);
 
         if ($this->roomHasConflict($request->room_id, $request->check_in, $request->check_out)) {
@@ -93,8 +97,7 @@ class BookingController extends Controller
         $room     = Room::findOrFail($request->room_id);
         $checkin  = Carbon::parse($request->check_in);
         $checkout = Carbon::parse($request->check_out);
-        $nights   = $checkin->diffInDays($checkout);
-        $total    = $nights * $room->price_per_night;
+        [$nights, $total] = $this->computeUnitsTotal($request->rate_type, (float) $request->rate, $checkin, $checkout);
 
         $booking = Booking::create([
             'booking_number'   => Booking::generateBookingNumber(),
@@ -110,7 +113,8 @@ class BookingController extends Controller
             'check_in'         => $request->check_in,
             'check_out'        => $request->check_out,
             'nights'           => $nights,
-            'room_price'       => $room->price_per_night,
+            'rate_type'        => $request->rate_type,
+            'room_price'       => $request->rate,
             'total_amount'     => $total,
             'payment_status'   => $request->payment_status,
             'payment_method'   => $request->payment_method,
@@ -129,7 +133,16 @@ class BookingController extends Controller
 
     public function show(Booking $booking)
     {
-        $booking->load(['room', 'customer']);
+        $booking->load(['room', 'customer', 'bill']);
+
+        // Booking payment status follows its invoice (Paid / Partial) when one exists
+        if ($booking->bill) {
+            $booking->payment_status = match ($booking->bill->status) {
+                'Paid'    => 'Paid',
+                'Partial' => 'Partial',
+                default   => 'Pending',
+            };
+        }
 
         return Inertia::render('Bookings/Show', [
             'booking' => [
@@ -142,11 +155,17 @@ class BookingController extends Controller
                 'guest_email'      => $booking->guest_email,
                 'adults'           => $booking->adults,
                 'children'         => $booking->children,
-                'check_in'         => optional($booking->check_in)->format('d M Y'),
-                'check_out'        => optional($booking->check_out)->format('d M Y'),
+                'check_in'         => optional($booking->check_in)->format('d M Y, h:i A'),
+                'check_out'        => optional($booking->check_out)->format('d M Y, h:i A'),
                 'nights'           => $booking->nights,
+                'rate_type'        => $booking->rate_type,
+                'unit_label'       => $booking->getUnitLabel(),
                 'room_price'       => $booking->room_price,
                 'total_amount'     => $booking->total_amount,
+                'invoice_paid'     => optional($booking->bill)->status === 'Paid',
+                'has_invoice'      => (bool) $booking->bill,
+                'invoice_number'   => optional($booking->bill)->invoice_number,
+                'bill_uuid'        => optional($booking->bill)->uuid,
                 'advance_paid'     => $booking->advance_paid,
                 'remaining'        => $booking->getRemainingBalance(),
                 'payment_method'   => $booking->payment_method,
@@ -154,6 +173,7 @@ class BookingController extends Controller
                 'paymentBadge'     => $booking->getPaymentBadgeClass(),
                 'status'           => $booking->status,
                 'statusBadge'      => $booking->getStatusBadgeClass(),
+                'locked'           => $booking->isInvoicePaid(),
                 'special_requests' => $booking->special_requests,
                 'notes'            => $booking->notes,
                 'room_number'      => $booking->room->room_number ?? '—',
@@ -167,6 +187,11 @@ class BookingController extends Controller
 
     public function edit(Booking $booking)
     {
+        if ($booking->isInvoicePaid()) {
+            return redirect()->route('admin.bookings.index')
+                ->with('error', 'Booking ' . $booking->booking_number . ' has a fully-paid invoice (' . optional($booking->bill)->invoice_number . ') and can no longer be edited.');
+        }
+
         return Inertia::render('Bookings/Edit', [
             'rooms'     => $this->roomOptions(Room::orderBy('room_number')->get()),
             'customers' => $this->customerOptions(),
@@ -182,9 +207,10 @@ class BookingController extends Controller
                 'guest_email'      => $booking->guest_email,
                 'adults'           => $booking->adults,
                 'children'         => $booking->children,
-                'check_in'         => optional($booking->check_in)->format('Y-m-d'),
-                'check_out'        => optional($booking->check_out)->format('Y-m-d'),
+                'check_in'         => optional($booking->check_in)->format('Y-m-d\TH:i'),
+                'check_out'        => optional($booking->check_out)->format('Y-m-d\TH:i'),
                 'nights'           => $booking->nights,
+                'rate_type'        => $booking->rate_type,
                 'room_price'       => $booking->room_price,
                 'total_amount'     => $booking->total_amount,
                 'remaining'        => $booking->getRemainingBalance(),
@@ -200,17 +226,30 @@ class BookingController extends Controller
 
     public function update(Request $request, Booking $booking)
     {
+        if ($booking->isInvoicePaid()) {
+            return redirect()->route('admin.bookings.index')
+                ->with('error', 'This booking is locked because its invoice is already fully paid.');
+        }
+
         $request->validate([
-            'room_id'        => 'required|exists:rooms,id',
-            'customer_id'    => 'required|exists:customers,id',
-            'guest_name'     => 'required|string|max:100',
-            'father_name'    => 'nullable|string|max:100',
-            'guest_phone'    => 'required|string|max:20',
-            'check_in'       => 'required|date',
-            'check_out'      => 'required|date|after:check_in',
-            'payment_status' => 'required',
-            'payment_method' => 'required',
-            'status'         => 'required',
+            'room_id'          => 'required|exists:rooms,id',
+            'customer_id'      => 'required|exists:customers,id',
+            'guest_name'       => 'required|string|max:50',
+            'father_name'      => 'nullable|string|max:60',
+            'guest_phone'      => 'required|string|max:20',
+            'guest_cnic'       => 'nullable|string|max:20',
+            'guest_email'      => 'nullable|email|max:100',
+            'adults'           => 'required|integer|min:1|max:50',
+            'children'         => 'nullable|integer|min:0|max:50',
+            'check_in'         => 'required|date',
+            'check_out'        => 'required|date|after:check_in',
+            'rate_type'        => 'required|in:Night,Day,Hourly',
+            'rate'             => 'required|numeric|min:0|max:9999999',
+            'payment_method'   => 'required|in:Cash,Card,Bank Transfer,JazzCash,EasyPaisa',
+            'payment_status'   => 'required|in:Pending,Paid,Partial,Refunded',
+            'status'           => 'required|in:Confirmed,Checked In,Checked Out,Cancelled,No Show',
+            'special_requests' => 'nullable|string|max:2000',
+            'notes'            => 'nullable|string|max:2000',
         ]);
 
         if ($this->roomHasConflict($request->room_id, $request->check_in, $request->check_out, $booking->id)) {
@@ -220,8 +259,7 @@ class BookingController extends Controller
         $room     = Room::findOrFail($request->room_id);
         $checkin  = Carbon::parse($request->check_in);
         $checkout = Carbon::parse($request->check_out);
-        $nights   = $checkin->diffInDays($checkout);
-        $total    = $nights * $room->price_per_night;
+        [$nights, $total] = $this->computeUnitsTotal($request->rate_type, (float) $request->rate, $checkin, $checkout);
 
         if ($booking->room_id != $request->room_id) {
             $booking->room->update(['status' => 'Available']);
@@ -240,7 +278,8 @@ class BookingController extends Controller
             'check_in'         => $request->check_in,
             'check_out'        => $request->check_out,
             'nights'           => $nights,
-            'room_price'       => $room->price_per_night,
+            'rate_type'        => $request->rate_type,
+            'room_price'       => $request->rate,
             'total_amount'     => $total,
             'payment_status'   => $request->payment_status,
             'payment_method'   => $request->payment_method,
@@ -260,6 +299,11 @@ class BookingController extends Controller
 
     public function destroy(Booking $booking)
     {
+        if ($booking->isInvoicePaid()) {
+            return redirect()->route('admin.bookings.index')
+                ->with('error', 'Cannot delete a booking that has a fully-paid invoice.');
+        }
+
         if ($booking->status === 'Checked In') {
             $booking->room->update(['status' => 'Available']);
         }
@@ -295,6 +339,23 @@ class BookingController extends Controller
             ->exists();
     }
 
+    /**
+     * Billable units + total by rate type.
+     * Night/Day → calendar days; Hourly → hours (rounded up). Minimum 1 unit.
+     */
+    private function computeUnitsTotal(string $rateType, float $rate, Carbon $checkin, Carbon $checkout): array
+    {
+        if ($rateType === 'Hourly') {
+            $seconds = max(0, $checkout->timestamp - $checkin->timestamp);
+            $units   = max(1, (int) ceil($seconds / 3600));
+        } else {
+            $days  = (int) round(($checkout->copy()->startOfDay()->timestamp - $checkin->copy()->startOfDay()->timestamp) / 86400);
+            $units = max(1, $days);
+        }
+
+        return [$units, round($units * $rate, 2)];
+    }
+
     private function roomOptions($rooms): array
     {
         return $rooms->map(fn ($r) => [
@@ -310,11 +371,12 @@ class BookingController extends Controller
     private function customerOptions(): array
     {
         return Customer::orderBy('name')->get()->map(fn ($c) => [
-            'id'    => $c->id,
-            'name'  => $c->name,
-            'phone' => $c->phone,
-            'cnic'  => $c->cnic,
-            'email' => $c->email,
+            'id'          => $c->id,
+            'name'        => $c->name,
+            'father_name' => $c->father_name,
+            'phone'       => $c->phone,
+            'cnic'        => $c->cnic,
+            'email'       => $c->email,
         ])->all();
     }
 }
