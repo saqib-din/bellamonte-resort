@@ -35,7 +35,7 @@
                             </li>
                             <li>
                                 <i class="icon_profile"></i>
-                                White Castle Resort Team
+                                Bellamonte Resort Team
                             </li>
                         </ul>
                     </div>
@@ -53,9 +53,9 @@
                     <div class="blog-details-text">
 
                         <div class="bd-title">
-                            <p>{{ $event->description ?? 'Nestled in the breathtaking hills of Shogran, White Castle Resort offers a perfect combination of luxury, comfort, and natural beauty. Guests can enjoy peaceful mountain views, fresh air, and a relaxing environment away from the busy city life.' }}
+                            <p>{{ $event->description ?? 'Nestled in the breathtaking hills of Shogran, Bellamonte Resort offers a perfect combination of luxury, comfort, and natural beauty. Guests can enjoy peaceful mountain views, fresh air, and a relaxing environment away from the busy city life.' }}
                             </p>
-                            <p>{{ $event->short_description ?? 'Whether you are planning a family vacation, honeymoon trip, corporate retreat, or weekend getaway, White Castle Resort provides premium rooms, exceptional hospitality, and unforgettable experiences.' }}
+                            <p>{{ $event->short_description ?? 'Whether you are planning a family vacation, honeymoon trip, corporate retreat, or weekend getaway, Bellamonte Resort provides premium rooms, exceptional hospitality, and unforgettable experiences.' }}
                             </p>
                             <p>Visitors can also explore nearby tourist attractions, hiking trails, forests, and beautiful
                                 landscapes of Kaghan Valley while enjoying the peaceful atmosphere of the resort.</p>
@@ -81,12 +81,12 @@
                         <div class="bd-more-text">
                             <div class="bm-item">
                                 <h4>{{ $event->section_1_title ?? 'Luxury & Comfort' }}</h4>
-                                <p>{{ $event->section_1_text ?? 'White Castle Resort offers spacious and comfortable rooms with premium interiors, mountain-facing balconies, quality room service, and peaceful surroundings. Guests can enjoy a relaxing stay with modern amenities and excellent hospitality.' }}
+                                <p>{{ $event->section_1_text ?? 'Bellamonte Resort offers spacious and comfortable rooms with premium interiors, mountain-facing balconies, quality room service, and peaceful surroundings. Guests can enjoy a relaxing stay with modern amenities and excellent hospitality.' }}
                                 </p>
                             </div>
                             <div class="bm-item">
                                 <h4>{{ $event->section_2_title ?? 'Perfect Destination in Northern Pakistan' }}</h4>
-                                <p>{{ $event->section_2_text ?? 'Shogran is one of the most beautiful tourist destinations in Pakistan. Staying at White Castle Resort allows visitors to experience nature, adventure, and luxury together. From bonfire nights to sightseeing tours, every moment becomes memorable.' }}
+                                <p>{{ $event->section_2_text ?? 'Shogran is one of the most beautiful tourist destinations in Pakistan. Staying at Bellamonte Resort allows visitors to experience nature, adventure, and luxury together. From bonfire nights to sightseeing tours, every moment becomes memorable.' }}
                                 </p>
                             </div>
                         </div>

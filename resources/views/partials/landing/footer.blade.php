@@ -14,16 +14,16 @@
             {{-- Col 1: Brand ──────────────────────────── --}}
             <div class="bm-footer__brand">
                 <a href="{{ url('/') }}" class="bm-footer__logo">
-                    <img src="{{ asset('admin/assets/images/whitecastle.jpeg') }}" alt="White Castle Resort Logo"
+                    <img src="{{ asset('admin/assets/images/logo.jpeg') }}" alt="Bellamonte Resort Logo"
                         style="height:64px; width:auto;">
                     <div class="bm-footer__logo-text">
-                        <span class="bm-footer__logo-name">The White Castle</span>
+                        <span class="bm-footer__logo-name">Bellamonte Resort</span>
                         <span class="bm-footer__logo-sub">Resort &bull; Shogran</span>
                     </div>
                 </a>
 
                 <p class="bm-footer__tagline">
-                    Nestled in the heart of the Kaghan Valley, White Castle Resort offers a sanctuary
+                    Nestled in the heart of the Kaghan Valley, Bellamonte Resort offers a sanctuary
                     of luxury amidst the majestic peaks of Shogran.
                 </p>
 
@@ -80,14 +80,14 @@
                     </li>
                     <li>
                         <span class="bm-footer__contact-icon"><i class="fa fa-envelope"></i></span>
-                        <a href="mailto:{{ \App\Models\Setting::get('hotel_email') ?? 'thewhitecastle4444@gmail.com' }}"
+                        <a href="mailto:{{ \App\Models\Setting::get('hotel_email') ?? 'bellamonteresort01@gmail.com' }}"
                             style="color: inherit; text-decoration: none;">
-                            {{ \App\Models\Setting::get('hotel_email') ?? 'thewhitecastle4444@gmail.com' }}
+                            {{ \App\Models\Setting::get('hotel_email') ?? 'bellamonteresort01@gmail.com' }}
                         </a>
                     </li>
                     <li>
                         <span class="bm-footer__contact-icon"><i class="fa fa-map-marker"></i></span>
-                        <span>{{ \App\Models\Setting::get('hotel_address') ?? 'White Castle Resort, Shogran, Pakistan' }}</span>
+                        <span>{{ \App\Models\Setting::get('hotel_address') ?? 'Bellamonte Resort, Shogran, Pakistan' }}</span>
                     </li>
                 </ul>
             </div>
@@ -105,7 +105,7 @@
                 <script>
                     document.write(new Date().getFullYear())
                 </script>
-               The White Castle Resort, Shogran. All rights reserved.
+               Bellamonte Resort, Shogran. All rights reserved.
             </p>
         </div>
 

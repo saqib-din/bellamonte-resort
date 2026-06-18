@@ -26,8 +26,8 @@
                                     </div>
                                 </div>
                                 <div class="content-stack">
-                                    <h2 class="text-white mb-1">The White Castle Resort</h2>
-                                    <p class="text-white">White Castle Resort Shogran offers luxury rooms, mountain views,
+                                    <h2 class="text-white mb-1">Bellamonte Resort</h2>
+                                    <p class="text-white">Bellamonte Resort Shogran offers luxury rooms, mountain views,
                                         hotel booking, family stays, and premium hospitality services in Shogran.</p>
                                     <div class="quick-stat mt-2">
                                         <i class="ti ti-calendar"></i>
@@ -58,7 +58,7 @@
     <div class="row g-3 mb-4">
 
         <!-- Total Rooms -->
-        <div class="col-xl-3 col-sm-6">
+        <div class="col-lg-4 col-md-6">
             <div class="card bm-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
@@ -79,7 +79,7 @@
         </div>
 
         <!-- Total Bookings -->
-        <div class="col-xl-3 col-sm-6">
+        <div class="col-lg-4 col-md-6">
             <div class="card bm-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
@@ -100,7 +100,7 @@
         </div>
 
         <!-- Total Customers -->
-        <div class="col-xl-3 col-sm-6">
+        <div class="col-lg-4 col-md-6">
             <div class="card bm-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
@@ -121,15 +121,15 @@
         </div>
 
         <!-- Paid Invoices (Revenue) -->
-        <div class="col-xl-3 col-sm-6">
+        <div class="col-lg-6 col-md-6">
             <div class="card bm-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <p class="bm-stat-label">Paid Invoices</p>
-                            <h3 class="bm-stat-value text-success">{{ n(stats.revenueThisMonth) }} Pkr</h3>
+                            <h3 class="bm-stat-value text-success">{{ n(stats.revenueThisMonth) }} ₨</h3>
                             <p class="bm-stat-sub"><span class="text-muted">Today:</span>
-                                <strong class="text-success ms-1">{{ n(stats.revenueToday) }} Pkr</strong></p>
+                                <strong class="text-success ms-1">{{ n(stats.revenueToday) }} ₨</strong></p>
                         </div>
                         <div class="avtar avtar-m bg-light-success rounded"><i class="ti ti-currency-dollar f-24"></i></div>
                     </div>
@@ -142,13 +142,13 @@
         </div>
 
         <!-- Pending Invoices -->
-        <div class="col-xl-3 col-sm-6">
+        <div class="col-lg-6 col-md-6">
             <div class="card bm-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <p class="bm-stat-label">Pending Invoices</p>
-                            <h3 class="bm-stat-value text-danger">{{ n(stats.pendingAmount) }} Pkr</h3>
+                            <h3 class="bm-stat-value text-danger">{{ n(stats.pendingAmount) }} ₨</h3>
                             <p class="bm-stat-sub"><span class="text-muted">Unpaid:</span>
                                 <strong class="text-danger ms-1">{{ stats.unpaidBills }}</strong>
                                 <span class="text-muted ms-2">Partial:</span>
@@ -165,7 +165,7 @@
         </div>
 
         <!-- Total Food Orders -->
-        <div class="col-xl-3 col-sm-6">
+        <div class="col-lg-6 col-md-6">
             <div class="card bm-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
@@ -188,27 +188,27 @@
         </div>
 
         <!-- Food Revenue -->
-        <div class="col-xl-3 col-sm-6">
+        <div class="col-lg-6 col-md-6">
             <div class="card bm-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <p class="bm-stat-label">Food Revenue</p>
-                            <h3 class="bm-stat-value text-success">{{ n(stats.foodRevenueThisMonth) }} Pkr</h3>
+                            <h3 class="bm-stat-value text-success">{{ n(stats.foodRevenueThisMonth) }} ₨</h3>
                             <p class="bm-stat-sub"><span class="text-muted">Today:</span>
-                                <strong class="text-success ms-1">{{ n(stats.foodRevenueToday) }} Pkr</strong></p>
+                                <strong class="text-success ms-1">{{ n(stats.foodRevenueToday) }} ₨</strong></p>
                         </div>
                         <div class="avtar avtar-m bg-light-success rounded"><i class="ti ti-cash f-24"></i></div>
                     </div>
                     <div class="bm-stat-footer">
-                        <span class="text-muted f-12"><i class="ti ti-clock me-1"></i> Pending: <strong class="text-danger">{{ n(stats.foodPendingAmount) }} Pkr</strong></span>
+                        <span class="text-muted f-12"><i class="ti ti-clock me-1"></i> Pending: <strong class="text-danger">{{ n(stats.foodPendingAmount) }} ₨</strong></span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Total Events -->
-        <div class="col-xl-3 col-sm-6">
+        <div class="col-lg-4 col-md-6">
             <div class="card bm-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
@@ -229,7 +229,7 @@
         </div>
 
         <!-- Total Contacts -->
-        <div class="col-xl-3 col-sm-6">
+        <div class="col-lg-4 col-md-6">
             <div class="card bm-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">
@@ -250,7 +250,7 @@
         </div>
 
         <!-- Total Users -->
-        <div class="col-xl-3 col-sm-6">
+        <div class="col-lg-4 col-md-6">
             <div class="card bm-stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between">

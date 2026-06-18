@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'The White Castle Resort'),
+    'name' => env('APP_NAME', 'Bellamonte Resort'),
 
     /*
     |--------------------------------------------------------------------------

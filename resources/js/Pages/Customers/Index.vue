@@ -23,31 +23,24 @@
                 <div class="card-header">
                     <div class="d-sm-flex align-items-center justify-content-between">
                         <h5 class="mb-3 mb-sm-0">All Customers</h5>
-                        <div class="d-flex gap-2 align-items-center">
-                            <select v-model="filters.per_page" class="form-select form-select-sm" style="width:90px;" @change="reload">
-                                <option :value="15">15</option>
-                                <option :value="30">30</option>
-                                <option :value="50">50</option>
-                                <option :value="100">100</option>
-                            </select>
-                            <input type="text" v-model="filters.search" class="form-control form-control-sm" style="width:200px;" placeholder="Search...">
-                            <Link href="/customers/create" class="btn btn-primary d-flex"><i class="ti ti-plus me-1"></i> Add Customer</Link>
-                        </div>
+                        <Link href="/customers/create" class="btn btn-primary d-flex"><i class="ti ti-plus me-1"></i> Add Customer</Link>
                     </div>
                 </div>
 
                 <div class="card-body table-card">
+                    <TableToolbar v-model:perPage="filters.per_page" v-model:search="filters.search" :per-page-options="[10, 15, 25, 50, 100]" />
+
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th role="button" @click="sortBy('id')">ID</th>
-                                    <th role="button" @click="sortBy('name')">Customer</th>
-                                    <th role="button" @click="sortBy('cnic')">CNIC / Passport</th>
-                                    <th role="button" @click="sortBy('phone')">Phone</th>
-                                    <th role="button" @click="sortBy('city')">City / Nationality</th>
-                                    <th role="button" @click="sortBy('gender')">Gender</th>
-                                    <th role="button" @click="sortBy('status')">Status</th>
+                                    <th role="button" @click="sortBy('id')">ID <SortIcon col="id" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('name')">Customer <SortIcon col="name" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('cnic')">CNIC / Passport <SortIcon col="cnic" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('phone')">Phone <SortIcon col="phone" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('city')">City / Nationality <SortIcon col="city" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('gender')">Gender <SortIcon col="gender" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('status')">Status <SortIcon col="status" :active="filters.sort" :dir="filters.dir" /></th>
                                     <th class="text-end">Action</th>
                                 </tr>
                             </thead>
@@ -93,16 +86,9 @@
                         </table>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
-                        <small class="text-muted">Showing {{ customers.from || 0 }} to {{ customers.to || 0 }} of {{ customers.total }} customers</small>
-                        <nav v-if="customers.last_page > 1">
-                            <ul class="pagination mb-0">
-                                <li v-for="(link, i) in customers.links" :key="i" class="page-item" :class="{ active: link.active, disabled: !link.url }">
-                                    <a class="page-link" href="#" @click.prevent="link.url && go(link.url)" v-html="link.label"></a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+                    <TableFooter :from="customers.from" :to="customers.to" :total="customers.total"
+                        :can-prev="!!customers.prev_page_url" :can-next="!!customers.next_page_url"
+                        @prev="go(customers.prev_page_url)" @next="go(customers.next_page_url)" />
                 </div>
             </div>
         </div>
@@ -110,10 +96,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue';
+import { reactive, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { swalDelete } from '@/lib/swalDelete';
+import TableToolbar from '@/Components/TableToolbar.vue';
+import TableFooter from '@/Components/TableFooter.vue';
+import SortIcon from '@/Components/SortIcon.vue';
 
 defineOptions({ layout: AppLayout });
 
@@ -140,6 +129,7 @@ function reload() {
 
 let t = null;
 watch(() => filters.search, () => { clearTimeout(t); t = setTimeout(reload, 350); });
+watch(() => filters.per_page, reload);
 
 function sortBy(col) {
     if (filters.sort === col) filters.dir = filters.dir === 'asc' ? 'desc' : 'asc';

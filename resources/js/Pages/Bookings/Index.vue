@@ -22,31 +22,24 @@
                 <div class="card-header">
                     <div class="d-sm-flex align-items-center justify-content-between">
                         <h5 class="mb-3 mb-sm-0">All Bookings</h5>
-                        <div class="d-flex gap-2 align-items-center">
-                            <select v-model="filters.per_page" class="form-select form-select-sm" style="width:90px;" @change="reload">
-                                <option :value="15">15</option>
-                                <option :value="30">30</option>
-                                <option :value="50">50</option>
-                                <option :value="100">100</option>
-                            </select>
-                            <input type="text" v-model="filters.search" class="form-control form-control-sm" style="width:200px;" placeholder="Search...">
-                            <Link href="/bookings/create" class="btn btn-primary d-flex"><i class="ti ti-plus me-1"></i> New Booking</Link>
-                        </div>
+                        <Link href="/bookings/create" class="btn btn-primary d-flex"><i class="ti ti-plus me-1"></i> New Booking</Link>
                     </div>
                 </div>
 
                 <div class="card-body table-card">
+                    <TableToolbar v-model:perPage="filters.per_page" v-model:search="filters.search" :per-page-options="[10, 15, 25, 50, 100]" />
+
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th role="button" @click="sortBy('booking_number')">Booking #</th>
-                                    <th role="button" @click="sortBy('guest_name')">Guest</th>
+                                    <th role="button" @click="sortBy('booking_number')">Booking # <SortIcon col="booking_number" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('guest_name')">Guest <SortIcon col="guest_name" :active="filters.sort" :dir="filters.dir" /></th>
                                     <th>Room</th>
-                                    <th role="button" @click="sortBy('check_in')">Check In</th>
-                                    <th role="button" @click="sortBy('check_out')">Check Out</th>
-                                    <th role="button" @click="sortBy('total_amount')">Total</th>
-                                    <th role="button" @click="sortBy('status')">Status</th>
+                                    <th role="button" @click="sortBy('check_in')">Check In <SortIcon col="check_in" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('check_out')">Check Out <SortIcon col="check_out" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('total_amount')">Total <SortIcon col="total_amount" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('status')">Status <SortIcon col="status" :active="filters.sort" :dir="filters.dir" /></th>
                                     <th class="text-end">Action</th>
                                 </tr>
                             </thead>
@@ -87,16 +80,9 @@
                         </table>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
-                        <small class="text-muted">Showing {{ bookings.from || 0 }} to {{ bookings.to || 0 }} of {{ bookings.total }} bookings</small>
-                        <nav v-if="bookings.last_page > 1">
-                            <ul class="pagination mb-0">
-                                <li v-for="(link, i) in bookings.links" :key="i" class="page-item" :class="{ active: link.active, disabled: !link.url }">
-                                    <a class="page-link" href="#" @click.prevent="link.url && go(link.url)" v-html="link.label"></a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+                    <TableFooter :from="bookings.from" :to="bookings.to" :total="bookings.total"
+                        :can-prev="!!bookings.prev_page_url" :can-next="!!bookings.next_page_url"
+                        @prev="go(bookings.prev_page_url)" @next="go(bookings.next_page_url)" />
                 </div>
             </div>
         </div>
@@ -108,6 +94,9 @@ import { reactive, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { swalDelete } from '@/lib/swalDelete';
+import TableToolbar from '@/Components/TableToolbar.vue';
+import TableFooter from '@/Components/TableFooter.vue';
+import SortIcon from '@/Components/SortIcon.vue';
 
 defineOptions({ layout: AppLayout });
 
@@ -134,6 +123,7 @@ function reload() {
 
 let t = null;
 watch(() => filters.search, () => { clearTimeout(t); t = setTimeout(reload, 350); });
+watch(() => filters.per_page, reload);
 
 function sortBy(col) {
     if (filters.sort === col) filters.dir = filters.dir === 'asc' ? 'desc' : 'asc';

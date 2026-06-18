@@ -138,6 +138,10 @@
         </div>
     </nav>
 
+    <!-- Mobile overlay — bahar click se sidebar close -->
+    <div v-if="mobileOpen" class="pc-menu-overlay" @click="mobileOpen = false"
+        style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1025;"></div>
+
     <!-- ══════════ TOPBAR ══════════ -->
     <header class="pc-header">
         <div class="header-wrapper">
@@ -182,7 +186,7 @@
                             <svg class="pc-icon"><use xlink:href="#custom-setting-2"></use></svg>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
-                            <NavLink :href="`/users/${user.uuid}/edit`" cls="dropdown-item" :inertia="isConverted('/users')">
+                            <NavLink v-if="can(['admin'])" :href="`/users/${user.uuid}/edit`" cls="dropdown-item" :inertia="isConverted('/users')">
                                 <i class="ti ti-user"></i><span>Profile</span>
                             </NavLink>
                             <a href="#" class="dropdown-item" @click.prevent="logout">
@@ -205,13 +209,16 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import NavLink from '@/Layouts/NavLink.vue';
 import FlashAlert from '@/Components/FlashAlert.vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth?.user ?? {});
+
+// Navigation par mobile sidebar close (link click karne par bhi band ho jaye)
+watch(() => page.url, () => { mobileOpen.value = false; });
 
 // Role-based menu visibility
 function can(roles) {
@@ -267,6 +274,11 @@ const setTheme = (mode) => {
 <style>
 .pc-sidebar .navbar-wrapper {
     height: 100%;
+}
+
+/* Mobile: active sidebar overlay (1025) ke upar rahe */
+.pc-sidebar.mob-sidebar-active {
+    z-index: 1030;
 }
 
 .pc-sidebar .navbar-content {

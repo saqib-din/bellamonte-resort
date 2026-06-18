@@ -13,7 +13,7 @@ class AdminSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@whitecastle.com'],
             [
-                'name'     => 'White Castle',
+                'name'     => 'Bellamonte Resort',
                 'password' => Hash::make('12345678'),
                 'role'     => 'admin', 
                 'status'   => 'active',   

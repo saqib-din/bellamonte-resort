@@ -86,6 +86,10 @@ class BookingController extends Controller
             'notes'            => 'nullable|string',
         ]);
 
+        if ($this->roomHasConflict($request->room_id, $request->check_in, $request->check_out)) {
+            return back()->withInput()->with('error', 'This room is already booked for the selected dates.');
+        }
+
         $room     = Room::findOrFail($request->room_id);
         $checkin  = Carbon::parse($request->check_in);
         $checkout = Carbon::parse($request->check_out);
@@ -209,6 +213,10 @@ class BookingController extends Controller
             'status'         => 'required',
         ]);
 
+        if ($this->roomHasConflict($request->room_id, $request->check_in, $request->check_out, $booking->id)) {
+            return back()->withInput()->with('error', 'This room is already booked for the selected dates.');
+        }
+
         $room     = Room::findOrFail($request->room_id);
         $checkin  = Carbon::parse($request->check_in);
         $checkout = Carbon::parse($request->check_out);
@@ -277,7 +285,16 @@ class BookingController extends Controller
         return back()->with('success', 'Guest has been checked in successfully!');
     }
 
-    // ── Helpers: serialize dropdown options for the Vue form ──
+    private function roomHasConflict($roomId, $checkIn, $checkOut, $ignoreId = null): bool
+    {
+        return Booking::where('room_id', $roomId)
+            ->whereIn('status', ['Confirmed', 'Checked In'])
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->whereDate('check_in', '<', $checkOut)
+            ->whereDate('check_out', '>', $checkIn)
+            ->exists();
+    }
+
     private function roomOptions($rooms): array
     {
         return $rooms->map(fn ($r) => [

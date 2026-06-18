@@ -8,7 +8,7 @@
                     <div class="card-body">
                         <div class="pt-0 pb-4 d-flex justify-content-center">
                             <img src="{{ asset('admin/assets/images/favicon.png') }}" class="img-fluid"
-                                alt="White Castle Resort App Logo" />
+                                alt="Bellamonte Resort App Logo" />
                         </div>
 
                         <h4 class="text-center f-w-500 mb-4">Login with your email</h4>

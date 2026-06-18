@@ -25,12 +25,12 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Hotel Name <span class="text-danger">*</span></label>
-                                <input type="text" v-model="form.hotel_name" class="form-control" :class="{ 'is-invalid': form.errors.hotel_name }" placeholder="White Castle Resort">
+                                <input type="text" v-model="form.hotel_name" class="form-control" :class="{ 'is-invalid': form.errors.hotel_name }" placeholder="Bellamonte Resort">
                                 <div v-if="form.errors.hotel_name" class="invalid-feedback">{{ form.errors.hotel_name }}</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Email</label>
-                                <input type="email" v-model="form.hotel_email" class="form-control" :class="{ 'is-invalid': form.errors.hotel_email }" placeholder="info@whitecastle.com">
+                                <input type="email" v-model="form.hotel_email" class="form-control" :class="{ 'is-invalid': form.errors.hotel_email }" placeholder="info@bellamonteresort.com">
                                 <div v-if="form.errors.hotel_email" class="invalid-feedback">{{ form.errors.hotel_email }}</div>
                             </div>
                             <div class="col-md-6">

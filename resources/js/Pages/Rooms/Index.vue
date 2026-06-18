@@ -19,35 +19,32 @@
         </div>
     </div>
 
-    <!-- Main Table -->
     <div class="row">
         <div class="col-sm-12">
             <div class="card">
                 <div class="card-header">
                     <div class="d-sm-flex align-items-center justify-content-between">
                         <h5 class="mb-3 mb-sm-0">All Rooms</h5>
-                        <div class="d-flex gap-2">
-                            <input type="text" v-model="search" class="form-control form-control-sm" style="width:200px;"
-                                placeholder="Search rooms...">
-                            <Link href="/admin/rooms/create" class="btn btn-primary d-flex">
-                                <i class="ti ti-plus me-1"></i> Add New Room
-                            </Link>
-                        </div>
+                        <Link href="/admin/rooms/create" class="btn btn-primary d-flex">
+                            <i class="ti ti-plus me-1"></i> Add New Room
+                        </Link>
                     </div>
                 </div>
 
                 <div class="card-body table-card">
+                    <TableToolbar v-model:perPage="perPage" v-model:search="search" :per-page-options="[10, 15, 25, 50, 100]" />
+
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th role="button" @click="sortBy('id')">#</th>
-                                    <th role="button" @click="sortBy('room_number')">Room</th>
-                                    <th role="button" @click="sortBy('type')">Type</th>
+                                    <th role="button" @click="sortBy('id')"># <SortIcon col="id" :active="sort" :dir="dir" /></th>
+                                    <th role="button" @click="sortBy('room_number')">Room <SortIcon col="room_number" :active="sort" :dir="dir" /></th>
+                                    <th role="button" @click="sortBy('type')">Type <SortIcon col="type" :active="sort" :dir="dir" /></th>
                                     <th>Check In</th>
                                     <th>Check Out</th>
-                                    <th role="button" @click="sortBy('price_per_night')">Price</th>
-                                    <th role="button" @click="sortBy('status')">Status</th>
+                                    <th role="button" @click="sortBy('price_per_night')">Price <SortIcon col="price_per_night" :active="sort" :dir="dir" /></th>
+                                    <th role="button" @click="sortBy('status')">Status <SortIcon col="status" :active="sort" :dir="dir" /></th>
                                     <th class="text-end">Action</th>
                                 </tr>
                             </thead>
@@ -96,23 +93,9 @@
                         </table>
                     </div>
 
-                    <!-- Footer: count + pagination -->
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
-                        <small class="text-muted">Showing {{ filtered.length ? from + 1 : 0 }} to {{ to }} of {{ filtered.length }} rooms</small>
-                        <nav v-if="totalPages > 1">
-                            <ul class="pagination mb-0">
-                                <li class="page-item" :class="{ disabled: page === 1 }">
-                                    <a class="page-link" href="#" @click.prevent="page > 1 && page--">«</a>
-                                </li>
-                                <li v-for="p in totalPages" :key="p" class="page-item" :class="{ active: p === page }">
-                                    <a class="page-link" href="#" @click.prevent="page = p">{{ p }}</a>
-                                </li>
-                                <li class="page-item" :class="{ disabled: page === totalPages }">
-                                    <a class="page-link" href="#" @click.prevent="page < totalPages && page++">»</a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+                    <TableFooter :from="filtered.length ? from + 1 : 0" :to="to" :total="filtered.length"
+                        :can-prev="page > 1" :can-next="page < totalPages"
+                        @prev="page > 1 && page--" @next="page < totalPages && page++" />
                 </div>
             </div>
         </div>
@@ -124,6 +107,9 @@ import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { swalDelete } from '@/lib/swalDelete';
+import TableToolbar from '@/Components/TableToolbar.vue';
+import TableFooter from '@/Components/TableFooter.vue';
+import SortIcon from '@/Components/SortIcon.vue';
 
 defineOptions({ layout: AppLayout });
 
@@ -135,7 +121,7 @@ const search  = ref('');
 const sort    = ref('id');
 const dir     = ref('desc');
 const page    = ref(1);
-const perPage = 10;
+const perPage = ref(15);
 
 const n = (v) => Number(v || 0).toLocaleString('en-US');
 
@@ -157,12 +143,12 @@ const filtered = computed(() => {
     return list;
 });
 
-const totalPages = computed(() => Math.max(1, Math.ceil(filtered.value.length / perPage)));
-const from       = computed(() => (page.value - 1) * perPage);
-const to         = computed(() => Math.min(from.value + perPage, filtered.value.length));
-const paginated  = computed(() => filtered.value.slice(from.value, from.value + perPage));
+const totalPages = computed(() => Math.max(1, Math.ceil(filtered.value.length / perPage.value)));
+const from       = computed(() => (page.value - 1) * perPage.value);
+const to         = computed(() => Math.min(from.value + perPage.value, filtered.value.length));
+const paginated  = computed(() => filtered.value.slice(from.value, from.value + perPage.value));
 
-watch([search, sort, dir], () => { page.value = 1; });
+watch([search, sort, dir, perPage], () => { page.value = 1; });
 
 function sortBy(col) {
     if (sort.value === col) dir.value = dir.value === 'asc' ? 'desc' : 'asc';

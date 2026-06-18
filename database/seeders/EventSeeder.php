@@ -28,7 +28,7 @@ class EventSeeder extends Seeder
                 'sort_order' => 2,
             ],
             [
-                'title'      => 'Bonfire Nights at White Castle Resort',
+                'title'      => 'Bonfire Nights at Bellamonte Resort',
                 'tag'        => 'Event',
                 'event_date' => '2026-05-20',
                 'sort_order' => 3,
@@ -64,7 +64,7 @@ class EventSeeder extends Seeder
                 'sort_order' => 8,
             ],
             [
-                'title'      => 'Outdoor Camping Experience Near White Castle Resort',
+                'title'      => 'Outdoor Camping Experience Near Bellamonte Resort',
                 'tag'        => 'Camping',
                 'event_date' => '2026-05-31',
                 'sort_order' => 9,

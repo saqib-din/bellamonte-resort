@@ -30,7 +30,7 @@
                 <div class="card-body p-4 p-md-5">
                     <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
                         <div>
-                            <h3 class="mb-1" style="font-family:Georgia,serif;color:#c9a84c;">🏨 White Castle Resort</h3>
+                            <h3 class="mb-1" style="font-family:Georgia,serif;color:#c9a84c;">🏨 Bellamonte Resort</h3>
                             <p class="text-muted mb-0 f-13">Hotel Management System</p>
                             <p class="text-muted f-12">Shogran, Pakistan | 0329 6777222</p>
                         </div>
@@ -79,7 +79,7 @@
                     <hr>
                     <div class="text-center text-muted f-13">
                         <p class="mb-1">Thank you for staying with us. 🙏</p>
-                        <p class="mb-0">White Castle Resort — Shogran, Pakistan</p>
+                        <p class="mb-0">Bellamonte Resort — Shogran, Pakistan</p>
                     </div>
                 </div>
             </div>

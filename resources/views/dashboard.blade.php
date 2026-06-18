@@ -297,8 +297,8 @@
                                             </div>
                                         </div>
                                         <div class="content-stack">
-                                            <h2 class="text-white mb-1">The White Castle Resort</h2>
-                                            <p class="text-white">White Castle Resort Shogran offers luxury rooms, mountain
+                                            <h2 class="text-white mb-1">Bellamonte Resort</h2>
+                                            <p class="text-white">Bellamonte Resort Shogran offers luxury rooms, mountain
                                                 views, hotel booking, family stays, and premium hospitality services in
                                                 Shogran.</p>
                                             <div class="quick-stat mt-2">

@@ -22,28 +22,24 @@
                 <div class="card-header">
                     <div class="d-sm-flex align-items-center justify-content-between">
                         <h5 class="mb-3 mb-sm-0">All Orders</h5>
-                        <div class="d-flex gap-2 align-items-center">
-                            <select v-model="filters.per_page" class="form-select form-select-sm" style="width:90px;" @change="reload">
-                                <option :value="15">15</option><option :value="30">30</option><option :value="50">50</option><option :value="100">100</option>
-                            </select>
-                            <input type="text" v-model="filters.search" class="form-control form-control-sm" style="width:200px;" placeholder="Search...">
-                            <Link href="/food/orders/create" class="btn btn-primary d-flex"><i class="ti ti-plus me-1"></i> New Order</Link>
-                        </div>
+                        <Link href="/food/orders/create" class="btn btn-primary d-flex"><i class="ti ti-plus me-1"></i> New Order</Link>
                     </div>
                 </div>
                 <div class="card-body table-card">
+                    <TableToolbar v-model:perPage="filters.per_page" v-model:search="filters.search" :per-page-options="[10, 15, 25, 50, 100]" />
+
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th role="button" @click="sortBy('order_number')">Order #</th>
-                                    <th role="button" @click="sortBy('guest_name')">Guest</th>
+                                    <th role="button" @click="sortBy('order_number')">Order # <SortIcon col="order_number" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('guest_name')">Guest <SortIcon col="guest_name" :active="filters.sort" :dir="filters.dir" /></th>
                                     <th>Room</th>
                                     <th>Type</th>
                                     <th>Items</th>
-                                    <th role="button" @click="sortBy('total_amount')">Total</th>
+                                    <th role="button" @click="sortBy('total_amount')">Total <SortIcon col="total_amount" :active="filters.sort" :dir="filters.dir" /></th>
                                     <th>Balance</th>
-                                    <th role="button" @click="sortBy('status')">Status</th>
+                                    <th role="button" @click="sortBy('status')">Status <SortIcon col="status" :active="filters.sort" :dir="filters.dir" /></th>
                                     <th class="text-end">Action</th>
                                 </tr>
                             </thead>
@@ -54,7 +50,7 @@
                                     <td><span v-if="o.room_number" class="badge bg-light-primary">Room {{ o.room_number }}</span><span v-else class="text-muted">—</span></td>
                                     <td><span class="badge" :class="o.orderTypeBadge">{{ o.order_type }}</span></td>
                                     <td><small class="text-muted">{{ o.items_count }} item(s)</small></td>
-                                    <td><strong class="text-dark">₨ {{ n(o.total_amount) }}</strong></td>
+                                    <td><strong class="text-muted">₨ {{ n(o.total_amount) }}</strong></td>
                                     <td><span v-if="o.balance_due > 0" class="text-danger fw-500">₨ {{ n(o.balance_due) }}</span><span v-else class="text-muted">—</span></td>
                                     <td><span class="badge" :class="o.statusBadge">{{ o.status }}</span></td>
                                     <td class="text-end">
@@ -70,16 +66,9 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
-                        <small class="text-muted">Showing {{ orders.from || 0 }} to {{ orders.to || 0 }} of {{ orders.total }} orders</small>
-                        <nav v-if="orders.last_page > 1">
-                            <ul class="pagination mb-0">
-                                <li v-for="(link, i) in orders.links" :key="i" class="page-item" :class="{ active: link.active, disabled: !link.url }">
-                                    <a class="page-link" href="#" @click.prevent="link.url && go(link.url)" v-html="link.label"></a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+                    <TableFooter :from="orders.from" :to="orders.to" :total="orders.total"
+                        :can-prev="!!orders.prev_page_url" :can-next="!!orders.next_page_url"
+                        @prev="go(orders.prev_page_url)" @next="go(orders.next_page_url)" />
                 </div>
             </div>
         </div>
@@ -91,6 +80,9 @@ import { reactive, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { swalDelete } from '@/lib/swalDelete';
+import TableToolbar from '@/Components/TableToolbar.vue';
+import TableFooter from '@/Components/TableFooter.vue';
+import SortIcon from '@/Components/SortIcon.vue';
 
 defineOptions({ layout: AppLayout });
 
@@ -113,6 +105,7 @@ function reload() {
 }
 let t = null;
 watch(() => filters.search, () => { clearTimeout(t); t = setTimeout(reload, 350); });
+watch(() => filters.per_page, reload);
 function sortBy(col) {
     if (filters.sort === col) filters.dir = filters.dir === 'asc' ? 'desc' : 'asc';
     else { filters.sort = col; filters.dir = 'asc'; }

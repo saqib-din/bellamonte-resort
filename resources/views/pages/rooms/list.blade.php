@@ -71,12 +71,12 @@
 
                     @php
                         $dummyRooms = [
-                            ['type' => 'Premium King Room', 'price' => 159],
-                            ['type' => 'Deluxe Room', 'price' => 139],
-                            ['type' => 'Double Room', 'price' => 119],
-                            ['type' => 'Luxury Room', 'price' => 199],
-                            ['type' => 'View Room', 'price' => 179],
-                            ['type' => 'Small Room', 'price' => 99],
+                            ['type' => 'Premium King Room', 'price' => 25599],
+                            ['type' => 'Deluxe Room', 'price' => 20339],
+                            ['type' => 'Double Room', 'price' => 15419],
+                            ['type' => 'Luxury Room', 'price' => 30699],
+                            ['type' => 'View Room', 'price' => 10979],
+                            ['type' => 'Small Room', 'price' => 10339],
                         ];
                     @endphp
 

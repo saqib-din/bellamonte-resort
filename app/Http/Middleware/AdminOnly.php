@@ -11,7 +11,7 @@ class AdminOnly
     public function handle(Request $request, Closure $next): Response
     {
         if (!auth()->check() || !auth()->user()->isAdmin()) {
-            abort(403, 'Sirf Admin yeh page dekh sakta hai!');
+            abort(403, 'Only admin can view this page!');
         }
 
         return $next($request);

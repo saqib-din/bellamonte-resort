@@ -30,7 +30,7 @@ class AboutController extends Controller
         $serviceDefaults = [1 => 'Restaurants Services', 2 => 'Travel & Camping', 3 => 'Event & Party'];
 
         $form = [
-            'welcome_title'       => $data['welcome_title'] ?? 'Welcome To White Castle Resort.',
+            'welcome_title'       => $data['welcome_title'] ?? 'Welcome To Bellamonte Resort.',
             'welcome_description' => $data['welcome_description'] ?? '',
             'video_title'         => $data['video_title'] ?? 'Discover Our Hotel & Services.',
             'video_subtitle'      => $data['video_subtitle'] ?? '',

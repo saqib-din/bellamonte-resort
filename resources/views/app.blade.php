@@ -2,8 +2,8 @@
 <html lang="en">
 
 <head>
-    {{-- <title>{{ config('app.name', 'White Castle Resort') }}</title> --}}
-    <title>The White Castle Resort</title>
+    {{-- <title>{{ config('app.name', 'Bellamonte Resort') }}</title> --}}
+    <title>Bellamonte Resort</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -11,16 +11,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <meta name="description"
-        content="White Castle Resort Shogran offers luxury rooms, mountain views, hotel booking, family stays, and premium hospitality services in Shogran." />
+        content="Bellamonte Resort Shogran offers luxury rooms, mountain views, hotel booking, family stays, and premium hospitality services in Shogran." />
 
     <meta name="keywords"
-        content="White Castle Resort, Shogran Hotel, luxury resort, hotel booking, mountain resort, family hotel, Shogran tourism, Pakistan hotels, vacation resort, rooms booking" />
+        content="Bellamonte Resort, Shogran Hotel, luxury resort, hotel booking, mountain resort, family hotel, Shogran tourism, Pakistan hotels, vacation resort, rooms booking" />
 
-    <meta name="author" content="White Castle Resort" />
+    <meta name="author" content="Bellamonte Resort" />
 
     {{-- Favicon --}}
-    <link rel="shortcut icon" href="{{ asset('admin/assets/images/whitecastle.jpeg') }}" />
-    <link rel="apple-touch-icon-precomposed" href="{{ asset('admin/assets/images/whitecastle.jpeg') }}" />
+    <link rel="shortcut icon" href="{{ asset('admin/assets/images/logo.jpeg') }}" />
+    <link rel="apple-touch-icon-precomposed" href="{{ asset('admin/assets/images/logo.jpeg') }}" />
 
     {{-- Able Pro theme CSS --}}
     <link rel="stylesheet" href="{{ asset('admin/assets/css/plugins/style.css') }}" />

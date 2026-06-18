@@ -6,9 +6,9 @@
             <div class="row">
                 <div class="col-lg-6">
                     <div class="hero-text">
-                        <h1>White Castle — Luxury Above Clouds
+                        <h1>Bellamonte Resort — Luxury Above Clouds
                         </h1>
-                        <p>Nestled in the heights of Shogran, White Castle Resort blends premium comfort with breathtaking
+                        <p>Nestled in the heights of Shogran, Bellamonte Resort blends premium comfort with breathtaking
                             mountain views — an unforgettable retreat for families, couples, and travelers.</p>
 
                         {{-- <a href="#" class="primary-btn">Discover Now</a> --}}
@@ -33,17 +33,17 @@
                     <div class="about-text">
                         <div class="section-title">
                             <span>About Us</span>
-                            <h2>{{ $data['welcome_title'] ?? 'Welcome To White Castle Resort.' }}</h2>
+                            <h2>{{ $data['welcome_title'] ?? 'Welcome To Bellamonte Resort.' }}</h2>
 
                         </div>
 
                         <p class="f-para">
-                            {{ $data['welcome_description'] ?? 'Perched in the beautiful hills of Shogran, Pakistan, White Castle Resort offers luxury accommodation, breathtaking mountain views, peaceful surroundings, and comfortable rooms for a memorable stay with family and friends.' }}
+                            {{ $data['welcome_description'] ?? 'Perched in the beautiful hills of Shogran, Pakistan, Bellamonte Resort offers luxury accommodation, breathtaking mountain views, peaceful surroundings, and comfortable rooms for a memorable stay with family and friends.' }}
                         </p>
 
                         <p class="s-para">
                             Whether you are planning a relaxing vacation, a romantic honeymoon, or a family getaway,
-                            White Castle Resort offers elegant rooms, stunning mountain views, delicious dining,
+                            Bellamonte Resort offers elegant rooms, stunning mountain views, delicious dining,
                             and an unforgettable stay surrounded by nature.
                         </p>
                         <a href="{{ route('about.us') }}" class="primary-btn about-btn">Read More</a>
@@ -53,7 +53,7 @@
                     <div class="about-pic">
                         <div class="row">
                             <div class="col-sm-6">
-                                <img src="{{ asset('landing-assets/img/shogran4.webp') }}" alt="White Castle Resort"
+                                <img src="{{ asset('landing-assets/img/shogran4.webp') }}" alt="Bellamonte Resort"
                                     style="
             height: 23em;
             width: 100%;
@@ -64,7 +64,7 @@
                             </div>
 
                             <div class="col-sm-6">
-                                <img src="{{ asset('landing-assets/img/shogran12.png') }}" alt="White Castle Resort"
+                                <img src="{{ asset('landing-assets/img/shogran12.png') }}" alt="Bellamonte Resort"
                                     style="
             height: 23em;
             width: 100%;
@@ -370,22 +370,26 @@
                 $top3 = $blogItems->take(3);
                 $bottom2 = $blogItems->slice(3);
 
-                $getImage = fn($event) => $useDb
-                    ? ($event->image
+                $blogFallbacks = ['shogran123.jpg', 'shogran121212.webp', 'shogran7.jpg', 'shogran4.webp', 'shogran6.webp'];
+                $getImage = function ($event, $i = 0) use ($useDb, $blogFallbacks) {
+                    if (!$useDb) {
+                        return $event->image_url; 
+                    }
+                    return $event->image
                         ? asset('uploads/events/' . $event->image)
-                        : asset('landing-assets/img/blog/blog-1.jpg'))
-                    : $event->image_url;
+                        : asset('landing-assets/img/' . $blogFallbacks[$i % count($blogFallbacks)]);
+                };
 
-                $getLink = fn($event) => $useDb ? route('event.detail', $event) : route('event.details');
+                $getLink = fn($event) => $useDb ? route('event.detail', $event) : route('events.list');
             @endphp
 
             <div class="row">
 
                 {{-- ── Top 3 cards ── --}}
-                @foreach ($top3 as $event)
+                @foreach ($top3 as $i => $event)
                     <div class="col-lg-4 col-md-6">
-                        <div class="blog-item set-bg" data-setbg="{{ $getImage($event) }}"
-                            style="background-image: url('{{ $getImage($event) }}'); background-size: cover; background-position: center;">
+                        <div class="blog-item set-bg" data-setbg="{{ $getImage($event, $i) }}"
+                            style="background-image: url('{{ $getImage($event, $i) }}'); background-size: cover; background-position: center;">
                             <div class="bi-text">
                                 <span class="b-tag">{{ $event->tag }}</span>
                                 <h4>
@@ -408,8 +412,8 @@
 
                 @if ($item4)
                     <div class="col-lg-8 col-md-12">
-                        <div class="blog-item small-size set-bg" data-setbg="{{ $getImage($item4) }}"
-                            style="background-image: url('{{ $getImage($item4) }}'); background-size: cover; background-position: center;">
+                        <div class="blog-item small-size set-bg" data-setbg="{{ $getImage($item4, 3) }}"
+                            style="background-image: url('{{ $getImage($item4, 3) }}'); background-size: cover; background-position: center;">
                             <div class="bi-text">
                                 <span class="b-tag">{{ $item4->tag }}</span>
                                 <h4>
@@ -426,8 +430,8 @@
 
                 @if ($item5)
                     <div class="col-lg-4 col-md-12">
-                        <div class="blog-item small-size set-bg" data-setbg="{{ $getImage($item5) }}"
-                            style="background-image: url('{{ $getImage($item5) }}'); background-size: cover; background-position: center;">
+                        <div class="blog-item small-size set-bg" data-setbg="{{ $getImage($item5, 4) }}"
+                            style="background-image: url('{{ $getImage($item5, 4) }}'); background-size: cover; background-position: center;">
                             <div class="bi-text">
                                 <span class="b-tag">{{ $item5->tag }}</span>
                                 <h4>

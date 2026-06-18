@@ -27,7 +27,7 @@
                     <div class="contact-text">
                         <h2>Contact Info</h2>
                         <p>
-                            For bookings and inquiries, feel free to contact White Castle Resort Shogran.
+                            For bookings and inquiries, feel free to contact Bellamonte Resort Shogran.
                             Our team is available to assist you with room reservations and travel support.
                         </p>
 
@@ -35,7 +35,7 @@
                             <tbody>
                                 <tr>
                                     <td class="c-o">Address:</td>
-                                    <td>White Castle Resort, Shogran, Khyber Pakhtunkhwa, Pakistan</td>
+                                    <td>Bellamonte Resort, Shogran, Khyber Pakhtunkhwa, Pakistan</td>
                                 </tr>
                                 <tr>
                                     <td class="c-o">Phone:</td>

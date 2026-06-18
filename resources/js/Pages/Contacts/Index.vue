@@ -68,21 +68,30 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Contacts List</h5>
-                    <input v-if="contacts.length" type="text" v-model="search" class="form-control form-control-sm" style="width:220px;" placeholder="Search...">
                 </div>
                 <div class="card-body table-card">
                     <div v-if="!contacts.length" class="text-center" style="min-height:300px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                         <img src="/admin/assets/images/application/img-empty-mail.png" alt="No mail" class="img-fluid mb-4" style="max-width:200px;">
                         <h2><b>There is No Mail</b></h2>
                     </div>
-                    <div v-else class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr><th>#</th><th>Name</th><th>Email</th><th>Subject</th><th>Phone</th><th>Replied</th><th class="text-end">Action</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="c in filtered" :key="c.id">
-                                    <td>{{ c.id }}</td>
+                    <template v-else>
+                        <TableToolbar v-model:perPage="perPage" v-model:search="search" :per-page-options="[10, 15, 25, 50, 100]" />
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th role="button" @click="sortBy('name')">Name <SortIcon col="name" :active="sort" :dir="dir" /></th>
+                                        <th role="button" @click="sortBy('email')">Email <SortIcon col="email" :active="sort" :dir="dir" /></th>
+                                        <th role="button" @click="sortBy('subject')">Subject <SortIcon col="subject" :active="sort" :dir="dir" /></th>
+                                        <th role="button" @click="sortBy('phone')">Phone <SortIcon col="phone" :active="sort" :dir="dir" /></th>
+                                        <th>Replied</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(c, i) in paginated" :key="c.id">
+                                        <td>{{ from + i + 1 }}</td>
                                     <td>{{ c.name }}</td>
                                     <td>{{ c.email }}</td>
                                     <td>{{ c.subject || '—' }}</td>
@@ -94,12 +103,16 @@
                                         <a href="javascript:void(0)" class="avtar avtar-xs btn-link-secondary" title="Delete" @click="askDelete(c)"><i class="ti ti-trash f-20"></i></a>
                                     </td>
                                 </tr>
-                                <tr v-if="!filtered.length">
-                                    <td colspan="7" class="text-center py-4 text-muted">No contacts match your search.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                                    <tr v-if="!filtered.length">
+                                        <td colspan="7" class="text-center py-4 text-muted">No contacts match your search.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <TableFooter :from="filtered.length ? from + 1 : 0" :to="to" :total="filtered.length"
+                            :can-prev="cpage > 1" :can-next="cpage < totalPages"
+                            @prev="cpage > 1 && cpage--" @next="cpage < totalPages && cpage++" />
+                    </template>
                 </div>
             </div>
         </div>
@@ -107,11 +120,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Link, useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import AppModal from '@/Components/AppModal.vue';
 import { swalDelete } from '@/lib/swalDelete';
+import TableToolbar from '@/Components/TableToolbar.vue';
+import TableFooter from '@/Components/TableFooter.vue';
+import SortIcon from '@/Components/SortIcon.vue';
 
 defineOptions({ layout: AppLayout });
 
@@ -119,17 +135,43 @@ const props = defineProps({
     contacts: { type: Array, default: () => [] },
 });
 
-const search = ref('');
+// ── Client-side search / sort / pagination ──
+const search  = ref('');
+const sort    = ref('name');
+const dir     = ref('asc');
+const cpage   = ref(1);
+const perPage = ref(15);
+
 const filtered = computed(() => {
     const s = search.value.trim().toLowerCase();
-    if (!s) return props.contacts;
-    return props.contacts.filter((c) =>
+    let list = props.contacts.filter((c) =>
+        !s ||
         (c.name || '').toLowerCase().includes(s) ||
         (c.email || '').toLowerCase().includes(s) ||
         (c.subject || '').toLowerCase().includes(s) ||
         (c.phone || '').toLowerCase().includes(s),
     );
+    list = [...list].sort((a, b) => {
+        let x = a[sort.value], y = b[sort.value];
+        if (typeof x === 'string') { x = x.toLowerCase(); y = (y || '').toLowerCase(); }
+        if (x < y) return dir.value === 'asc' ? -1 : 1;
+        if (x > y) return dir.value === 'asc' ? 1 : -1;
+        return 0;
+    });
+    return list;
 });
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filtered.value.length / perPage.value)));
+const from       = computed(() => (cpage.value - 1) * perPage.value);
+const to         = computed(() => Math.min(from.value + perPage.value, filtered.value.length));
+const paginated  = computed(() => filtered.value.slice(from.value, from.value + perPage.value));
+
+watch([search, sort, dir, perPage], () => { cpage.value = 1; });
+
+function sortBy(col) {
+    if (sort.value === col) dir.value = dir.value === 'asc' ? 'desc' : 'asc';
+    else { sort.value = col; dir.value = 'asc'; }
+}
 
 const viewTarget   = ref(null);
 const replyTarget  = ref(null);

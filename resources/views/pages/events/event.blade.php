@@ -21,13 +21,16 @@
 @section('content')
     <section class="blog-section blog-page spad">
         <div class="container">
+            @php
+                $eventFallbacks = ['shogran123.jpg', 'shogran121212.webp', 'shogran7.jpg', 'shogran4.webp', 'shogran6.webp', 'shogran5.png', 'SHOGRAN.jpg', 'shogran.webp', 'shogran12.png'];
+            @endphp
             <div class="row">
 
                 @forelse ($events as $event)
                     @php
                         $img = $event->image
                             ? asset('uploads/events/' . $event->image)
-                            : asset('landing-assets/img/blog/blog-1.jpg');
+                            : asset('landing-assets/img/' . $eventFallbacks[$loop->index % count($eventFallbacks)]);
                     @endphp
                     <div class="col-lg-4 col-md-6">
                         <div class="blog-item set-bg" data-setbg="{{ $img }}"

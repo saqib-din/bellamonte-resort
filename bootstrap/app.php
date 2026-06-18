@@ -19,9 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        // 'admin' alias — used by Route::...->middleware('admin')
+        // Route middleware aliases
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminOnly::class,
+            'role'  => \App\Http\Middleware\CheckRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
