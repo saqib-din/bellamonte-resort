@@ -56,7 +56,10 @@
                                     </td>
                                     <td><i class="ti ti-calendar-event f-13 text-muted me-1"></i>{{ b.check_in }}</td>
                                     <td><i class="ti ti-calendar-event f-13 text-muted me-1"></i>{{ b.check_out }}</td>
-                                    <td><strong class="text-success">₨ {{ n(b.total_amount) }}</strong></td>
+                                    <td>
+                                        <strong class="text-success">₨ {{ n(b.total_amount) }}</strong>
+                                        <small v-if="b.room_price" class="text-muted d-block">₨{{ n(b.room_price) }} × {{ b.nights }} {{ unitShort(b.rate_type) }}</small>
+                                    </td>
                                     <td><span class="badge" :class="b.statusBadge">{{ b.status }}</span></td>
                                     <td class="text-end">
                                         <button v-if="b.status === 'Confirmed'" class="avtar avtar-xs btn-link-success" title="Check In" @click="doAction(b, 'checkin')">
@@ -147,4 +150,5 @@ function askDelete(b) {
 }
 
 const n = (v) => Number(v || 0).toLocaleString('en-US');
+const unitShort = (t) => (t === 'Hourly' ? 'hr' : t === 'Day' ? 'day' : 'night');
 </script>

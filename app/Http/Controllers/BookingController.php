@@ -42,6 +42,9 @@ class BookingController extends Controller
             'check_in'       => optional($b->check_in)->format('d M Y'),
             'check_out'      => optional($b->check_out)->format('d M Y'),
             'total_amount'   => $b->total_amount,
+            'room_price'     => $b->room_price,
+            'nights'         => $b->nights,
+            'rate_type'      => $b->rate_type,
             'status'         => $b->status,
             'statusBadge'    => $b->getStatusBadgeClass(),
             'locked'         => optional($b->bill)->status === 'Paid',
@@ -82,7 +85,7 @@ class BookingController extends Controller
             'check_in'         => 'required|date',
             'check_out'        => 'required|date|after:check_in',
             'rate_type'        => 'required|in:Night,Day,Hourly',
-            'rate'             => 'required|numeric|min:0|max:9999999',
+            'rate'             => 'nullable|numeric',
             'payment_method'   => 'required|in:Cash,Card,Bank Transfer,JazzCash,EasyPaisa',
             'payment_status'   => 'required|in:Pending,Paid,Partial,Refunded',
             'status'           => 'required|in:Confirmed,Checked In,Checked Out,Cancelled,No Show',
@@ -97,7 +100,7 @@ class BookingController extends Controller
         $room     = Room::findOrFail($request->room_id);
         $checkin  = Carbon::parse($request->check_in);
         $checkout = Carbon::parse($request->check_out);
-        [$nights, $total] = $this->computeUnitsTotal($request->rate_type, (float) $request->rate, $checkin, $checkout);
+        [$nights, $total] = $this->computeUnitsTotal($request->rate_type, $this->rateForType($room, $request->rate_type), $checkin, $checkout);
 
         $booking = Booking::create([
             'booking_number'   => Booking::generateBookingNumber(),
@@ -114,7 +117,7 @@ class BookingController extends Controller
             'check_out'        => $request->check_out,
             'nights'           => $nights,
             'rate_type'        => $request->rate_type,
-            'room_price'       => $request->rate,
+            'room_price'       => $this->rateForType($room, $request->rate_type),
             'total_amount'     => $total,
             'payment_status'   => $request->payment_status,
             'payment_method'   => $request->payment_method,
@@ -244,7 +247,7 @@ class BookingController extends Controller
             'check_in'         => 'required|date',
             'check_out'        => 'required|date|after:check_in',
             'rate_type'        => 'required|in:Night,Day,Hourly',
-            'rate'             => 'required|numeric|min:0|max:9999999',
+            'rate'             => 'nullable|numeric',
             'payment_method'   => 'required|in:Cash,Card,Bank Transfer,JazzCash,EasyPaisa',
             'payment_status'   => 'required|in:Pending,Paid,Partial,Refunded',
             'status'           => 'required|in:Confirmed,Checked In,Checked Out,Cancelled,No Show',
@@ -259,7 +262,7 @@ class BookingController extends Controller
         $room     = Room::findOrFail($request->room_id);
         $checkin  = Carbon::parse($request->check_in);
         $checkout = Carbon::parse($request->check_out);
-        [$nights, $total] = $this->computeUnitsTotal($request->rate_type, (float) $request->rate, $checkin, $checkout);
+        [$nights, $total] = $this->computeUnitsTotal($request->rate_type, $this->rateForType($room, $request->rate_type), $checkin, $checkout);
 
         if ($booking->room_id != $request->room_id) {
             $booking->room->update(['status' => 'Available']);
@@ -279,7 +282,7 @@ class BookingController extends Controller
             'check_out'        => $request->check_out,
             'nights'           => $nights,
             'rate_type'        => $request->rate_type,
-            'room_price'       => $request->rate,
+            'room_price'       => $this->rateForType($room, $request->rate_type),
             'total_amount'     => $total,
             'payment_status'   => $request->payment_status,
             'payment_method'   => $request->payment_method,
@@ -356,6 +359,15 @@ class BookingController extends Controller
         return [$units, round($units * $rate, 2)];
     }
 
+    private function rateForType(Room $room, string $rateType): float
+    {
+        return match ($rateType) {
+            'Day'    => (float) $room->day_rate,
+            'Hourly' => (float) $room->hourly_rate,
+            default  => (float) $room->price_per_night,
+        };
+    }
+
     private function roomOptions($rooms): array
     {
         return $rooms->map(fn ($r) => [
@@ -363,6 +375,8 @@ class BookingController extends Controller
             'room_number' => $r->room_number,
             'type'        => $r->type,
             'price'       => $r->price_per_night,
+            'day_rate'    => $r->day_rate,
+            'hourly_rate' => $r->hourly_rate,
             'capacity'    => $r->capacity,
             'status'      => $r->status,
         ])->all();

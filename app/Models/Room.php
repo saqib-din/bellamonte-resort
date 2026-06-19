@@ -15,6 +15,8 @@ class Room extends Model
         'type',
         'floor',
         'price_per_night',
+        'day_rate',
+        'hourly_rate',
         'capacity',
         'size',
         'bed_type',

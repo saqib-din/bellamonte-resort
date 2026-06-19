@@ -145,7 +145,7 @@ class Bill extends Model
         $this->tax_percent  = 0;
         $this->tax_amount   = 0;
         $this->total_amount = $total;
-        $this->balance_due  = $total - $paid;
+        $this->balance_due  = max(0, $total - $paid);
 
         $this->status = match (true) {
             $paid <= 0     => 'Unpaid',

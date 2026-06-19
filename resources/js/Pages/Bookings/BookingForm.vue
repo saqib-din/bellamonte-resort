@@ -16,8 +16,12 @@
                                 <div v-if="selectedRoom" class="mt-2 p-2 bg-light rounded">
                                     <small>
                                         <span class="text-muted">Type:</span> <strong>{{ selectedRoom.type }}</strong> &nbsp;|&nbsp;
-                                        <span class="text-muted">Capacity:</span> <strong>{{ selectedRoom.capacity }} persons</strong> &nbsp;|&nbsp;
-                                        <span class="text-muted">Price:</span> <strong class="text-success">₨{{ n(selectedRoom.price) }}</strong>/night
+                                        <span class="text-muted">Capacity:</span> <strong>{{ selectedRoom.capacity }} persons</strong>
+                                        <span class="d-block mt-1">
+                                            <span class="text-muted">Night:</span> <strong class="text-success">₨{{ n(selectedRoom.price) }}</strong>
+                                            <template v-if="Number(selectedRoom.day_rate) > 0"> &nbsp;|&nbsp; <span class="text-muted">Day:</span> <strong class="text-success">₨{{ n(selectedRoom.day_rate) }}</strong></template>
+                                            <template v-if="Number(selectedRoom.hourly_rate) > 0"> &nbsp;|&nbsp; <span class="text-muted">Hourly:</span> <strong class="text-success">₨{{ n(selectedRoom.hourly_rate) }}</strong></template>
+                                        </span>
                                     </small>
                                 </div>
                             </div>
@@ -99,10 +103,10 @@
                                 <label class="form-label">Rate <small class="text-muted">({{ rateLabel }})</small> <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text">₨</span>
-                                    <input type="number" v-model.number="form.rate" class="form-control" :class="{ 'is-invalid': form.errors.rate }" min="0" placeholder="0">
+                                    <input type="number" v-model.number="form.rate" class="form-control" :class="{ 'is-invalid': form.errors.rate }" min="0" placeholder="0" readonly tabindex="-1">
                                 </div>
                                 <div v-if="form.errors.rate" class="text-danger f-12 mt-1">{{ form.errors.rate }}</div>
-                                <small v-else class="text-muted">Auto-filled from room — edit for day/hourly.</small>
+                                <small v-else class="text-muted">Comes from the selected room's rate (not editable).</small>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Check In <small class="text-muted">(date &amp; time)</small> <span class="text-danger">*</span></label>
@@ -207,7 +211,7 @@
                         <ul class="list-unstyled mb-0">
                             <li class="mb-2"><i class="ti ti-home text-primary me-1"></i><strong>Room &amp; Customer</strong><p class="text-muted mb-0 ms-3">Select an available room and customer. Guest details will be auto-filled from the selected customer.</p></li>
                             <hr class="my-2">
-                            <li class="mb-2"><i class="ti ti-calendar text-warning me-1"></i><strong>Check In / Check Out</strong><p class="text-muted mb-0 ms-3">Total amount is calculated automatically based on selected dates and room price per night.</p></li>
+                            <li class="mb-2"><i class="ti ti-calendar text-warning me-1"></i><strong>Stay Type & Rate</strong><p class="text-muted mb-0 ms-3">Pick Night / Day / Hourly — the rate comes from the room automatically and the total is calculated live.</p></li>
                             <hr class="my-2">
                             <li class="mb-2"><i class="ti ti-settings text-success me-1"></i><strong>Booking Status</strong><p class="text-muted mb-0 ms-3">Set as Confirmed for future bookings or Checked In if the guest has already arrived.</p></li>
                             <hr class="my-2">
@@ -311,9 +315,14 @@ const units = computed(() => {
 
 const total = computed(() => (Number(form.rate) || 0) * units.value);
 
-watch(() => form.room_id, () => {
-    if (selectedRoom.value) form.rate = selectedRoom.value.price;
+const roomRate = computed(() => {
+    const r = selectedRoom.value;
+    if (!r) return 0;
+    if (form.rate_type === 'Day') return Number(r.day_rate) || 0;
+    if (form.rate_type === 'Hourly') return Number(r.hourly_rate) || 0;
+    return Number(r.price) || 0;
 });
+watch(roomRate, (v) => { form.rate = v; }, { immediate: true });
 
 const n = (v) => Number(v || 0).toLocaleString('en-US');
 
@@ -335,3 +344,4 @@ function submit() {
     }
 }
 </script>
+                                      

@@ -36,6 +36,24 @@
                                 <div v-if="form.errors.price_per_night" class="text-danger f-12 mt-1">{{ form.errors.price_per_night }}</div>
                             </div>
                             <div class="col-md-4">
+                                <label class="form-label">Day-Use Rate (₨)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₨</span>
+                                    <input type="number" v-model="form.day_rate" class="form-control" :class="{ 'is-invalid': form.errors.day_rate }" placeholder="Optional" min="0">
+                                </div>
+                                <div v-if="form.errors.day_rate" class="text-danger f-12 mt-1">{{ form.errors.day_rate }}</div>
+                                <small v-else class="text-muted">Blank = uses night rate</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Hourly Rate (₨)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₨</span>
+                                    <input type="number" v-model="form.hourly_rate" class="form-control" :class="{ 'is-invalid': form.errors.hourly_rate }" placeholder="Optional" min="0">
+                                </div>
+                                <div v-if="form.errors.hourly_rate" class="text-danger f-12 mt-1">{{ form.errors.hourly_rate }}</div>
+                                <small v-else class="text-muted">Blank = uses night rate</small>
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label">Max Capacity <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="ti ti-users"></i></span>
@@ -199,6 +217,8 @@ const form = useForm({
     type:            r.type ?? '',
     floor:           r.floor ?? 1,
     price_per_night: r.price_per_night ?? '',
+    day_rate:        r.day_rate ?? '',
+    hourly_rate:     r.hourly_rate ?? '',
     capacity:        r.capacity ?? 2,
     size:            r.size ?? '',
     bed_type:        r.bed_type ?? '',

@@ -34,8 +34,6 @@
                                     <th role="button" @click="sortBy('invoice_number')">Invoice # <SortIcon col="invoice_number" :active="filters.sort" :dir="filters.dir" /></th>
                                     <th role="button" @click="sortBy('guest_name')">Guest <SortIcon col="guest_name" :active="filters.sort" :dir="filters.dir" /></th>
                                     <th>Room</th>
-                                    <th>Check In</th>
-                                    <th>Check Out</th>
                                     <th>Method</th>
                                     <th role="button" @click="sortBy('total_amount')">Total <SortIcon col="total_amount" :active="filters.sort" :dir="filters.dir" /></th>
                                     <th role="button" @click="sortBy('status')">Status <SortIcon col="status" :active="filters.sort" :dir="filters.dir" /></th>
@@ -53,8 +51,6 @@
                                         </template>
                                         <span v-else class="text-muted">—</span>
                                     </td>
-                                    <td>{{ b.check_in || '—' }}</td>
-                                    <td>{{ b.check_out || '—' }}</td>
                                     <td><small>{{ b.payment_method }}</small></td>
                                     <td><strong class="text-muted">₨ {{ n(b.total_amount) }}</strong></td>
                                     <td><span class="badge" :class="b.statusBadge">{{ b.status }}</span></td>
