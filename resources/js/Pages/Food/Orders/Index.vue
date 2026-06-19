@@ -55,7 +55,7 @@
                                     <td><span class="badge" :class="o.statusBadge">{{ o.status }}</span></td>
                                     <td class="text-end">
                                         <Link :href="`/food/orders/${o.uuid}`" class="avtar avtar-xs btn-link-secondary" title="View"><i class="ti ti-eye f-18"></i></Link>
-                                        <Link :href="`/food/orders/${o.uuid}/edit`" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></Link>
+                                        <Link v-if="o.status !== 'Paid' && o.status !== 'Cancelled'" :href="`/food/orders/${o.uuid}/edit`" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></Link>
                                         <a :href="`/food/orders/${o.uuid}/print`" target="_blank" class="avtar avtar-xs btn-link-secondary" title="Print"><i class="ti ti-printer f-18"></i></a>
                                         <button class="avtar avtar-xs btn-link-secondary" title="Delete" @click="askDelete(o)"><i class="ti ti-trash f-18"></i></button>
                                     </td>

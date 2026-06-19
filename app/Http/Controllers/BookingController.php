@@ -77,9 +77,9 @@ class BookingController extends Controller
             'customer_id'      => 'required|exists:customers,id',
             'guest_name'       => 'required|string|max:50',
             'father_name'      => 'nullable|string|max:60',
-            'guest_phone'      => 'required|string|max:20',
+            'guest_phone'      => ['required', 'string', 'max:20', 'regex:/^[0-9\s\-\+\(\)]{7,20}$/'],
             'guest_cnic'       => 'nullable|string|max:20',
-            'guest_email'      => 'nullable|email|max:100',
+            'guest_email'      => ['nullable', 'email', 'max:100', 'regex:/^.+@.+\..+$/'],
             'adults'           => 'required|integer|min:1|max:50',
             'children'         => 'nullable|integer|min:0|max:50',
             'check_in'         => 'required|date',
@@ -91,6 +91,10 @@ class BookingController extends Controller
             'status'           => 'required|in:Confirmed,Checked In,Checked Out,Cancelled,No Show',
             'special_requests' => 'nullable|string|max:2000',
             'notes'            => 'nullable|string|max:2000',
+        ], [
+            'guest_phone.regex' => 'Please enter a valid phone number — digits and + - ( ) only.',
+            'guest_email.regex' => 'Please enter a valid email address, e.g. name@example.com.',
+            'guest_email.email' => 'Please enter a valid email address, e.g. name@example.com.',
         ]);
 
         if ($this->roomHasConflict($request->room_id, $request->check_in, $request->check_out)) {
@@ -239,9 +243,9 @@ class BookingController extends Controller
             'customer_id'      => 'required|exists:customers,id',
             'guest_name'       => 'required|string|max:50',
             'father_name'      => 'nullable|string|max:60',
-            'guest_phone'      => 'required|string|max:20',
+            'guest_phone'      => ['required', 'string', 'max:20', 'regex:/^[0-9\s\-\+\(\)]{7,20}$/'],
             'guest_cnic'       => 'nullable|string|max:20',
-            'guest_email'      => 'nullable|email|max:100',
+            'guest_email'      => ['nullable', 'email', 'max:100', 'regex:/^.+@.+\..+$/'],
             'adults'           => 'required|integer|min:1|max:50',
             'children'         => 'nullable|integer|min:0|max:50',
             'check_in'         => 'required|date',
@@ -253,6 +257,10 @@ class BookingController extends Controller
             'status'           => 'required|in:Confirmed,Checked In,Checked Out,Cancelled,No Show',
             'special_requests' => 'nullable|string|max:2000',
             'notes'            => 'nullable|string|max:2000',
+        ], [
+            'guest_phone.regex' => 'Please enter a valid phone number — digits and + - ( ) only.',
+            'guest_email.regex' => 'Please enter a valid email address, e.g. name@example.com.',
+            'guest_email.email' => 'Please enter a valid email address, e.g. name@example.com.',
         ]);
 
         if ($this->roomHasConflict($request->room_id, $request->check_in, $request->check_out, $booking->id)) {

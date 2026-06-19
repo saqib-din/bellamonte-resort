@@ -21,10 +21,14 @@ class ContactController extends Controller
     {
         $validated = $request->validate([
             'name'    => 'required|string|max:100',
-            'email'   => 'required|email|max:150',
-            'phone'   => 'nullable|string|max:20',
+            'email'   => ['required', 'email', 'max:150', 'regex:/^.+@.+\..+$/'],
+            'phone'   => ['nullable', 'string', 'max:20', 'regex:/^[0-9\s\-\+\(\)]{7,20}$/'],
             'subject' => 'nullable|string|max:200',
             'message' => 'required|string|max:5000',
+        ], [
+            'phone.regex' => 'Please enter a valid phone number — digits and + - ( ) only.',
+            'email.regex' => 'Please enter a valid email address, e.g. name@example.com.',
+            'email.email' => 'Please enter a valid email address, e.g. name@example.com.',
         ]);
 
         Contact::create([

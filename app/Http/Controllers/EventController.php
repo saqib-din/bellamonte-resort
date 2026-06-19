@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class EventController extends Controller
 {
     private array $imageFields = ['image', 'detail_image_1', 'detail_image_2', 'detail_image_3'];
 
-    private function rules(bool $imageRequired = false): array
+    private function rules(bool $imageRequired = false, ?int $ignoreId = null): array
     {
         return [
             'title'             => 'required|string|max:200',
@@ -26,8 +27,19 @@ class EventController extends Controller
             'section_1_text'    => 'nullable|string|max:200',
             'section_2_title'   => 'nullable|string|max:200',
             'section_2_text'    => 'nullable|string|max:200',
-            'sort_order'        => 'nullable|integer|min:0',
+            'sort_order'        => ['required', 'integer', 'min:1', 'max:9', Rule::unique('events', 'sort_order')->ignore($ignoreId)],
             'is_active'         => 'nullable|boolean',
+        ];
+    }
+
+    private function validationMessages(): array
+    {
+        return [
+            'sort_order.required' => 'Sort order is required.',
+            'sort_order.integer'  => 'Sort order must be a whole number.',
+            'sort_order.min'      => 'Sort order must be between 1 and 9.',
+            'sort_order.max'      => 'Sort order must be between 1 and 9.',
+            'sort_order.unique'   => 'This sort order is already used by another event. Each event must have a unique order (1–9).',
         ];
     }
 
@@ -96,7 +108,7 @@ class EventController extends Controller
             return redirect()->route('events.index')->with('error', 'Maximum 9 events allowed. Please delete one first.');
         }
 
-        $request->validate($this->rules(imageRequired: true));
+        $request->validate($this->rules(imageRequired: true), $this->validationMessages());
 
         $data               = $request->except(array_merge($this->imageFields, ['_method']));
         $data['is_active']  = $request->boolean('is_active', true);
@@ -140,7 +152,7 @@ class EventController extends Controller
 
     public function update(Request $request, Event $event)
     {
-        $request->validate($this->rules(imageRequired: false));
+        $request->validate($this->rules(imageRequired: false, ignoreId: $event->id), $this->validationMessages());
 
         $data              = $request->except(array_merge($this->imageFields, ['_method']));
         $data['is_active'] = $request->boolean('is_active', true);

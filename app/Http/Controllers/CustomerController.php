@@ -71,8 +71,8 @@ class CustomerController extends Controller
             'name'        => 'required|string|max:100',
             'father_name' => 'nullable|string|max:255',
             'cnic'        => 'required|string|max:20|unique:customers,cnic',
-            'phone'       => 'required|string|max:20',
-            'email'       => 'nullable|email|max:100',
+            'phone'       => ['required', 'string', 'max:20', 'regex:/^[0-9\s\-\+\(\)]{7,20}$/'],
+            'email'       => ['nullable', 'email', 'max:100', 'regex:/^.+@.+\..+$/'],
             'city'        => 'nullable|string|max:100',
             'nationality' => 'nullable|string|max:50',
             'gender'      => 'nullable|in:Male,Female,Other',
@@ -81,6 +81,10 @@ class CustomerController extends Controller
             'status'      => 'required|in:Active,Blacklisted',
             'notes'       => 'nullable|string',
             'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ], [
+            'phone.regex' => 'Please enter a valid phone number — digits and + - ( ) only.',
+            'email.regex' => 'Please enter a valid email address, e.g. name@example.com.',
+            'email.email' => 'Please enter a valid email address, e.g. name@example.com.',
         ]);
 
         $data = $request->except('image');
@@ -164,8 +168,8 @@ class CustomerController extends Controller
             'name'        => 'required|string|max:100',
             'father_name' => 'nullable|string|max:255',
             'cnic'        => 'required|string|max:20|unique:customers,cnic,' . $customer->id,
-            'phone'       => 'required|string|max:20',
-            'email'       => 'nullable|email|max:100',
+            'phone'       => ['required', 'string', 'max:20', 'regex:/^[0-9\s\-\+\(\)]{7,20}$/'],
+            'email'       => ['nullable', 'email', 'max:100', 'regex:/^.+@.+\..+$/'],
             'city'        => 'nullable|string|max:100',
             'nationality' => 'nullable|string|max:50',
             'gender'      => 'nullable|in:Male,Female,Other',
@@ -174,6 +178,10 @@ class CustomerController extends Controller
             'status'      => 'required|in:Active,Blacklisted',
             'notes'       => 'nullable|string',
             'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ], [
+            'phone.regex' => 'Please enter a valid phone number — digits and + - ( ) only.',
+            'email.regex' => 'Please enter a valid email address, e.g. name@example.com.',
+            'email.email' => 'Please enter a valid email address, e.g. name@example.com.',
         ]);
 
         $data = $request->except(['image', '_method']);

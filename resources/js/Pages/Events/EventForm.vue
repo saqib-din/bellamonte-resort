@@ -99,9 +99,9 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label">Sort Order</label>
-                            <input type="number" v-model.number="form.sort_order" class="form-control" :class="{ 'is-invalid': form.errors.sort_order }" min="0">
+                            <input type="number" v-model.number="form.sort_order" class="form-control" :class="{ 'is-invalid': form.errors.sort_order }" min="1" max="9">
                             <div v-if="form.errors.sort_order" class="invalid-feedback">{{ form.errors.sort_order }}</div>
-                            <small class="text-muted">Lower number = shown first</small>
+                            <small class="text-muted">Must be 1–9 and unique (lower = shown first).</small>
                         </div>
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" v-model="form.is_active" id="is_active">
@@ -121,7 +121,7 @@
                             <li class="list-group-item d-flex justify-content-between align-items-center py-2"><span class="text-muted">Detail Images</span><span class="badge bg-light-secondary">Optional (3)</span></li>
                             <li class="list-group-item d-flex justify-content-between align-items-center py-2"><span class="text-muted">Image Size</span><span class="badge bg-light-secondary">Max 2MB</span></li>
                             <li class="list-group-item d-flex justify-content-between align-items-center py-2"><span class="text-muted">Formats</span><span class="badge bg-light-secondary">JPG, PNG, WEBP</span></li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center py-2"><span class="text-muted">Sort Order</span><span class="text-muted" style="font-size:12px;">0 = Show first</span></li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-2"><span class="text-muted">Sort Order</span><span class="text-muted" style="font-size:12px;">1–9, must be unique</span></li>
                             <li class="list-group-item d-flex justify-content-between align-items-center py-2"><span class="text-muted">Status</span><span class="text-muted" style="font-size:12px;">Inactive = Hidden</span></li>
                         </ul>
                     </div>
@@ -164,7 +164,7 @@ const form = useForm({
     section_1_text:    e.section_1_text ?? '',
     section_2_title:   e.section_2_title ?? '',
     section_2_text:    e.section_2_text ?? '',
-    sort_order:        e.sort_order ?? 0,
+    sort_order:        e.sort_order ?? 1,
     is_active:         props.event ? e.is_active : true,
     image:             null,
     detail_image_1:    null,

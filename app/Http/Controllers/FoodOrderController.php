@@ -77,7 +77,7 @@ class FoodOrderController extends Controller
             'customer_id'          => 'nullable|exists:customers,id',
             'guest_name'           => 'required|string|max:255',
             'father_name'          => 'nullable|string|max:255',
-            'guest_phone'          => 'nullable|string|max:20',
+            'guest_phone'          => ['nullable', 'string', 'max:20', 'regex:/^[0-9\s\-\+\(\)]{7,20}$/'],
             'room_number'          => 'nullable|string|max:20',
             'order_type'           => 'required|in:Room Service,Dine In,Takeaway',
             'payment_method'       => 'required|string|max:50',
@@ -88,6 +88,7 @@ class FoodOrderController extends Controller
             'items.*.food_item_id' => 'required|exists:food_items,id',
             'items.*.quantity'     => 'required|integer|min:1|max:1000',
         ], [
+            'guest_phone.regex'         => 'Please enter a valid phone number — digits and + - ( ) only.',
             'items.required'            => 'Please add at least one item to the order.',
             'items.min'                 => 'Please add at least one item to the order.',
             'items.*.quantity.required' => 'Quantity is required for each item.',
@@ -107,6 +108,9 @@ class FoodOrderController extends Controller
             ]);
         }
 
+        // Auto-mark Paid when the full amount has been paid
+        $status = ($totals['total'] > 0 && $totals['balance'] <= 0) ? 'Paid' : 'Pending';
+
         $order = FoodOrder::create([
             'order_number'   => FoodOrder::generateOrderNumber(),
             'booking_id'     => $request->booking_id ?: null,
@@ -117,7 +121,7 @@ class FoodOrderController extends Controller
             'room_number'    => $request->room_number,
             'order_type'     => $request->order_type,
             'payment_method' => $request->payment_method,
-            'status'         => 'Pending',
+            'status'         => $status,
             'subtotal'       => $subtotal,
             'discount'       => $totals['discount'],
             'tax_percent'    => $totals['taxPct'],
@@ -146,6 +150,11 @@ class FoodOrderController extends Controller
 
     public function edit(FoodOrder $foodOrder)
     {
+        if (in_array($foodOrder->status, ['Paid', 'Cancelled'], true)) {
+            return redirect()->route('food.orders.show', $foodOrder)
+                ->with('error', 'This order is ' . $foodOrder->status . ' and can no longer be edited.');
+        }
+
         $foodOrder->load('items');
 
         return Inertia::render('Food/Orders/Edit', [
@@ -179,12 +188,17 @@ class FoodOrderController extends Controller
 
     public function update(Request $request, FoodOrder $foodOrder)
     {
+        if (in_array($foodOrder->status, ['Paid', 'Cancelled'], true)) {
+            return redirect()->route('food.orders.show', $foodOrder)
+                ->with('error', 'This order is ' . $foodOrder->status . ' and can no longer be edited.');
+        }
+
         $request->validate([
             'booking_id'           => 'nullable|exists:bookings,id',
             'customer_id'          => 'nullable|exists:customers,id',
             'guest_name'           => 'required|string|max:255',
             'father_name'          => 'nullable|string|max:255',
-            'guest_phone'          => 'nullable|string|max:20',
+            'guest_phone'          => ['nullable', 'string', 'max:20', 'regex:/^[0-9\s\-\+\(\)]{7,20}$/'],
             'room_number'          => 'nullable|string|max:20',
             'order_type'           => 'required|in:Room Service,Dine In,Takeaway',
             'payment_method'       => 'required|string|max:50',
@@ -195,6 +209,7 @@ class FoodOrderController extends Controller
             'items.*.food_item_id' => 'required|exists:food_items,id',
             'items.*.quantity'     => 'required|integer|min:1|max:1000',
         ], [
+            'guest_phone.regex'         => 'Please enter a valid phone number — digits and + - ( ) only.',
             'items.required'            => 'Please add at least one item to the order.',
             'items.min'                 => 'Please add at least one item to the order.',
             'items.*.quantity.required' => 'Quantity is required for each item.',
@@ -214,6 +229,9 @@ class FoodOrderController extends Controller
             ]);
         }
 
+        // Auto-mark Paid when the full amount has been paid (otherwise keep current status)
+        $status = ($totals['total'] > 0 && $totals['balance'] <= 0) ? 'Paid' : $foodOrder->status;
+
         $foodOrder->update([
             'booking_id'     => $request->booking_id ?: null,
             'customer_id'    => $request->customer_id ?: null,
@@ -223,6 +241,7 @@ class FoodOrderController extends Controller
             'room_number'    => $request->room_number,
             'order_type'     => $request->order_type,
             'payment_method' => $request->payment_method,
+            'status'         => $status,
             'subtotal'       => $subtotal,
             'discount'       => $totals['discount'],
             'tax_percent'    => $totals['taxPct'],

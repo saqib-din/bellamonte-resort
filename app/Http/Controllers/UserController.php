@@ -55,11 +55,15 @@ class UserController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:100',
-            'email'    => 'required|email|unique:users,email',
+            'email'    => ['required', 'email', 'regex:/^.+@.+\..+$/', 'unique:users,email'],
             'password' => 'required|min:6|confirmed',
             'role'     => 'required|in:manager,receptionist,accountant,staff',
-            'phone'    => 'nullable|string|max:20',
+            'phone'    => ['nullable', 'string', 'max:20', 'regex:/^[0-9\s\-\+\(\)]{7,20}$/'],
             'status'   => 'required|in:active,inactive',
+        ], [
+            'phone.regex' => 'Please enter a valid phone number — digits and + - ( ) only.',
+            'email.regex' => 'Please enter a valid email address, e.g. name@example.com.',
+            'email.email' => 'Please enter a valid email address, e.g. name@example.com.',
         ]);
 
         // Another admin account cannot be created!
@@ -100,11 +104,15 @@ class UserController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:100',
-            'email'    => 'required|email|unique:users,email,' . $user->id,
+            'email'    => ['required', 'email', 'regex:/^.+@.+\..+$/', 'unique:users,email,' . $user->id],
             'password' => 'nullable|min:6|confirmed',
             'role'     => 'required|in:admin,manager,receptionist,accountant,staff',
-            'phone'    => 'nullable|string|max:20',
+            'phone'    => ['nullable', 'string', 'max:20', 'regex:/^[0-9\s\-\+\(\)]{7,20}$/'],
             'status'   => 'required|in:active,inactive',
+        ], [
+            'phone.regex' => 'Please enter a valid phone number — digits and + - ( ) only.',
+            'email.regex' => 'Please enter a valid email address, e.g. name@example.com.',
+            'email.email' => 'Please enter a valid email address, e.g. name@example.com.',
         ]);
 
         if (!$user->isAdmin() && $request->role === 'admin') {

@@ -755,6 +755,9 @@ ol {
     margin-right: -15px;
     position: relative;
     overflow: hidden;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
 }
 .hp-room-items .hp-room-item:hover .hr-text {
     bottom: 135px;
@@ -1186,7 +1189,11 @@ ol {
     margin-bottom: 30px;
 }
 .room-item img {
-    min-width: 100%;
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
 }
 .room-item .ri-text {
     border: 1px solid #ebebeb;
@@ -1257,6 +1264,11 @@ ol {
     margin-bottom: 50px;
 }
 .room-details-item img {
+    width: 100%;
+    height: 460px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
     margin-bottom: 40px;
 }
 .room-details-item .rd-text .rd-title {

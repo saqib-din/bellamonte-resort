@@ -13,7 +13,7 @@
                     <h2 class="mb-0">🍽️ {{ order.order_number }}</h2>
                     <div class="d-flex gap-2">
                         <a :href="`/food/orders/${order.uuid}/print`" target="_blank" class="btn btn-outline-secondary"><i class="ti ti-printer me-1"></i> Print</a>
-                        <Link :href="`/food/orders/${order.uuid}/edit`" class="btn btn-primary"><i class="ti ti-edit me-1"></i> Edit</Link>
+                        <Link v-if="order.status !== 'Paid' && order.status !== 'Cancelled'" :href="`/food/orders/${order.uuid}/edit`" class="btn btn-primary"><i class="ti ti-edit me-1"></i> Edit</Link>
                     </div>
                 </div>
             </div>
