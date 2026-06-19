@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ClearsDashboardCache;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Booking;
 use Illuminate\Support\Carbon;
@@ -9,6 +10,8 @@ use Illuminate\Support\Str;
 
 class Customer extends Model
 {
+    use ClearsDashboardCache;
+
     protected $fillable = [
         'name',
         'father_name',

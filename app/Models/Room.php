@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ClearsDashboardCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 
 class Room extends Model
 {
+    use ClearsDashboardCache;
+
     protected $fillable = [
 
         'uuid',

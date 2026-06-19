@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ClearsDashboardCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Event extends Model
 {
+    use ClearsDashboardCache;
     use HasFactory;
 
     protected $fillable = [

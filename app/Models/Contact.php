@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ClearsDashboardCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Contact extends Model
 {
+    use ClearsDashboardCache;
     use HasFactory;
 
     protected $fillable = [

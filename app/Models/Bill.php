@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ClearsDashboardCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Bill extends Model
 {
+    use ClearsDashboardCache;
+
     protected $fillable = [
         'invoice_number',
         'booking_id',
