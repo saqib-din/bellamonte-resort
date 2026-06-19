@@ -16,7 +16,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Customer (Optional)</label>
-                                <SearchSelect v-model="form.customer_id" :options="customerOpts" :invalid="!!form.errors.customer_id" placeholder="-- Customer --" search-placeholder="Search customer..." />
+                                <SearchSelect v-model="form.customer_id" fetch-url="/customers/search" :preload="customers" :invalid="!!form.errors.customer_id" placeholder="-- Customer --" search-placeholder="Search customer..." />
                                 <div v-if="form.errors.customer_id" class="text-danger f-12 mt-1">{{ form.errors.customer_id }}</div>
                             </div>
                         </div>
@@ -278,7 +278,6 @@ const form = useForm({
 });
 
 const bookingOpts  = computed(() => props.bookings.map((x) => ({ value: x.id, label: x.label })));
-const customerOpts = computed(() => props.customers.map((c) => ({ value: c.id, label: `${c.name} — ${c.phone}` })));
 
 const totals = computed(() => {
     const room    = Number(form.room_charges) || 0;
@@ -344,15 +343,3 @@ function submit() {
     }
 }
 </script>
-
-<style scoped>
-.surface-box {
-    background: #f8f9fa;
-    border: 1px solid #e0e0e0;
-}
-
-[data-pc-theme="dark"] .surface-box {
-    background: rgba(255, 255, 255, .04);
-    border-color: rgba(255, 255, 255, .12);
-}
-</style>

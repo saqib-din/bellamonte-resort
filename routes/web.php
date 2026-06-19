@@ -85,6 +85,7 @@ Route::middleware('auth')->group(function () {
         Route::post('bookings/{booking}/checkout', [BookingController::class, 'checkout'])->name('admin.bookings.checkout');
 
         // Customers
+        Route::get('customers/search', [CustomerController::class, 'search'])->name('customers.search');
         Route::resource('customers', CustomerController::class);
 
         // Food — Orders

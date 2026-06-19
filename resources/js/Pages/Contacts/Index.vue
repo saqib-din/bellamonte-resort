@@ -70,48 +70,48 @@
                     <h5 class="mb-0">Contacts List</h5>
                 </div>
                 <div class="card-body table-card">
-                    <div v-if="!contacts.length" class="text-center" style="min-height:300px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                    <div v-if="!contacts.data.length && !filters.search" class="text-center" style="min-height:300px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                         <img src="/admin/assets/images/application/img-empty-mail.png" alt="No mail" class="img-fluid mb-4" style="max-width:200px;">
                         <h2><b>There is No Mail</b></h2>
                     </div>
                     <template v-else>
-                        <TableToolbar v-model:perPage="perPage" v-model:search="search" :per-page-options="[10, 15, 25, 50, 100]" />
+                        <TableToolbar v-model:perPage="filters.per_page" v-model:search="filters.search" :per-page-options="[10, 15, 25, 50, 100]" />
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th role="button" @click="sortBy('name')">Name <SortIcon col="name" :active="sort" :dir="dir" /></th>
-                                        <th role="button" @click="sortBy('email')">Email <SortIcon col="email" :active="sort" :dir="dir" /></th>
-                                        <th role="button" @click="sortBy('subject')">Subject <SortIcon col="subject" :active="sort" :dir="dir" /></th>
-                                        <th role="button" @click="sortBy('phone')">Phone <SortIcon col="phone" :active="sort" :dir="dir" /></th>
-                                        <th>Replied</th>
+                                        <th role="button" @click="sortBy('name')">Name <SortIcon col="name" :active="filters.sort" :dir="filters.dir" /></th>
+                                        <th role="button" @click="sortBy('email')">Email <SortIcon col="email" :active="filters.sort" :dir="filters.dir" /></th>
+                                        <th role="button" @click="sortBy('subject')">Subject <SortIcon col="subject" :active="filters.sort" :dir="filters.dir" /></th>
+                                        <th role="button" @click="sortBy('phone')">Phone <SortIcon col="phone" :active="filters.sort" :dir="filters.dir" /></th>
+                                        <th role="button" @click="sortBy('is_replied')">Replied <SortIcon col="is_replied" :active="filters.sort" :dir="filters.dir" /></th>
                                         <th class="text-end">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(c, i) in paginated" :key="c.id">
-                                        <td>{{ from + i + 1 }}</td>
-                                    <td>{{ c.name }}</td>
-                                    <td>{{ c.email }}</td>
-                                    <td>{{ c.subject || '—' }}</td>
-                                    <td>{{ c.phone || '—' }}</td>
-                                    <td><span class="badge" :class="c.is_replied ? 'bg-light-success' : 'bg-light-danger'">{{ c.is_replied ? 'Yes' : 'No' }}</span></td>
-                                    <td class="text-end">
-                                        <a href="javascript:void(0)" class="avtar avtar-xs btn-link-secondary" title="View" @click="viewTarget = c"><i class="ti ti-eye f-20"></i></a>
-                                        <a v-if="!c.is_replied" href="javascript:void(0)" class="avtar avtar-xs btn-link-secondary" title="Reply" @click="openReply(c)"><i class="ti ti-arrow-back-up f-20"></i></a>
-                                        <a href="javascript:void(0)" class="avtar avtar-xs btn-link-secondary" title="Delete" @click="askDelete(c)"><i class="ti ti-trash f-20"></i></a>
-                                    </td>
-                                </tr>
-                                    <tr v-if="!filtered.length">
+                                    <tr v-for="(c, i) in contacts.data" :key="c.id">
+                                        <td>{{ (contacts.from || 0) + i }}</td>
+                                        <td>{{ c.name }}</td>
+                                        <td>{{ c.email }}</td>
+                                        <td>{{ c.subject || '—' }}</td>
+                                        <td>{{ c.phone || '—' }}</td>
+                                        <td><span class="badge" :class="c.is_replied ? 'bg-light-success' : 'bg-light-danger'">{{ c.is_replied ? 'Yes' : 'No' }}</span></td>
+                                        <td class="text-end">
+                                            <a href="javascript:void(0)" class="avtar avtar-xs btn-link-secondary" title="View" @click="viewTarget = c"><i class="ti ti-eye f-20"></i></a>
+                                            <a v-if="!c.is_replied" href="javascript:void(0)" class="avtar avtar-xs btn-link-secondary" title="Reply" @click="openReply(c)"><i class="ti ti-arrow-back-up f-20"></i></a>
+                                            <a href="javascript:void(0)" class="avtar avtar-xs btn-link-secondary" title="Delete" @click="askDelete(c)"><i class="ti ti-trash f-20"></i></a>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="!contacts.data.length">
                                         <td colspan="7" class="text-center py-4 text-muted">No contacts match your search.</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                        <TableFooter :from="filtered.length ? from + 1 : 0" :to="to" :total="filtered.length"
-                            :can-prev="cpage > 1" :can-next="cpage < totalPages"
-                            @prev="cpage > 1 && cpage--" @next="cpage < totalPages && cpage++" />
+                        <TableFooter :from="contacts.from" :to="contacts.to" :total="contacts.total"
+                            :can-prev="!!contacts.prev_page_url" :can-next="!!contacts.next_page_url"
+                            @prev="go(contacts.prev_page_url)" @next="go(contacts.next_page_url)" />
                     </template>
                 </div>
             </div>
@@ -120,7 +120,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { Link, useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import AppModal from '@/Components/AppModal.vue';
@@ -132,50 +132,35 @@ import SortIcon from '@/Components/SortIcon.vue';
 defineOptions({ layout: AppLayout });
 
 const props = defineProps({
-    contacts: { type: Array, default: () => [] },
+    contacts: { type: Object, required: true },
+    filters:  { type: Object, default: () => ({}) },
 });
 
-// ── Client-side search / sort / pagination ──
-const search  = ref('');
-const sort    = ref('name');
-const dir     = ref('asc');
-const cpage   = ref(1);
-const perPage = ref(15);
-
-const filtered = computed(() => {
-    const s = search.value.trim().toLowerCase();
-    let list = props.contacts.filter((c) =>
-        !s ||
-        (c.name || '').toLowerCase().includes(s) ||
-        (c.email || '').toLowerCase().includes(s) ||
-        (c.subject || '').toLowerCase().includes(s) ||
-        (c.phone || '').toLowerCase().includes(s),
-    );
-    list = [...list].sort((a, b) => {
-        let x = a[sort.value], y = b[sort.value];
-        if (typeof x === 'string') { x = x.toLowerCase(); y = (y || '').toLowerCase(); }
-        if (x < y) return dir.value === 'asc' ? -1 : 1;
-        if (x > y) return dir.value === 'asc' ? 1 : -1;
-        return 0;
-    });
-    return list;
+const filters = reactive({
+    search:   props.filters.search   ?? '',
+    sort:     props.filters.sort     ?? 'created_at',
+    dir:      props.filters.dir      ?? 'desc',
+    per_page: props.filters.per_page ?? 15,
 });
 
-const totalPages = computed(() => Math.max(1, Math.ceil(filtered.value.length / perPage.value)));
-const from       = computed(() => (cpage.value - 1) * perPage.value);
-const to         = computed(() => Math.min(from.value + perPage.value, filtered.value.length));
-const paginated  = computed(() => filtered.value.slice(from.value, from.value + perPage.value));
-
-watch([search, sort, dir, perPage], () => { cpage.value = 1; });
-
-function sortBy(col) {
-    if (sort.value === col) dir.value = dir.value === 'asc' ? 'desc' : 'asc';
-    else { sort.value = col; dir.value = 'asc'; }
+function reload() {
+    router.get('/contacts', {
+        search: filters.search || undefined, sort: filters.sort, dir: filters.dir, per_page: filters.per_page,
+    }, { preserveState: true, preserveScroll: true, replace: true });
 }
+let t = null;
+watch(() => filters.search, () => { clearTimeout(t); t = setTimeout(reload, 350); });
+watch(() => filters.per_page, reload);
+function sortBy(col) {
+    if (filters.sort === col) filters.dir = filters.dir === 'asc' ? 'desc' : 'asc';
+    else { filters.sort = col; filters.dir = 'asc'; }
+    reload();
+}
+function go(url) { if (url) router.get(url, {}, { preserveState: true, preserveScroll: true }); }
 
-const viewTarget   = ref(null);
-const replyTarget  = ref(null);
-const replyForm    = useForm({ reply_message: '' });
+const viewTarget  = ref(null);
+const replyTarget = ref(null);
+const replyForm   = useForm({ reply_message: '' });
 
 function openReply(c) {
     viewTarget.value = null;

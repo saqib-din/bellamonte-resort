@@ -43,9 +43,28 @@ class ContactController extends Controller
     }
 
     // ─── Admin: List all contacts (Inertia)
-    public function index()
+    public function index(Request $request)
     {
-        $contacts = Contact::latest()->get()->map(fn ($c) => [
+        $query = Contact::query();
+
+        if ($request->filled('search')) {
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('name', 'like', "%{$s}%")
+                    ->orWhere('email', 'like', "%{$s}%")
+                    ->orWhere('phone', 'like', "%{$s}%")
+                    ->orWhere('subject', 'like', "%{$s}%");
+            });
+        }
+
+        $sortable = ['name', 'email', 'subject', 'phone', 'is_replied', 'created_at'];
+        $sort = in_array($request->sort, $sortable, true) ? $request->sort : 'created_at';
+        $dir  = $request->dir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sort, $dir);
+
+        $perPage = (int) $request->input('per_page', 15);
+
+        $contacts = $query->paginate($perPage)->withQueryString()->through(fn ($c) => [
             'id'                  => $c->id,
             'name'                => $c->name,
             'email'               => $c->email,
@@ -63,6 +82,12 @@ class ContactController extends Controller
 
         return Inertia::render('Contacts/Index', [
             'contacts' => $contacts,
+            'filters'  => [
+                'search'   => $request->search,
+                'sort'     => $sort,
+                'dir'      => $dir,
+                'per_page' => $perPage,
+            ],
         ]);
     }
 

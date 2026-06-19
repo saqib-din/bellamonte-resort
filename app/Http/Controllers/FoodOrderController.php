@@ -163,7 +163,7 @@ class FoodOrderController extends Controller
         return Inertia::render('Food/Orders/Edit', [
             'categories' => $this->categoryOptions(),
             'bookings'   => $this->bookingOptions(),
-            'customers'  => $this->customerOptions(),
+            'customers'  => $this->customerOptions($foodOrder->customer_id),
             'order'      => [
                 'uuid'           => $foodOrder->uuid,
                 'order_number'   => $foodOrder->order_number,
@@ -385,12 +385,21 @@ class FoodOrderController extends Controller
             ])->all();
     }
 
-    private function customerOptions(): array
+    private function customerOptions($selectedId = null): array
     {
-        return Customer::orderBy('name')->get()->map(fn ($c) => [
-            'id'    => $c->id,
+        $rows = Customer::orderBy('name')->limit(50)->get();
+
+        if ($selectedId && ! $rows->contains('id', $selectedId)) {
+            if ($sel = Customer::find($selectedId)) {
+                $rows->prepend($sel);
+            }
+        }
+
+        return $rows->map(fn ($c) => [
+            'value' => $c->id,
+            'label' => $c->name . ' — ' . $c->phone,
             'name'  => $c->name,
             'phone' => $c->phone,
-        ])->all();
+        ])->values()->all();
     }
 }

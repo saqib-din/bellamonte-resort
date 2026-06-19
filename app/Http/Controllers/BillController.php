@@ -97,7 +97,7 @@ class BillController extends Controller
 
         return Inertia::render('Billing/Edit', [
             'bookings'  => $this->bookingOptions(Booking::with(['room', 'customer'])->latest()->get()),
-            'customers' => $this->customerOptions(),
+            'customers' => $this->customerOptions($bill->customer_id),
             'bill'      => [
                 'uuid'            => $bill->uuid,
                 'invoice_number'  => $bill->invoice_number,
@@ -314,13 +314,25 @@ class BillController extends Controller
         ])->all();
     }
 
-    private function customerOptions(): array
+    private function customerOptions($selectedId = null): array
     {
-        return Customer::orderBy('name')->get()->map(fn ($c) => [
-            'id'    => $c->id,
-            'name'  => $c->name,
-            'phone' => $c->phone,
-        ])->all();
+        $rows = Customer::orderBy('name')->limit(50)->get();
+
+        if ($selectedId && ! $rows->contains('id', $selectedId)) {
+            if ($sel = Customer::find($selectedId)) {
+                $rows->prepend($sel);
+            }
+        }
+
+        return $rows->map(fn ($c) => [
+            'value'       => $c->id,
+            'label'       => $c->name . ' — ' . $c->phone,
+            'name'        => $c->name,
+            'father_name' => $c->father_name,
+            'phone'       => $c->phone,
+            'cnic'        => $c->cnic,
+            'email'       => $c->email,
+        ])->values()->all();
     }
 
     private function generateInvoiceNumber(): string

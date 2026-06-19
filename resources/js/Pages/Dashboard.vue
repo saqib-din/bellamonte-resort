@@ -291,3 +291,90 @@ const canManage = computed(() => page.props.auth?.user?.canManage === true);
 // number_format() equivalent (thousands separators, no decimals)
 const n = (v) => Number(v || 0).toLocaleString('en-US');
 </script>
+<style>
+/* Welcome banner: floating image + glass icons (same as classic design) */
+.classical-image-container {
+    position: relative;
+    height: 100%;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.image-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+}
+.glass-frame {
+    padding: 18px;
+    animation: float-gentle 6s ease-in-out infinite;
+}
+.banner-image {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 16px;
+    filter: drop-shadow(0 18px 45px rgba(0, 0, 0, 0.35));
+}
+.float-icon {
+    position: absolute;
+    width: 52px;
+    height: 52px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+.float-icon i {
+    font-size: 24px;
+    color: #fff;
+    animation: sparkle-rotate 2.5s ease-in-out infinite;
+}
+.icon-1 {
+    top: 0;
+    right: -10px;
+    animation: float-up-down 3s ease-in-out infinite;
+}
+.icon-2 {
+    bottom: 10px;
+    left: -10px;
+    animation: float-up-down 4s ease-in-out infinite .8s;
+}
+.icon-3 {
+    top: 65%;
+    right: -15px;
+    animation: float-up-down 3.5s ease-in-out infinite 1.2s;
+}
+@keyframes float-gentle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+@keyframes float-up-down {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+@keyframes sparkle-rotate {
+    0%, 100% { transform: rotate(0deg); opacity: 1; }
+    50% { transform: rotate(180deg); opacity: .7; }
+}
+.quick-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    white-space: nowrap;
+}
+.quick-stat i {
+    font-size: 20px;
+}
+</style>

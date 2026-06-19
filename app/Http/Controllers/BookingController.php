@@ -201,7 +201,7 @@ class BookingController extends Controller
 
         return Inertia::render('Bookings/Edit', [
             'rooms'     => $this->roomOptions(Room::orderBy('room_number')->get()),
-            'customers' => $this->customerOptions(),
+            'customers' => $this->customerOptions($booking->customer_id),
             'booking'   => [
                 'uuid'             => $booking->uuid,
                 'booking_number'   => $booking->booking_number,
@@ -390,15 +390,24 @@ class BookingController extends Controller
         ])->all();
     }
 
-    private function customerOptions(): array
+    private function customerOptions($selectedId = null): array
     {
-        return Customer::orderBy('name')->get()->map(fn ($c) => [
-            'id'          => $c->id,
+        $rows = Customer::orderBy('name')->limit(50)->get();
+
+        if ($selectedId && ! $rows->contains('id', $selectedId)) {
+            if ($sel = Customer::find($selectedId)) {
+                $rows->prepend($sel);
+            }
+        }
+
+        return $rows->map(fn ($c) => [
+            'value'       => $c->id,
+            'label'       => $c->name . ' — ' . $c->phone,
             'name'        => $c->name,
             'father_name' => $c->father_name,
             'phone'       => $c->phone,
             'cnic'        => $c->cnic,
             'email'       => $c->email,
-        ])->all();
+        ])->values()->all();
     }
 }

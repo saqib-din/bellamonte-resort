@@ -60,6 +60,33 @@ class CustomerController extends Controller
         ]);
     }
 
+    // Async type-to-search for customer dropdowns (returns up to 20 matches)
+    public function search(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+
+        $rows = Customer::query()
+            ->when($q !== '', function ($w) use ($q) {
+                $w->where('name', 'like', "%{$q}%")
+                    ->orWhere('phone', 'like', "%{$q}%")
+                    ->orWhere('cnic', 'like', "%{$q}%");
+            })
+            ->orderBy('name')
+            ->limit(20)
+            ->get()
+            ->map(fn ($c) => [
+                'value'       => $c->id,
+                'label'       => $c->name . ' — ' . $c->phone,
+                'name'        => $c->name,
+                'father_name' => $c->father_name,
+                'phone'       => $c->phone,
+                'cnic'        => $c->cnic,
+                'email'       => $c->email,
+            ]);
+
+        return response()->json($rows);
+    }
+
     public function create()
     {
         return Inertia::render('Customers/Create');

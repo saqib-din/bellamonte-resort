@@ -27,8 +27,8 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Select Customer <span class="text-danger">*</span></label>
-                                <SearchSelect v-model="form.customer_id" :options="customerOpts" :invalid="!!form.errors.customer_id"
-                                    placeholder="-- Select Customer --" search-placeholder="Search customer..." @change="fillCustomer" />
+                                <SearchSelect v-model="form.customer_id" fetch-url="/customers/search" :preload="customers" :invalid="!!form.errors.customer_id"
+                                    placeholder="-- Select Customer --" search-placeholder="Search customer..." @select="fillCustomer" />
                                 <div v-if="form.errors.customer_id" class="text-danger f-12 mt-1">{{ form.errors.customer_id }}</div>
                             </div>
                         </div>
@@ -293,11 +293,6 @@ const roomOpts = computed(() => props.rooms.map((r) => ({
         (props.mode === 'edit' && r.id !== form.room_id && r.status !== 'Available' ? ' [Occupied]' : ''),
 })));
 
-const customerOpts = computed(() => props.customers.map((c) => ({
-    value: c.id,
-    label: `${c.name} — ${c.phone}`,
-})));
-
 const rateLabel = computed(() => (form.rate_type === 'Hourly' ? 'Per Hour' : form.rate_type === 'Day' ? 'Per Day' : 'Per Night'));
 const unitLabel = computed(() => (form.rate_type === 'Hourly' ? 'Hours' : form.rate_type === 'Day' ? 'Days' : 'Nights'));
 
@@ -326,8 +321,7 @@ watch(roomRate, (v) => { form.rate = v; }, { immediate: true });
 
 const n = (v) => Number(v || 0).toLocaleString('en-US');
 
-function fillCustomer() {
-    const c = props.customers.find((x) => x.id === form.customer_id);
+function fillCustomer(c) {
     if (!c) return;
     form.guest_name   = c.name || '';
     form.father_name  = c.father_name || '';
@@ -344,4 +338,3 @@ function submit() {
     }
 }
 </script>
-                                      
