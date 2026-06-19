@@ -17,6 +17,7 @@ class FoodOrder extends Model
         'room_number',
         'order_type',
         'status',
+        'payment_status',
         'payment_method',
         'subtotal',
         'discount',
@@ -67,9 +68,20 @@ class FoodOrder extends Model
             'Pending'   => 'bg-light-warning text-warning',
             'Preparing' => 'bg-light-info text-info',
             'Served'    => 'bg-light-primary text-primary',
-            'Paid'      => 'bg-light-success text-success',
+            'Completed' => 'bg-light-success text-success',
             'Cancelled' => 'bg-light-danger text-danger',
             default     => 'bg-light-secondary',
+        };
+    }
+
+    public function getPaymentBadgeClassAttribute(): string
+    {
+        return match ($this->payment_status) {
+            'Paid'     => 'bg-light-success text-success',
+            'Partial'  => 'bg-light-warning text-warning',
+            'Unpaid'   => 'bg-light-danger text-danger',
+            'Refunded' => 'bg-light-secondary text-secondary',
+            default    => 'bg-light-secondary',
         };
     }
 

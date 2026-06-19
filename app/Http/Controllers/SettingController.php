@@ -23,14 +23,18 @@ class SettingController extends Controller
     {
         $request->validate([
             'hotel_name'    => 'required|string|max:100',
-            'hotel_email'   => 'nullable|email|max:150',
-            'hotel_phone'   => 'nullable|string|max:30',
+            'hotel_email'   => ['nullable', 'email', 'max:150', 'regex:/^.+@.+\..+$/'],
+            'hotel_phone'   => ['nullable', 'string', 'max:30', 'regex:/^[0-9\s\-\+\(\)]{7,30}$/'],
             'hotel_country' => 'nullable|string|max:100',
             'hotel_address' => 'nullable|string|max:255',
             'facebook'      => 'nullable|string|max:255',
             'instagram'     => 'nullable|string|max:255',
             'twitter'       => 'nullable|string|max:255',
             'hotel_logo'    => 'nullable|image|mimes:jpg,jpeg,png,webp,svg|max:2048',
+        ], [
+            'hotel_phone.regex' => 'Please enter a valid phone number — digits and + - ( ) only.',
+            'hotel_email.regex' => 'Please enter a valid email address, e.g. name@example.com.',
+            'hotel_email.email' => 'Please enter a valid email address, e.g. name@example.com.',
         ]);
 
         // Save logo

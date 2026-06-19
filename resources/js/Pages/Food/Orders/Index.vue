@@ -39,7 +39,8 @@
                                     <th>Items</th>
                                     <th role="button" @click="sortBy('total_amount')">Total <SortIcon col="total_amount" :active="filters.sort" :dir="filters.dir" /></th>
                                     <th>Balance</th>
-                                    <th role="button" @click="sortBy('status')">Status <SortIcon col="status" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th role="button" @click="sortBy('status')">Order <SortIcon col="status" :active="filters.sort" :dir="filters.dir" /></th>
+                                    <th>Payment</th>
                                     <th class="text-end">Action</th>
                                 </tr>
                             </thead>
@@ -53,15 +54,16 @@
                                     <td><strong class="text-muted">₨ {{ n(o.total_amount) }}</strong></td>
                                     <td><span v-if="o.balance_due > 0" class="text-danger fw-500">₨ {{ n(o.balance_due) }}</span><span v-else class="text-muted">—</span></td>
                                     <td><span class="badge" :class="o.statusBadge">{{ o.status }}</span></td>
+                                    <td><span class="badge" :class="o.paymentBadge">{{ o.payment_status }}</span></td>
                                     <td class="text-end">
                                         <Link :href="`/food/orders/${o.uuid}`" class="avtar avtar-xs btn-link-secondary" title="View"><i class="ti ti-eye f-18"></i></Link>
-                                        <Link v-if="o.status !== 'Paid' && o.status !== 'Cancelled'" :href="`/food/orders/${o.uuid}/edit`" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></Link>
+                                        <Link v-if="o.status !== 'Cancelled' && o.payment_status !== 'Paid'" :href="`/food/orders/${o.uuid}/edit`" class="avtar avtar-xs btn-link-secondary" title="Edit"><i class="ti ti-edit f-18"></i></Link>
                                         <a :href="`/food/orders/${o.uuid}/print`" target="_blank" class="avtar avtar-xs btn-link-secondary" title="Print"><i class="ti ti-printer f-18"></i></a>
                                         <button class="avtar avtar-xs btn-link-secondary" title="Delete" @click="askDelete(o)"><i class="ti ti-trash f-18"></i></button>
                                     </td>
                                 </tr>
                                 <tr v-if="!orders.data.length">
-                                    <td colspan="9" class="text-center py-4 text-muted"><i class="ti ti-tools-kitchen-2 f-40 d-block mb-2"></i>No orders found.</td>
+                                    <td colspan="10" class="text-center py-4 text-muted"><i class="ti ti-tools-kitchen-2 f-40 d-block mb-2"></i>No orders found.</td>
                                 </tr>
                             </tbody>
                         </table>

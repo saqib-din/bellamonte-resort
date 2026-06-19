@@ -48,6 +48,8 @@ class FoodOrderController extends Controller
             'balance_due'     => $o->balance_due,
             'status'          => $o->status,
             'statusBadge'     => $o->status_badge_class,
+            'payment_status'  => $o->payment_status,
+            'paymentBadge'    => $o->payment_badge_class,
         ]);
 
         return Inertia::render('Food/Orders/Index', [
@@ -108,8 +110,8 @@ class FoodOrderController extends Controller
             ]);
         }
 
-        // Auto-mark Paid when the full amount has been paid
-        $status = ($totals['total'] > 0 && $totals['balance'] <= 0) ? 'Paid' : 'Pending';
+        // Payment status is derived from how much has been paid
+        $payment = ($totals['total'] > 0 && $totals['paid'] >= $totals['total']) ? 'Paid' : ($totals['paid'] > 0 ? 'Partial' : 'Unpaid');
 
         $order = FoodOrder::create([
             'order_number'   => FoodOrder::generateOrderNumber(),
@@ -121,7 +123,8 @@ class FoodOrderController extends Controller
             'room_number'    => $request->room_number,
             'order_type'     => $request->order_type,
             'payment_method' => $request->payment_method,
-            'status'         => $status,
+            'status'         => 'Pending',
+            'payment_status' => $payment,
             'subtotal'       => $subtotal,
             'discount'       => $totals['discount'],
             'tax_percent'    => $totals['taxPct'],
@@ -150,9 +153,9 @@ class FoodOrderController extends Controller
 
     public function edit(FoodOrder $foodOrder)
     {
-        if (in_array($foodOrder->status, ['Paid', 'Cancelled'], true)) {
+        if ($foodOrder->status === 'Cancelled' || $foodOrder->payment_status === 'Paid') {
             return redirect()->route('food.orders.show', $foodOrder)
-                ->with('error', 'This order is ' . $foodOrder->status . ' and can no longer be edited.');
+                ->with('error', 'This order can no longer be edited (' . ($foodOrder->payment_status === 'Paid' ? 'fully Paid' : 'Cancelled') . ').');
         }
 
         $foodOrder->load('items');
@@ -188,9 +191,9 @@ class FoodOrderController extends Controller
 
     public function update(Request $request, FoodOrder $foodOrder)
     {
-        if (in_array($foodOrder->status, ['Paid', 'Cancelled'], true)) {
+        if ($foodOrder->status === 'Cancelled' || $foodOrder->payment_status === 'Paid') {
             return redirect()->route('food.orders.show', $foodOrder)
-                ->with('error', 'This order is ' . $foodOrder->status . ' and can no longer be edited.');
+                ->with('error', 'This order can no longer be edited (' . ($foodOrder->payment_status === 'Paid' ? 'fully Paid' : 'Cancelled') . ').');
         }
 
         $request->validate([
@@ -229,8 +232,8 @@ class FoodOrderController extends Controller
             ]);
         }
 
-        // Auto-mark Paid when the full amount has been paid (otherwise keep current status)
-        $status = ($totals['total'] > 0 && $totals['balance'] <= 0) ? 'Paid' : $foodOrder->status;
+        // Payment status is derived from how much has been paid (kitchen status is left unchanged)
+        $payment = ($totals['total'] > 0 && $totals['paid'] >= $totals['total']) ? 'Paid' : ($totals['paid'] > 0 ? 'Partial' : 'Unpaid');
 
         $foodOrder->update([
             'booking_id'     => $request->booking_id ?: null,
@@ -241,7 +244,7 @@ class FoodOrderController extends Controller
             'room_number'    => $request->room_number,
             'order_type'     => $request->order_type,
             'payment_method' => $request->payment_method,
-            'status'         => $status,
+            'payment_status' => $payment,
             'subtotal'       => $subtotal,
             'discount'       => $totals['discount'],
             'tax_percent'    => $totals['taxPct'],
@@ -270,7 +273,7 @@ class FoodOrderController extends Controller
 
     public function updateStatus(Request $request, FoodOrder $foodOrder)
     {
-        $request->validate(['status' => 'required|in:Pending,Preparing,Served,Paid,Cancelled']);
+        $request->validate(['status' => 'required|in:Pending,Preparing,Served,Completed,Cancelled']);
         $foodOrder->update(['status' => $request->status]);
 
         return back()->with('success', 'Status updated to ' . $request->status);
@@ -327,6 +330,8 @@ class FoodOrderController extends Controller
             'payment_method' => $o->payment_method,
             'status'         => $o->status,
             'statusBadge'    => $o->status_badge_class,
+            'payment_status' => $o->payment_status,
+            'paymentBadge'   => $o->payment_badge_class,
             'subtotal'       => $o->subtotal,
             'discount'       => $o->discount,
             'tax_percent'    => $o->tax_percent,

@@ -2,7 +2,7 @@
     $hotel = \App\Models\Setting::get('hotel_name') ?: 'Bellamonte Resort';
     $phone = \App\Models\Setting::get('hotel_phone') ?: '0329 6777222';
     $addr  = \App\Models\Setting::get('hotel_address') ?: 'Shogran, Kaghan Valley, Pakistan';
-    $isPaid = ($foodOrder->balance_due <= 0) || ($foodOrder->status === 'Paid');
+    $isPaid = ($foodOrder->payment_status === 'Paid') || ($foodOrder->balance_due <= 0);
     $pct = rtrim(rtrim(number_format($foodOrder->tax_percent, 2), '0'), '.');
     $change = max($foodOrder->amount_paid - $foodOrder->total_amount, 0);
 @endphp

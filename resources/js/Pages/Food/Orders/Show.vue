@@ -13,7 +13,7 @@
                     <h2 class="mb-0">🍽️ {{ order.order_number }}</h2>
                     <div class="d-flex gap-2">
                         <a :href="`/food/orders/${order.uuid}/print`" target="_blank" class="btn btn-outline-secondary"><i class="ti ti-printer me-1"></i> Print</a>
-                        <Link v-if="order.status !== 'Paid' && order.status !== 'Cancelled'" :href="`/food/orders/${order.uuid}/edit`" class="btn btn-primary"><i class="ti ti-edit me-1"></i> Edit</Link>
+                        <Link v-if="order.status !== 'Cancelled' && order.payment_status !== 'Paid'" :href="`/food/orders/${order.uuid}/edit`" class="btn btn-primary"><i class="ti ti-edit me-1"></i> Edit</Link>
                     </div>
                 </div>
             </div>
@@ -61,13 +61,14 @@
                 <div class="card-header"><h5 class="mb-0">Order Info</h5></div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Status</span><span class="badge" :class="order.statusBadge">{{ order.status }}</span></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Order Status</span><span class="badge" :class="order.statusBadge">{{ order.status }}</span></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Payment</span><span class="badge" :class="order.paymentBadge">{{ order.payment_status }}</span></li>
                         <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Type</span><span class="badge" :class="order.orderTypeBadge">{{ order.order_type }}</span></li>
                         <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Guest</span><span>{{ order.guest_name }}</span></li>
                         <li v-if="order.father_name" class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Father Name</span><span>{{ order.father_name }}</span></li>
                         <li v-if="order.guest_phone" class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Phone</span><span>{{ order.guest_phone }}</span></li>
                         <li v-if="order.room_number" class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Room</span><span class="badge bg-light-primary">Room {{ order.room_number }}</span></li>
-                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Payment</span><span>{{ order.payment_method }}</span></li>
+                        <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Method</span><span>{{ order.payment_method }}</span></li>
                         <li class="list-group-item px-0 d-flex justify-content-between"><span class="text-muted">Date</span><span>{{ order.date }}</span></li>
                     </ul>
                 </div>
@@ -100,7 +101,7 @@ const props = defineProps({
     order: { type: Object, required: true },
 });
 
-const statuses = ['Pending', 'Preparing', 'Served', 'Paid', 'Cancelled'];
+const statuses = ['Pending', 'Preparing', 'Served', 'Completed', 'Cancelled'];
 const n = (v) => Number(v || 0).toLocaleString('en-US');
 
 function setStatus(status) {

@@ -49,9 +49,9 @@ class DashboardController extends Controller
         $totalFoodOrders      = FoodOrder::count();
         $pendingFoodOrders    = FoodOrder::where('status', 'Pending')->count();
         $servedFoodOrders     = FoodOrder::where('status', 'Served')->count();
-        $foodRevenueToday     = FoodOrder::where('status', 'Paid')->whereDate('created_at', $today)->sum('total_amount');
-        $foodRevenueThisMonth = FoodOrder::where('status', 'Paid')->where('created_at', '>=', $thisMonth)->sum('total_amount');
-        $foodPendingAmount    = FoodOrder::whereIn('status', ['Pending', 'Preparing', 'Served'])->sum('balance_due');
+        $foodRevenueToday     = FoodOrder::where('payment_status', 'Paid')->whereDate('created_at', $today)->sum('total_amount');
+        $foodRevenueThisMonth = FoodOrder::where('payment_status', 'Paid')->where('created_at', '>=', $thisMonth)->sum('total_amount');
+        $foodPendingAmount    = FoodOrder::whereIn('payment_status', ['Unpaid', 'Partial'])->sum('balance_due');
 
         // ══ CUSTOMERS
         $totalCustomers = Customer::count();

@@ -1567,6 +1567,9 @@ ol {
     position: relative;
     margin-bottom: 30px;
     border-radius: 5px;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
 }
 .blog-item.small-size {
     height: 400px;
@@ -1616,6 +1619,9 @@ ol {
 .blog-details-hero {
     height: 530px;
     padding-top: 165px;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
 }
 .bd-hero-text {
     text-align: center;
