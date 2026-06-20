@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Bill;
 use App\Models\Booking;
 use App\Models\Customer;
+use App\Models\FoodOrder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -297,21 +298,30 @@ class BillController extends Controller
 
     private function bookingOptions($bookings): array
     {
-        return $bookings->map(fn ($b) => [
-            'id'          => $b->id,
-            'label'       => $b->booking_number . ' — ' . $b->guest_name . ' | Room ' . ($b->room->room_number ?? '?')
-                . ' | ' . optional($b->check_in)->format('d M') . ' → ' . optional($b->check_out)->format('d M Y, h:i A'),
-            'guest_name'  => $b->guest_name,
-            'father_name' => $b->father_name,
-            'guest_phone' => $b->guest_phone,
-            'room_number' => $b->room->room_number ?? '',
-            'room_type'   => $b->room->type ?? '',
-            'check_in'    => optional($b->check_in)->format('Y-m-d\TH:i'),
-            'check_out'   => optional($b->check_out)->format('Y-m-d\TH:i'),
-            'nights'      => $b->nights,
-            'amount'      => $b->total_amount,
-            'customer_id' => $b->customer_id,
-        ])->all();
+        return $bookings->map(function ($b) {
+            // Unsettled food orders charged to this booking (to fold into the invoice)
+            $foodOrders = FoodOrder::where('booking_id', $b->id)
+                ->where('payment_status', '!=', 'Paid')
+                ->get(['id', 'total_amount']);
+
+            return [
+                'id'          => $b->id,
+                'label'       => $b->booking_number . ' — ' . $b->guest_name . ' | Room ' . ($b->room->room_number ?? '?')
+                    . ' | ' . optional($b->check_in)->format('d M') . ' → ' . optional($b->check_out)->format('d M Y, h:i A'),
+                'guest_name'  => $b->guest_name,
+                'father_name' => $b->father_name,
+                'guest_phone' => $b->guest_phone,
+                'room_number' => $b->room->room_number ?? '',
+                'room_type'   => $b->room->type ?? '',
+                'check_in'    => optional($b->check_in)->format('Y-m-d\TH:i'),
+                'check_out'   => optional($b->check_out)->format('Y-m-d\TH:i'),
+                'nights'      => $b->nights,
+                'amount'      => $b->total_amount,
+                'customer_id' => $b->customer_id,
+                'food_total'  => (float) $foodOrders->sum('total_amount'),
+                'food_count'  => $foodOrders->count(),
+            ];
+        })->all();
     }
 
     private function customerOptions($selectedId = null): array

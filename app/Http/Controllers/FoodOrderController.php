@@ -273,6 +273,10 @@ class FoodOrderController extends Controller
 
     public function updateStatus(Request $request, FoodOrder $foodOrder)
     {
+        if ($foodOrder->payment_status === 'Paid') {
+            return back()->with('error', 'This order is Paid and Completed - its status is locked.');
+        }
+
         $request->validate(['status' => 'required|in:Pending,Preparing,Served,Completed,Cancelled']);
         $foodOrder->update(['status' => $request->status]);
 

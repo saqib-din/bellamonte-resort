@@ -74,12 +74,17 @@
                 </div>
             </div>
 
-            <div class="card mb-4">
+            <div v-if="order.payment_status !== 'Paid'" class="card mb-4">
                 <div class="card-header"><h5 class="mb-0">Update Status</h5></div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         <button v-for="s in statuses" :key="s" class="btn w-100" :class="order.status === s ? 'btn-primary' : 'btn-outline-secondary'" @click="setStatus(s)">{{ s }}</button>
                     </div>
+                </div>
+            </div>
+            <div v-else class="card mb-4">
+                <div class="card-body text-center text-muted py-3">
+                    <i class="ti ti-lock me-1"></i> Order is Paid &amp; Completed — status locked.
                 </div>
             </div>
 

@@ -135,6 +135,7 @@
                                 <label class="form-label">Extra Charges (₨) <small class="text-muted">Food, Laundry, etc.</small></label>
                                 <div class="input-group"><span class="input-group-text">₨</span><input type="number" v-model.number="form.extra_charges" class="form-control" :class="{ 'is-invalid': form.errors.extra_charges || extraChargesError }" min="0"></div>
                                 <div v-if="form.errors.extra_charges || extraChargesError" class="text-danger f-13 mt-1">{{ form.errors.extra_charges || extraChargesError }}</div>
+                                <small v-if="selectedBooking && selectedBooking.food_count > 0" class="text-info f-12 d-block mt-1"><i class="ti ti-tools-kitchen-2 me-1"></i>Includes ₨{{ n(selectedBooking.food_total) }} from {{ selectedBooking.food_count }} food order(s) on this booking — they'll be marked Paid with this invoice.</small>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Discount (₨)</label>
@@ -278,6 +279,7 @@ const form = useForm({
 });
 
 const bookingOpts  = computed(() => props.bookings.map((x) => ({ value: x.id, label: x.label })));
+const selectedBooking = computed(() => props.bookings.find((x) => x.id === form.booking_id) || null);
 
 const totals = computed(() => {
     const room    = Number(form.room_charges) || 0;
@@ -332,6 +334,7 @@ function fillFromBooking() {
     form.check_out    = bk.check_out || '';
     form.nights       = bk.nights || 1;
     form.room_charges = Number(bk.amount || 0);
+    form.extra_charges = Number(bk.food_total || 0);
     if (bk.customer_id) form.customer_id = bk.customer_id;
 }
 

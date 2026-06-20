@@ -69,6 +69,7 @@ class Bill extends Model
         // Keep the linked booking's payment status in sync with this invoice
         static::saved(function (Bill $bill) {
             $bill->syncBookingPaymentStatus();
+            $bill->settleBookingFoodOrders();
         });
 
         static::deleted(function (Bill $bill) {
@@ -183,5 +184,28 @@ class Bill extends Model
         if ($booking->payment_status !== $status) {
             $booking->update(['payment_status' => $status]);
         }
+    }
+
+    /**
+     * When this invoice is fully Paid, settle (mark Paid) every unpaid
+     * food order charged to the same booking — so the guest pays once at
+     * checkout and nothing stays outstanding separately.
+     */
+    public function settleBookingFoodOrders(): void
+    {
+        if ($this->status !== 'Paid' || ! $this->booking_id) {
+            return;
+        }
+
+        \App\Models\FoodOrder::where('booking_id', $this->booking_id)
+            ->where('payment_status', '!=', 'Paid')
+            ->get()
+            ->each(function ($order) {
+                $order->status         = 'Completed';
+                $order->payment_status = 'Paid';
+                $order->amount_paid    = $order->total_amount;
+                $order->balance_due    = 0;
+                $order->save();
+            });
     }
 }
