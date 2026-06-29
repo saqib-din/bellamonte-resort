@@ -43,7 +43,7 @@
                                 </tr>
                                 <tr>
                                     <td class="c-o">Email:</td>
-                                    <td>thewhitecastle4444@gmail.com</td>
+                                    <td>contact@bellamonteresort.com</td>
                                 </tr>
                                 <tr>
                                     <td class="c-o">Location:</td>

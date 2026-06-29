@@ -69,8 +69,8 @@
             <li><a href="tel:03296777222" style="color: inherit; text-decoration: none;">
                     <i class="fa fa-phone"></i> 0329 6777222
                 </a></li>
-            <li><a href="mailto:bellamonteresort01@gmail.com" style="color: inherit; text-decoration: none;">
-                    <i class="fa fa-envelope"></i> bellamonteresort01@gmail.com
+            <li><a href="mailto:contact@bellamonteresort.com" style="color: inherit; text-decoration: none;">
+                    <i class="fa fa-envelope"></i> contact@bellamonteresort.com
                 </a></li>
         </ul>
     </div>

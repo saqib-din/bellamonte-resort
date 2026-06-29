@@ -492,7 +492,7 @@
         <!-- Footer -->
         <div class="footer">
             <div class="thankyou">Thank you for staying with us.</div>
-            <div>Bellamonte Resort — Shogran, Pakistan | thewhitecastle4444@gmail.com | 0329 6777222</div>
+            <div>Bellamonte Resort — Shogran, Pakistan | contact@bellamonteresort.com | 0329 6777222</div>
             <div style="margin-top:6px;font-size:11px;color:#777;">
                 Generated on {{ now()->format('d M Y, h:i A') }}
             </div>

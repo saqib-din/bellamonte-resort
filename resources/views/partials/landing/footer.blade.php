@@ -17,7 +17,7 @@
                     <img src="{{ asset('admin/assets/images/logo.jpeg') }}" alt="Bellamonte Resort Logo"
                         style="height:64px; width:auto;">
                     <div class="bm-footer__logo-text">
-                        <span class="bm-footer__logo-name">Bellamonte Resort</span>
+                        <span class="bm-footer__logo-name">Bellamonte</span>
                         <span class="bm-footer__logo-sub">Resort &bull; Shogran</span>
                     </div>
                 </a>
@@ -80,9 +80,9 @@
                     </li>
                     <li>
                         <span class="bm-footer__contact-icon"><i class="fa fa-envelope"></i></span>
-                        <a href="mailto:{{ \App\Models\Setting::get('hotel_email') ?? 'bellamonteresort01@gmail.com' }}"
+                        <a href="mailto:{{ \App\Models\Setting::get('hotel_email') ?? 'contact@bellamonteresort.com' }}"
                             style="color: inherit; text-decoration: none;">
-                            {{ \App\Models\Setting::get('hotel_email') ?? 'bellamonteresort01@gmail.com' }}
+                            {{ \App\Models\Setting::get('hotel_email') ?? 'contact@bellamonteresort.com' }}
                         </a>
                     </li>
                     <li>

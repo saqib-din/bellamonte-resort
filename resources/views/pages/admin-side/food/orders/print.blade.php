@@ -208,7 +208,7 @@
     <div class="c b">Thank you for your order!</div>
     <div class="c foot">Please visit again — {{ $hotel }}</div>
     <div class="c order-no b">* {{ $foodOrder->order_number }} *</div>
-    <div class="c foot">This is a computer generated receipt.</div>
+    {{-- <div class="c foot">This is a computer generated receipt.</div> --}}
 
     {{-- ===== Screen-only controls ===== --}}
     <div class="no-print c">
